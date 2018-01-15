@@ -1,0 +1,61 @@
+---
+title: "Counting"
+author: "Andreas Blaette"
+date: "15 1 2018"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## The Art of Counting
+
+Counting is a very basic task when working with text. Counting is essentially simple: It is nothing but making  statements how often a word, or words, or linguistic patterns occurr in a corpus, or a subcorpus. However, a social scientist counting words or linguistic patterns should see counting is measuring. Counts are stable and objective, the reliability and intersubjectivity of the measurement are minor problems. Words and linguistic patterns can be observed directly, many issues associated with measuring latent variables do not arise. But counting is not trivial. Without conscious reflection, what is actually measured by counting lexical items, without an awareness that counting is measuring and needs to meet standards of validity, a simple move "from words to numbers" (...) can violate fundamental concerns of social science. Counting without methodological reflection will lead to flawed and bad science.
+
+If done well, counting can be powerful instruments. Corpora offer efficient ways to extract information from vast amounts of text efficiently. In particular, when we move from counts of patterns in one subcorpus to the dispersion of counts in one or two dimensions, the basis for comparative statements that involve a synchronic or diachronic dimension can be generated quickly. Sometimes, simply counting single words may do. Often, we may want to count more complex linguistic patterns. The following sections will discuss the move from counts to dispersions. 
+
+The corpus used for the examples is the GermaParl corpus. Before moving on, load the polmineR library, and activate the corpus.
+
+```{r}
+library(polmineR)
+use("GermaParl")
+```
+
+
+### Words
+
+```{r}
+count("GERMAPARL", query = "Ausländer")
+```
+
+### Multi-word expressions
+
+```{r}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
