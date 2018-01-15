@@ -26,36 +26,65 @@ use("GermaParl")
 
 ### Words
 
+The method in the polmineR-package to perform counts, it is not necessarily a surprise, is called 'count'. It can be used for a variety of scenarios. To learn about the uses of the count-method, call the documentation (i.e. the help page) for the method.
+
+```{r}
+?count
+```
+
+Count can be applied to different objects. We start by 
+
 ```{r}
 count("GERMAPARL", query = "Ausländer")
 ```
 
-### Multi-word expressions
+```{r}
+auslaender <- count("GERMAPARL", query = "Ausländer")[["count"]]
+zuwanderer <- count("GERMAPARL", query = "Zuwanderer")[["count"]]
+einwanderer <- count("GERMAPARL", query = "Einwanderer")[["count"]]
+migranten <- count("GERMAPARL", query = "Migranten")[["count"]]
+```
 
 ```{r}
+barplot(
+  c(auslaender, zuwanderer, einwanderer, migranten),
+  names.arg = c("Ausländer", "Zuwanderer", "Einwanderer", "Migranten"),
+  las = 2, cex.axis = 1, 
+)
+```
+
+```{r}
+bt2005 <- partition("GERMAPARL", year = "2005")
+cnt <- count(bt2005, query = c("Ausländer", "Zuwanderer", "Einwanderer", "Migranten"))
+barplot(cnt[["count"]], names.arg = cnt[["query"]], las = 2)
+```
+
+Now we move to regular expressions.
+
+```{r}
+count("GERMAPARL", '"Multikult.*"', cqp = TRUE)
+count("GERMAPARL", '"Multikult.*"', cqp = TRUE, breakdown = TRUE)
+```
+
+```{r}
+sAttributes("GERMAPARL", "party")
+csu <- partition("GERMAPARL", party = "CSU")
+cdu <- partition("GERMAPARL", party = "CDU")
+spd <- partition("GERMAPARL", party = "SPD")
+gru <- partition("GERMAPARL", party = "GRUENE")
 ```
 
 
+### Multi-word expressions and complex queries
 
-
-
-
-
-
-
-
-
-
-
-
-```{r cars}
-summary(cars)
+```{r}
+count("GERMAPARL", query = '"Menschen" "mit" "Migrationshintergrund"')
 ```
 
-## Including Plots
-
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+cnt <- count("GERMAPARL", query = '[pos = "ADJA"] "Integration"', breakdown = TRUE)
+head(cnt, 10)
 ```
+
+
 
