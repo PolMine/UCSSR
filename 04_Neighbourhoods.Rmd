@@ -28,7 +28,7 @@ use("GermaParl")
 
 In addition to polmineR, we will use the packages, tm, magrittr and wordcloud. 
 
-```{r}
+```{r, eval = FALSE}
 if (!"tm" %in% available.packages()[,"Package"]) install.packages("tm")
 if (!"magrittr" %in% available.packages()[,"Package"]) install.packages("magrittr")
 if (!"wordcloud" %in% available.packages()[,"Package"]) install.packages("wordcloud")
