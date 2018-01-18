@@ -1,0 +1,104 @@
+---
+title: "Analysing Neighborhoods"
+author: "Andreas Blaette"
+date: "18 1 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Getting started
+
+The neighborhoods of words, and more generally, of lexical items are interesting for many reason. What patterns occurr in a context of 5, 10 or 15 words to the left and to the right of a word, or the match of a query? "You shall know a word by the neighborhood it keeps" (Firth 1957:11) is a frequently quoted, programmatic statement in linguistics. It has inspired statistical approaches to analyse word contexts. In fact, computing collocations is a core technique in corpus linguistics, and extremely productive to gain insights into to the way language is used in a data-driven manner. Analysing collocations has become an essential tool in lexicography, for instance.
+
+There are many reasons why social scientists are fascinated by the idea to adapt working with collocations. Collocations come with the promise that the framing of groups and issues may be explored efficiently and productively. But social scientists usually have different research interests than corpus linguists. Rules of thumb and choices that guide corpus linguists in a reasoned and established manner may deserve reconsideration, as we relocate analysing collocations to another discipline. This concerns word context size and statistical measures, for instance. 
+
+The most important concern of this chapter on the analysis of word context is that deriving statements about meaning from a statistical identification of cooccurrences requires interpretation. This interpretation cannot be derived from statistical measures, but from reading relevant passages of text the statistical measures indicate as being potentially interesting. Moving from words to numbers is extremely productive to reveal patterns, but the interpretation of patterns will require moving from numbers to word again.
+
+Before we look into cooccurrences, a remark on terminology. The same statistical procedures are used to identify collocations and cooccurrences. The statement that a word is a collocate is an observation about a linguistic pattern, the stickiness of one word towards another. But the concern here is not linguistic patterns. Just as social scientists are careful not to confuse correlation and causation, the more technical, and less substantial term 'cooccurrences' somewhat pushes us to see that findings about cooccurrences are merely statements about a statistical regularity - in need of further inquiry to obtain substantial statements.
+
+## Initialization
+
+```{r}
+library(polmineR)
+use("GermaParl")
+```
+
+In addition to polmineR, we will use the packages, tm, magrittr and wordcloud. 
+
+```{r}
+if (!"tm" %in% available.packages()[,"Package"]) install.packages("tm")
+if (!"magrittr" %in% available.packages()[,"Package"]) install.packages("magrittr")
+if (!"wordcloud" %in% available.packages()[,"Package"]) install.packages("wordcloud")
+```
+
+```{r}
+library(tm)
+library(wordcloud)
+library(magrittr)
+```
+
+We use different context sizes.
+
+```{r}
+cooccurrences("GERMAPARL", query = "Islam")
+cooccurrences("GERMAPARL", query = "Islam", left = 10, right = 10)
+cooccurrences("GERMAPARL", query = "Islam", left = 15, right = 15)
+```
+
+Set the context size to a value (15) for the session.
+
+```{r}
+options("polmineR.left" = 15)
+options("polmineR.right" = 15)
+```
+
+We also define "junk" vocabulary.
+
+```{r}
+junk <- c(tm::stopwords("de"), c(".", "''", ",", "``", ")", "(", "-", "!", "[", "]"), "000")
+```
+
+```{r}
+cooccurrences("GERMAPARL", "Muslime") %>% subset(!word %in% junk)
+cooccurrences("GERMAPARL", "Aussiedler") %>% subset(!word %in% junk)
+cooccurrences("GERMAPARL", "Flüchtlinge") %>% subset(!word %in% junk)
+cooccurrences("GERMAPARL", "Asylbewerber") %>% subset(!word %in% junk)
+cooccurrences("GERMAPARL", "Asylsuchende") %>% subset(!word %in% junk)
+```
+
+A very common visualisation is to use wordclouds.
+
+```{r}
+hv <- cooccurrences("GERMAPARL", "Heimatvertriebene") %>%
+  subset(!word %in% junk) %>% subset(rank_ll <= 75)
+pal <- brewer.pal(8,"Dark2")
+wordcloud(
+  words = hv[["word"]], scale = c(2.5, 0.5), freq = hv[["ll"]] / 5,
+  color = pal, random.color = TRUE
+  )
+```
+
+However, it is much better to use dotplots.
+
+```{r}
+cooccurrences("GERMAPARL", "Asylbewerber") %>% subset(!word %in% junk) %>% dotplot()
+```
+
+Very often, we want to work with partitions. So what do we see, when we distinguish parties?
+
+```{r}
+cdu <- partition("GERMAPARL", party = "CDU", interjection = "FALSE")
+csu <- partition("GERMAPARL", party = "CSU", interjection = "FALSE")
+spd <- partition("GERMAPARL", party = "SPD", interjection = "FALSE")
+gruene <- partition("GERMAPARL", party = "GRUENE", interjection = "FALSE")
+```
+
+```{r}
+cdu %>% cooccurrences("Flüchtlinge") %>% subset(!word %in% junk) %>% dotplot()
+csu %>% cooccurrences("Flüchtlinge") %>% subset(!word %in% junk) %>% dotplot()
+spd %>% cooccurrences("Flüchtlinge") %>% subset(!word %in% junk) %>% dotplot()
+gruene %>% cooccurrences("Flüchtlinge") %>% subset(!word %in% junk) %>% dotplot()
+```

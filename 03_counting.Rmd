@@ -35,7 +35,8 @@ The method in the polmineR-package to perform counts, it is not necessarily a su
 Count can be applied to different objects. We start by 
 
 ```{r}
-count("GERMAPARL", query = "Ausländer")
+count("GERMAPARL", query = "Zuwanderer")
+
 ```
 
 ```{r}
@@ -43,6 +44,11 @@ auslaender <- count("GERMAPARL", query = "Ausländer")[["count"]]
 zuwanderer <- count("GERMAPARL", query = "Zuwanderer")[["count"]]
 einwanderer <- count("GERMAPARL", query = "Einwanderer")[["count"]]
 migranten <- count("GERMAPARL", query = "Migranten")[["count"]]
+gastarbeiter <- count("GERMAPARL", query = "Gastarbeiter")[["count"]]
+flüchtlinge
+geflüchtete
+asylbewerber
+asylbetrüger
 ```
 
 ```{r}
@@ -54,9 +60,30 @@ barplot(
 ```
 
 ```{r}
-bt2005 <- partition("GERMAPARL", year = "2005")
-cnt <- count(bt2005, query = c("Ausländer", "Zuwanderer", "Einwanderer", "Migranten"))
-barplot(cnt[["count"]], names.arg = cnt[["query"]], las = 2)
+y <- dispersion("GERMAPARL", query = "Flüchtlinge", sAttribute = "year")
+```
+
+```{r}
+cdu <- partition("GERMAPARL", party = "CDU")
+gruene <- partition("GERMAPARL", party = "GRUENE")
+cnt_cdu <- count(
+  cdu,
+  query = c("Ausländer", "Zuwanderer", "Einwanderer", "Migranten", "Flüchtlinge")
+  )
+cnt_gruene <- count(
+  gruene,
+  query = c("Ausländer", "Zuwanderer", "Einwanderer", "Migranten", "Flüchtlinge")
+  )
+
+par(mfrow = c(1,2))
+barplot(
+  cnt_cdu[["count"]], names.arg = cnt_cdu[["query"]], las = 2,
+  ylim = c(0,2000), main = "CDU"
+  )
+barplot(
+  cnt_gruene[["count"]], names.arg = cnt_gruene[["query"]], las = 2,
+  ylim = c(0,2000), main = "Grüne"
+  )
 ```
 
 Now we move to regular expressions.
