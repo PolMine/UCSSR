@@ -1,0 +1,128 @@
+---
+title: "Nutzung von Konkordanzen in 'polmineR'"
+subtitle: 'Beispielanalysen mit dem GermaParl-Korpus'
+author: "Andreas Blaette"
+date: "28 Mai 2018"
+output:
+  slidy_presentation:
+    footer: Copyright (c) 2018, Andreas Blaette
+  beamer_presentation: default
+  ioslides_presentation: default
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r, message = FALSE, results = "hide", echo = FALSE}
+# Dieser Code wird im Foliensatz nicht angezeigt und ist nur erforderlich,
+# um gegebenenfalls fehlende Pakete nachzuladen:
+# kable und kableExtra werden benötigt, um tabellarische Ausgaben zu generieren.
+if (!"knitr" %in% rownames(installed.packages())) install.packages("knitr")
+if (!"kableExtra" %in% rownames(installed.packages())) install.packages("kableExtra")
+```
+
+
+## Initialisierung
+
+Die Beispiele basieren auf dem GermaParl-Korpus. Der Datensatz in dem Paket muss nach dem Laden von polmineR mit dem `use`-Befehl aktiviert werden.
+
+```{r initialize, eval = TRUE, message=FALSE}
+library(polmineR)
+use("GermaParl")
+```
+
+Wenn Sie den Code der folgenden Beispiele auf Ihrem eigenen Rechner nachvollziehen möchten, können Sie das 'Rmarkdown'-Dokument, mit dem der Foliensatz generiert wurde, direkt in R laden:
+
+```{r get_code, eval = FALSE}
+if (!"RCurl" %in% rownames(installed.packages())) install.packages("RCurl")
+library(RCurl)
+script <- getURL(
+  "https://raw.githubusercontent.com/PolMine/polmineR.tutorials/master/polmineR_KWIC.Rmd",
+  ssl.verifypeer = FALSE
+  )
+```
+
+
+Speichern Sie das Skript auf Ihrem Schreibtisch - oder an einem anderen Speicherort.
+
+```{r save_code, eval = FALSE}
+filename <- "~/Desktop/polmineR_KWIC.Rmd"
+if (interactive()) writeLines(text = script, con = filename)
+```
+
+Wenn Sie jetzt das Dokument öffnen, können Sie den Code Schritt für Schritt nachvollziehen. Nutzen Sie den Code als Ausgnagspunkt für Ihre eigenen Analysen!
+
+----
+
+## Konkordanen und KWIC: Basics
+
+  * Die Analyse von Wortumfeldern von Worten und Suchbegriffen übernimmt als analytischer Schritt eine Scharnierfunktion zwischen quantitativen Zählverfahren und einem qualitativ-interpretativen Zugang zu Textdaten. In der Linguistik wird dabei von Konkordanzen gesprochen, in der sozialwissenschaftlichen Tradition der Inhaltsanalyse von Keyword-In-Context-Analysen (kurz "KWIC"). Der Kürze und Prägnanz wegen heißt die Methode im polmineR-Paket kurz `kwic`.
+  
+  * Eine wichtige Vorentscheidung ist die Festlegung, wie viele Worte nach links und nach rechts angezeigt werden sollen. In linguistischen Analysen (hier oft Lexikographie, d.h. Entwicklung von Lexika) ist ein Fenster von 5 Worten links und rechts gebräuchlich. Wie viel Kontext benötigen Sie als Politikwissenschaftler für eine Grob-Kontextualisierung? Häufig wird das mehr sein, als im linguistischen Verwendungskontext von Konkordanzen / dem KWIC-Verfahren.
+  
+  * Zum Teil wird es nicht ausreichen, nur einen kurzen Textausschnitt im Umfeld eines Wortes zu lesen und zu interpretieren. Wenn erforderlich, sollte die Lektüre des Volltextes eines Suchtreffers erfolgen. Dies leistet im polmineR-Paket die `read`-Methode.
+  
+
+----
+
+## Konkordanzen und KWIC: Im Forschungsprozess
+
+  * Die Analyse von Konkordanzen lässt sich sinnvoll auch mit der statistischen Analysen von Kookkurrenzen verbinden: Die Kookkurrenz-Analyse liefert Hinweise auf statische Auffälligkeiten des Sprachgebrauchs, die dann per KWIC näher analysiert und interpretiert werden.
+  
+  * Ein sinnvoller Schritt zur Systematisierung von Interpretationen von Konkordanzen ist, diese zu kategorisieren bzw. typisieren. Dafür kann es hilfreich sein, diese nach Excel zu exportieren (Methode `mail`), um dort in einer Zusatzspalte Kategorisierungen einzutragen bzw. Interpretationen zu notieren.
+  
+  * Bitte übersehen Sie bei der Arbeit mit Konkordanzen nicht, dass es sich um ein interpretative Arbeit handelt, die hermeneutisches Gespühr erfordert! 
+  
+
+----
+
+## KWIC-Methode: Grundlagen
+
+Wie bei anderen Funktionen und Methoden können Sie die Dokumentation zur `kwic`-Methode aufrufen, indem Sie ein Fragezeichen voranstellen. Dort finden Sie übrigens auch erste Literaturhinweise!
+
+```{r, eval = FALSE}
+?kwic
+```
+
+Die Methode kann auf Objekte der Klassen `character` (d.h. auf ein Korpus als Ganzes), `partition` und `context` angewendet werden. Den Suchbegriff definieren Sie über das Argument `query`.
+
+```{r, eval = FALSE}
+kwic("GERMAPARL", query = "Migrationshintergrund")
+
+bt2005 <- partition("GERMAPARL", year = 2005)
+kwic(bt2005, query = "Migrationshintergrund")
+```  
+
+Bei der Formulierung von Suchanfragen können Sie wie die CQP-Syntax verwenden. Setzen Sie dafür das Argument `cqp` auf `TRUE`. (Wenn Sie das nicht machen, prüft polmineR automatisch, ob die CQP-Syntax verwendet wird.)
+
+```{r, eval = FALSE}
+kwic("GERMAPARL", query = '[pos = "NN"] "mit" "Migrationshintergrund"', cqp = TRUE)
+kwic(bt2005, query = '[pos = "NN"] "mit" Migrationshintergrund"', cqp = TRUE)
+```  
+
+Die Ausgabe des Ergebnisse erfolgt dann im Viewer-Panel von RStudio.
+
+----
+
+## KWIC: Einsatzszenarien
+
+Wie eingangs besprochen, werden Sie oft mehr Wortumfeld sehen wollen als nur (wie voreingestellt) fünf Worte links und rechts. Nutzen Sie für die Bestimmung des Wortumfels die Argument `left` und `right`.
+
+```{r, eval = FALSE}
+kwic("GERMAPARL", query = "Ausländer", left = 10, right = 10)
+kwic("GERMAPARL", query = "Ausländer", left = 15, right = 15)
+```
+
+Es gibt gute gründe davon auszugehen, dass Merkmale eines Sprechers wie Fraktions- bzw. Parteizugehörigkeit (Parteiendifferenzthese!), Geschlecht etc. einen Unterschied machen: Zeigen Sie die Metadaten zu einer Konkordanz mit dem Argument `sAttribute` an. Beachte: Mehrere Attribute müssen kombiniert werden über c(), das "c" steht hier für "combine".
+
+```{r, eval = FALSE}
+kwic(bt2005, query = "Ausländer", sAttribute = "party")
+kwic(bt2005, query = "Ausländer", sAttribute = c("party", "date"))
+```
+
+Um den Volltext zu einer Konkordanz zu lesen, machen Sie eine Zwischenspeicherung des KWIC-Ergebnisses, und wenden dann die `read`-Methode an.
+
+```{r, eval = FALSE}
+K <- kwic(bt2005, query = "Ausländer", sAttribute = "party")
+read(K, 1)
+```

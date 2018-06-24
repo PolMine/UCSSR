@@ -1,0 +1,156 @@
+---
+title: "Analyse von Zeitreihen mit 'polmineR'"
+subtitle: 'Beispielanalysen mit dem GermaParl-Korpus'
+author: "Andreas Blaette"
+date: "13 Mai 2018"
+output:
+  slidy_presentation:
+    footer: Copyright (c) 2018, Andreas Blaette
+  beamer_presentation: default
+  ioslides_presentation: default
+editor_options: 
+  chunk_output_type: console
+---
+
+
+## Initialisierung
+
+Die Beispiele basieren auf dem GermaParl-Korpus. Der Datensatz in dem Paket muss nach dem Laden von polmineR mit dem `use-Befehl aktiviert werden.
+
+```{r initialize, eval = TRUE, message=FALSE}
+library(polmineR)
+use("GermaParl")
+```
+
+Wenn Sie den Code der folgenden Beispiele auf Ihrem eigenen Rechner nachvollziehen möchten, können Sie das 'Rmarkdown'-Dokument, mit dem der Foliensatz generiert wurde, direkt in R laden:
+
+```{r get_code, eval = FALSE}
+if (!"RCurl" %in% rownames(installed.packages())) install.packages("RCurl")
+library(RCurl)
+script <- getURL(
+  "https://raw.githubusercontent.com/PolMine/polmineR.tutorials/master/polmineR_Zeitreihen.Rmd",
+  ssl.verifypeer = FALSE
+  )
+```
+
+
+Speichern Sie das Skript auf Ihrem Schreibtisch - oder an einem anderen Speicherort.
+
+```{r save_code, eval = FALSE}
+filename <- "~/Desktop/polmineR_Zeitreihen.Rmd"
+if (interactive()) writeLines(text = script, con = filename)
+```
+
+Wenn Sie jetzt das Dokument öffnen, können Sie den Code Schritt für Schritt nachvollziehen (und auf Ihre Bedürfnisse anpassen).
+
+----
+
+## Zeit und Häufigkeitsverteilungen
+
+Die Häufigkeit von Worten (im Sinne von Schlagworten) oder von Suchbegriffen lässt sich mit der `count`-Methode bestimmen. Die `dispersion`-Methode vollzieht die Zählung über ein oder zwei strukturelle Attribute (d.h. Dimensionen).
+
+```{r get_simple_dispersion}
+dt <- dispersion("GERMAPARL", query = "Flüchtlinge", sAttribute = "year")
+head(dt) # wir betrachten nur den Anfang der Tabelle
+```
+
+Eine schöne und praktische Ansicht bietet die `View`-Funktion von RStudio.
+
+```{r, eval = interactive()}
+View(dt)
+```
+
+Der Rückgabewert die `dispersion`-Methode ist ein `data.table`. Wenn Sie es gewöhnt sind, mit `data.frame`-Objekten zu arbeiten, können Sie die Umwandlung leicht vollziehen.
+
+```{r}
+df <- as.data.frame(dt)
+```
+
+----
+
+## Einfache Visualisierung der Häufigkeiten
+
+```{r}
+barplot(height = df[["count"]], names.arg = df[["year"]], las = 2)
+```
+
+Dieses einfache Balkendiagramm bestätigt bereits die Vermutung, dass der sprunghafte Anstieg der Fluchtmigration von 2015 auch im Bundestag erheblichen Widerhall hatte.
+
+----
+
+## Häufigkeitsverteilung über zwei Dimensionen
+
+Der Analyse fügen wir jetzt noch als zweite Dimension eine Differenzierung nach Parteien hinzu.
+
+```{r}
+dt <- dispersion("GERMAPARL", query = "Flüchtlinge", sAttribute = c("year", "party"))
+```
+
+Für die Arbeit mit Zeitreihen-Daten nutzen wir das `xts`-Paket, das bei Bedarf zuerst installiert wird.
+
+```{r, message = FALSE}
+if (!"xts" %in% rownames(installed.packages())) install.packages("xts")
+library(xts)
+```
+
+Wir erzeugen nun ein `xts`-Objekt auf Basis der schon erfolgten Kreuztabelle mit den Häufigkeiten und schauen, wie das aussieht.
+
+```{r}
+ts <- xts(x = dt[,c("CDU", "CSU", "FDP", "GRUENE", "SPD")],
+          order.by = as.Date(sprintf("%s-01-01", dt[["year"]])))
+head(ts)
+```
+
+----
+
+## Visualisierung des Zeitverlaufs
+
+Besser sind die Dinge über ein Zeitreihen-Diagramm zu erkennen.
+
+```{r}
+plot(ts, multi.panel = TRUE, col = c("black", "black", "blue", "green", "red"), lwd = 2)
+```
+
+----
+
+## Was passiert während der Jahre?
+
+
+
+```{r}
+dt <- dispersion("GERMAPARL", query = "Flüchtlings", sAttribute = "date")
+ts <- xts(x = dt[["count"]], order.by = as.Date(dt[["date"]]))
+plot(ts)
+```
+
+Das sieht wenig aussagekräftig aus. Wir sollten daher einen Weg finden, die Zählung auf einen größeren Zeitraum zu aggregieren.
+
+---- 
+
+## Woche - Monat - Quartal - Jahr
+
+Als Zeiteinheit für eine Aggregation über den einzelnen Tag hinaus werden wir Woche, Monat, Quartal und Jahr verwenden. Für die Wochen brauchen wir das `lubridate`-Paket.
+
+```{r load_lubridate, message = FALSE}
+if (!"lubridate" %in% rownames(installed.packages())) install.packages("lubridate")
+library(lubridate)
+```
+
+Nun legen wir aggregierte Zeitreihenobjekte an. Der Code hierfür ist bewusst kompakt und vielleicht nicht auf Anhieb verständlich. Im Zweifelsfall ... per copy & paste bedienen!
+
+```{r}
+ts_week <- aggregate(ts, {a <- ymd(paste(year(index(ts)), 1, 1, sep = "-")); week(a) <- week(index(ts)); a})
+ts_month <- aggregate(ts, as.Date(as.yearmon(index(ts))))
+ts_qtr <- aggregate(ts, as.Date(as.yearqtr(index(ts))))
+ts_year <- aggregate(ts, as.Date(sprintf("%s-01-01", gsub("^(\\d{4})-.*?$", "\\1", index(ts)))))
+```
+
+----
+
+Welche Aggregation der Zeitreihe erscheint Ihnen am sinnvollsten?
+
+```{r}
+par(mfrow = c(2,2), mar = c(2,2,3,1))
+plot(ts_week, main = "Aggregation: Woche"); plot(ts_month, main = "Aggregation: Monat");
+plot(ts_qtr, main = "Aggregation: Quartal"); plot(ts_year, main = "Aggregation: Jahr")
+```

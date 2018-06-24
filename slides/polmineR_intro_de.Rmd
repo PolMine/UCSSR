@@ -1,0 +1,541 @@
+---
+title: 'Text as Linguistic Data'
+subtitle: 'Korpusanalyse mit polmineR'
+author: "Andreas Blaette"
+date: "16 April 2018"
+output:
+  slidy_presentation:
+    footer: Copyright (c) 2018, Andreas Blaette
+  ioslides_presentation: default
+  beamer_presentation: default
+editor_options: 
+  chunk_output_type: console
+---
+
+
+## Warum Korpusanalyse mit R?
+
+- R als sozialwissenschaftliche 'lingua franca'
+- Interaktivität
+- freundliche Nutzercommunity
+- RStudio als IDE
+- dynamische Weiterentwicklung von R, RStudio
+
+
+## Zielsetzungen von polmineR
+
+- Quelloffenheit (Open Source)
+- Portabilität (Nutzung unter Windows, macOS, Linux)
+- Interaktivität
+- Reproduzierbarkeit und Validität (durch Volltextanzeigen)
+- Performanz
+- Nutzerfreundlichkeit (Dokumentation)
+
+----
+
+## Installation
+
+### Systemvoraussetzungen
+
+- Windows, macOS, Linux
+- (möglichst) mehr als 4GB Arbeitsspeicher
+- optional: mehrere Prozessorkerne, SSD
+
+
+### Installation von polmineR: Windows
+
+#### Installation des CRAN-Relase
+
+```{r, eval = FALSE}
+install.packages("polmineR.Rcpp", repos = "http://polmine.sowi.uni-due.de/packages", type = "win.binary")
+install.packages("polmineR")
+```
+
+#### Installation der Entwicklungsversion auf GitHub
+
+```{r, eval = FALSE}
+devtools::install_github("PolMine/polmineR", ref = "dev")
+```
+
+----
+
+## Schritte nach der Installation
+
+```{r, eval = FALSE}
+library(polmineR)
+```
+
+### Umgebungsvariable CORPUS_REGISTRY
+
+Die Umgebungsvariable 'CORPUS_REGISTRY' kann folgendermaßen vorübergehend gesetzt werden.
+
+```{r, eval = FALSE}
+Sys.getenv("CORPUS_REGISTRY")
+Sys.setenv(CORPUS_REGISTRY="/var/local/cwb/registry")
+```
+
+Die dauerhafte Definition ist möglich über folgende Dateien:
+- .Renviron
+- Startup-Dateien in /etc/R/
+
+
+### Installation von Korpora
+
+Über den PolMine-Webserver steht das GermaParl-Korpus zur Verfügung.
+
+```{r, eval = FALSE}
+library(polmineR)
+install.corpus("GermaParl")
+```
+
+Aktivierung eines Korpus in einem R-Datenpaket:
+
+```{r, eval = FALSE}
+use("GermaParl")
+```
+
+----
+
+### polmineR - Schnelleinstieg (Arbeit mit Korpora und CQP)
+
+Anzeige von Konkordanzen / Keyword-in-Context (KWIC) ...
+
+```{r, eval = FALSE}
+kwic("GERMAPARL", "Islam", meta = "year")
+kwic("GERMAPARL", '[pos = "ADJA"] "Integration"', cqp = TRUE, meta = "speaker")
+```
+
+Zählung von Worthäufigkeiten ...
+
+```{r, eval = FALSE}
+cnt <- count("GERMAPARL", pAttribute = "word")
+```
+
+Arbeit mit komplexen Suchbegriffen (CQP Syntax)
+
+```{r, eval = FALSE}
+count("GERMAPARL", query = '[pos = "ADJA"] "Integration"')
+```
+
+Verteilung eines Suchbegriffs ...
+
+```{r, eval = FALSE}
+d <- dispersion("GERMAPARL", query = "Aussiedler", sAttribute = "year")
+```
+
+----
+
+### polmineR - Schnelleinstieg (Arbeit mit Subkorpora / "Partitionen")
+
+Anlegen einer Partition ...
+
+```{r, eval = FALSE}
+merkel <- partition("GERMAPARL", speaker = "Angela Merkel", date = "2005-11-30", type = "plpr")
+```
+
+Lesen des Volltexts ...
+
+```{r, eval = FALSE}
+read(regerklaerung)
+```
+
+Anzeige von Konkordanzen ...
+
+```{r, eval = FALSE}
+bt2002 <- partition("GERMAPARL", year = "2002", interjection = FALSE)
+kwic(bt2002, "Islam", meta = "year")
+kwic(bt2002, "Islam", meta = c("year", "speaker"))
+kwic(bt2002, "Islam", meta = c("year", "speaker", "party"))
+kwic(bt2002, "Islam", meta = c("year", "speaker", "party"), left = 30, right = 30)
+```
+
+Frequenzzählung
+
+```{r, eval = FALSE}
+bt2002 <- partition("GERMAPARL", year = "2002", pAttribute = "word", type = "plpr")
+view(bt2002)
+```
+
+
+```{r, eval = FALSE}
+M <- enrich(merkel, pAttribute = c("word", "pos"))
+view(M)
+```
+
+----
+
+### Ein kleines Visualisierungsszenario
+
+```{r, eval = TRUE}
+library(RColorBrewer)
+library(polmineR)
+use("GermaParl", verbose = FALSE)
+```
+
+```{r, eval = TRUE}
+M <- partition(
+  "GERMAPARL", speaker = "Angela Merkel", date = "2005-11-30",
+  interjection = "FALSE", pAttribute = c("word", "pos"), verbose = FALSE
+  )
+nouns <- subset(M, pos == "NN")
+nouns <- sort(nouns, "count")
+```
+
+----
+
+```{r}
+dotplot(nouns, col = "count", n = 25)
+```
+
+
+----
+
+```{r, eval = TRUE}
+library(wordcloud)
+wordcloud(
+  words = nouns@stat[["word"]][1:50],
+  freq = nouns@stat[["count"]][1:50]/2,
+  colors = brewer.pal(8,"Dark2")
+  )
+```
+
+----
+
+
+## Anlegen von Partition
+
+
+### Eine wichtige Unterscheidung
+
+- s-Attribute (parameter sAttributes)
+- p-Attribute (parameter pAttributes)
+
+
+### Exploration eines Korpus
+
+Finden verfügbarer p-Attribute
+
+```{r, eval = TRUE}
+pAttributes("GERMAPARL")
+```
+
+Finden verfügbarer s-Attribute 
+
+```{r, eval = FALSE}
+sAttributes("GERMAPARL")
+```
+
+Finden der Ausprägungen eines s-Attributes
+
+```{r, eval = TRUE}
+speakers <- sAttributes("GERMAPARL", "speaker")
+head(speakers)
+```
+
+----
+
+
+#### Partitionierung
+
+
+```{r, eval = FALSE}
+schroeder <- partition("GERMAPARL", speaker = "Gerhard Schröder")
+bk <- partition("GERMAPARL", speaker = c("Gerhard Schröder", "Angela Merkel"))
+bk <- partition("GERMAPARL", speaker = c("Gerhard Schröder", "Angela Merkel"), lp=c("14", "15", "16"))
+```
+
+----
+
+Kurzeinführung in die Welt der regulären Ausdrücke
+--------------------------------------------------
+
+** Zeichenklassen: **
+. beliebiges Zeichen
+\\d Zahl
+
+** Quantoren **
++ mindestens einmal
+* keinmal oder beliebig oft
+{} bestimmte Anzahl
+
+** Sonstiges **
+Alternativen in Klammern
+alternative Zeichen in eckigen Klammern 
+
+
+```{r, eval = FALSE}
+schroederPost911 <- partition(
+  "GERMAPARL", speaker = "Gerhard Schröder",
+  date = c("2001-(09|10|11|12)-.*"), regex=TRUE
+  )
+sAttributes(schroederPost911, "date")
+```
+
+Partitionen bündeln!
+---------------------
+
+```{r, eval = FALSE}
+schroeder <- partitionBundle(
+  schroederPost911,
+  sAttribute = sAttributes(schroederPost911, "date"),
+  type = "plpr"
+)
+summary(schroeder)
+read(schroeder, meta="speaker_date")
+label(schroeder, meta="speaker_date")
+1read(schroeder[[8]], meta="speaker_date")
+```
+
+
+Ein fortgeschrittenes Szenario
+------------------------------
+
+```{r, eval = FALSE}
+library(chron)
+library(magrittr)
+days <- sAttributes("GERMAPARL", "date")
+aftermath <- seq.dates(from = "11/09/2001", "11/03/2002", by = "days") %>%
+  as.Date(format="%Y-%m-%d") %>%
+  as.character
+sessionsAftermath <- days[days %in% aftermath]
+foo <- partition("GERMAPARL", date =sessionsAftermath, pAttribute="word")
+view(foo)
+```
+
+Einige weitere Möglichkeiten
+
+----------------------------
+- in partitionen hineinzoomen
+- session settings
+
+```{r, eval = FALSE}
+session
+corpus(session)
+corpus(session) <- "BT"
+partition(list(speaker_name="Angela Merkel"))
+```
+
+
+Frequenzzählungen
+=================
+
+## count()
+
+```{r, eval = FALSE}
+btByYears <- partitionBundle(
+  "BT",
+  def=list(speaker_type="speech"),
+  var=list(speaker_year=NULL)
+  )
+islam <- count(
+  btByYears,
+  query=c('Islam', 'Muslime', 'Terror'),
+  pAttribute="word", mc=FALSE
+  )
+islam2 <- as.data.frame(islam)[, c(2:ncol(islam))]
+rownames(islam2) <- islam[["partition"]]
+library(bubblegraph)
+linechart(as.data.frame(t(islam2)))
+```
+
+
+```{r, eval = FALSE}
+mig <- count(
+  btByYears,
+  query=c('"Asyl.*"', '"Flüchtling.*"', '".*[aA]ussiedler.*"', '"Übersiedler.*"', '"Gastarbeiter.*"', '"Vertriebene.*"', '"Menschen" "mit" "Migrationshintergrund"'),
+  pAttribute="word", mc=FALSE
+  )
+mig2 <- as.data.frame(mig)[, c(2:ncol(mig))]
+rownames(mig2) <- mig[["partition"]]
+library(bubblegraph)
+linechart(as.data.frame(t(mig2)))
+
+```
+
+
+### Frequenzzählung mit CQP-Syntax
+
+## Nutzung der CQP-Syntax
+
+Grundlagen:
+- Ansteuern von p-Attributen
+- Quantoren 
+- Platzhalter
+
+```{r, eval = FALSE}
+sttsTagsetInfo <- "http://www.ims.uni-stuttgart.de/forschung/ressourcen/lexika/TagSets/stts-table.html"
+browseURL(sttsTagsetInfo)
+```
+
+
+http://cwb.sourceforge.net/files/CQP_Tutorial/
+http://cwb.sourceforge.net/files/CQP_Tutorial.pdf
+http://www.ims.uni-stuttgart.de/forschung/projekte/CorpusWorkbench/CQPTutorial/cqp-tutorial.2up.pdf
+
+
+
+```{r, eval = FALSE}
+btByYear <- partitionBundle(
+  "BT",
+  def=list(speaker_type="speech"),
+  var=list(speaker_year=as.character(c(1998:2007)))
+  )
+
+mig <- count(
+  btByYear,
+  query=c('"Asyl.*"', '"Flüchtling.*"', '".*[aA]ussiedler.*"', '"Übersiedler.*"', '"Gastarbeiter.*"', '"Vertriebene.*"'),
+  pAttribute="word", mc=FALSE
+  )
+mig2 <- as.data.frame(mig)[, c(2:ncol(mig))]
+rownames(mig2) <- mig[["partition"]]
+library(bubblegraph)
+linechart(as.data.frame(t(mig2)))
+```
+
+
+frequencies()
+-------------
+
+```{r, eval = FALSE}
+foo <- frequencies(bt, query='"[mM]ultikult.*"', pAttribute=NULL)
+```
+
+Übung: Parteienunterschiede ...
+
+```{r, eval = FALSE}
+csu <- partition(list(speaker_party=".*CSU.*"), regex=TRUE)
+```
+
+Konkordanzen
+============
+
+```{r, eval = FALSE}
+kwic("GERMAPARL", '"Krieg" []{1,5} "Terror"', meta = "speaker")
+kwic(bt, '"Krieg" "gegen" "den" "Terror"', meta=c("speaker_date", "speaker_name"))
+```
+
+```{r, eval = FALSE}
+foo <- frequencies(bt, '"()"')
+
+Bkwic(bt, '"Krieg" "gegen" []{0,1} [pos="NN"]', meta=c("speaker_date", "speaker_party"))
+```
+
+Inspektion der Hilfe ...
+
+Und ein Beispiel: Prävention in der Sozialpolitik
+
+
+#### Kollokationsanalysen
+
+
+```{r, eval = FALSE}
+bt <- partition("BT", list(speaker_year="2006"), regex=TRUE)
+islam <- context(bt, "Islam", pAttribute="word")
+islam <- context(bt, '"Islam.*"', pAttribute=c("word", "pos"))
+view(islam)
+islam2 <- subset(islam, pos %in% c("NN", "ADJA"))
+view(islam2)
+wordcloud(
+  words=islam2@stat[["word"]][1:50],
+  freq=islam2@stat[["ll"]][1:50]/2,
+  colors=brewer.pal(8,"Dark2")
+  )
+dotplot(islam2, col="ll", 25)
+```
+
+weiterführend: Als Testverfahren implementiert t-test, PMI, log-likelihood
+
+** Beachte: **
+- Abhängigkeit der statistischen Testwerte von der Korpusgröße
+- keine unmittelbare Vergleichbarkeit der Testwerte!
+- qualitative Validierung
+
+
+** Diskussion: **
+Welche Filter sind angemessen?
+Welche Schwellenwerte sind angemessen?
+Welcher Kontext ist bei politikwissenschaftlichen Fragestellungen angemessen?
+
+
+----
+
+#### Schlagwortanalysen
+
+
+Was nicht funktioniert ...
+
+```{r, eval = FALSE}
+schroeder1 <- partition("GERMAPARL", speaker = "Gerhard Schröder", date = "2001-09-12", pAttribute = "word")
+schroeder2 <- partition("GERMAPARL", speaker = "Gerhard Schröder", date="2001-09-19", pAttribute = "word")
+schroeder3 <- partition("GERMAPARL", speaker = "Gerhard Schröder", date="2001-11-28", pAttribute = "word")
+
+bt2001 <- partition("GERMAPARL", year = "2001", pAttribute = "word")
+
+keyws1 <- features(schroeder1, bt2001)
+keyws2 <- features(schroeder2, bt2001)
+keyws3 <- features(schroeder3, bt2001)
+
+view(keyws1)
+view(keyws2)
+view(keyws3)
+```
+
+
+Mehr ist besser ...
+
+```{r, eval = FALSE}
+bt2002 <- partition("GERMAPARL", year = "2002", interjection = FALSE, pAttribute="word")
+btBefore <- partition("GERMAPARL", year = 1996:2001, interjection = FALSE, pAttribute = "word")
+
+keyws <- features(bt2002, btBefore)
+view(keyws)
+```
+
+
+Übung: Themenschwerpunkte von Schröder in der 15. Legislaturperiode?
+
+
+Perspektiven der Textstatistik
+==============================
+
+```{r, eval = FALSE}
+merkel <- partition("BT", list(speaker_name=".*Merkel.*", speaker_type="speech"), regex=TRUE, pAttribute="word")
+merkelSpeeches <- as.speeches(
+  merkel, sAttributeDates="speaker_date", sAttributeNames="speaker_name",
+  gap=500
+  )
+merkelSpeeches <- enrich(merkelSpeeches, pAttribute="word")
+dtm <- as.DocumentTermMatrix(merkelSpeeches, col="count")
+toDrop <- polmineR:::noise(dtm)
+dtmTrimmed <- trim(dtm, termsToDrop=unique(unlist(toDrop)))
+dtmTrimmed <- trim(dtmTrimmed, docsToDrop = names(which(slam::row_sums(dtmTrimmed) < 20)))
+
+library(topicmodels)
+tmodel <- LDA(
+  dtmTrimmed, k=20, method = "Gibbs",
+  control = list(burnin = 1000, iter = 50, keep = 50, verbose=TRUE)
+)
+View(terms(tmodel, k=20))
+```
+
+
+### Was passiert da eigentlich?!
+
+- S4-Klassen und ihre Slots (Strukturanalyse mit str())
+- Vererbung von Methoden, weniger zu merken
+
+```{r, eval = FALSE}
+str(nounsOnly)
+methods("partition"")
+getMethod("subset", "textstat")
+```
+
+
+----
+
+## Ausblick: Alternativen
+
+- Perl (reguläre Ausdrücke etc.)
+- Python (NLTK,  etc.)
+- Java (Stanford NLP, mallet etc.)
+- C++ (Performanz)
