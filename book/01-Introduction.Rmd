@@ -1,0 +1,14 @@
+# Introduction
+
+## Corpora in Social Science Research
+
+### Corpora, Big Data, and Text Mining
+
+### Corpus and Content Analysis
+
+## Getting Started
+
+### Hardware: Know Your Machine
+
+### Software: Tools, Toolkits, Frameworks 
+

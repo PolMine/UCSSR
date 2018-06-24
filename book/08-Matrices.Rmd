@@ -1,0 +1,5 @@
+# Bags of Words and Matrices
+
+## Uses and Limits of Bag of Word Approaches
+
+## Parsimony: Sparse Matrices 

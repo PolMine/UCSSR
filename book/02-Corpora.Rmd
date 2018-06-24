@@ -1,0 +1,33 @@
+# Corpora
+
+## Corpora as Linguistic Data for Social Science
+
+### Corpora that Exist and Might Exits
+
+### Corpora and the Wealth of Text
+
+
+## Data Formats
+
+### The Beauty and Limits of Plain Text
+
+### Extended Markup Language (XML)
+
+#### Standardization: Text Encoding Initiative (TEI)
+
+#### Alternative Standards
+
+### From Words to Numbers: Indexing and Query Engines
+
+
+## Annotated Corpora
+
+### Linguistic Annotation
+
+### Structural Annotation (Metadata)
+
+### Subcorpora, Contrastive and Comparative Research
+
+
+## The Licencensing Issue
+

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Using Corpora in Social Science Research</title>
+  <meta name="description" content="Using Corpora in Social Science Research">
+  <meta name="generator" content="bookdown 0.5 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Using Corpora in Social Science Research" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Using Corpora in Social Science Research" />
+  
+  
+  
+
+<meta name="author" content="Andreas Blaette">
+
+
+<meta name="date" content="2018-01-22">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="queries.html">
+<link rel="next" href="analysing-neighborhoods.html">
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Foreword</a></li>
+<li class="chapter" data-level="2" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>2</b> Introduction</a></li>
+<li class="chapter" data-level="3" data-path="corpora.html"><a href="corpora.html"><i class="fa fa-check"></i><b>3</b> Corpora</a><ul>
+<li class="chapter" data-level="3.1" data-path="corpora.html"><a href="corpora.html#keeping-it-simple-the-beauty-and-limits-of-plain-text"><i class="fa fa-check"></i><b>3.1</b> Keeping it Simple: The Beauty and Limits of Plain Text</a></li>
+<li class="chapter" data-level="3.2" data-path="corpora.html"><a href="corpora.html#metadata-and-structural-annotation"><i class="fa fa-check"></i><b>3.2</b> Metadata and Structural Annotation</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="corpora.html"><a href="corpora.html#xml-and-html"><i class="fa fa-check"></i><b>3.2.1</b> XML and HTML</a></li>
+<li class="chapter" data-level="3.2.2" data-path="corpora.html"><a href="corpora.html#text-encoding-initiative-tei"><i class="fa fa-check"></i><b>3.2.2</b> Text Encoding Initiative (TEI)</a></li>
+<li class="chapter" data-level="3.2.3" data-path="corpora.html"><a href="corpora.html#other-standards"><i class="fa fa-check"></i><b>3.2.3</b> Other Standards</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="corpora.html"><a href="corpora.html#linguistic-annotation"><i class="fa fa-check"></i><b>3.3</b> Linguistic Annotation</a></li>
+<li class="chapter" data-level="3.4" data-path="corpora.html"><a href="corpora.html#indexing-corpora"><i class="fa fa-check"></i><b>3.4</b> Indexing Corpora</a></li>
+<li class="chapter" data-level="3.5" data-path="corpora.html"><a href="corpora.html#licences"><i class="fa fa-check"></i><b>3.5</b> Licences</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="queries.html"><a href="queries.html"><i class="fa fa-check"></i><b>4</b> Queries</a></li>
+<li class="chapter" data-level="5" data-path="counting.html"><a href="counting.html"><i class="fa fa-check"></i><b>5</b> Counting</a><ul>
+<li class="chapter" data-level="5.1" data-path="counting.html"><a href="counting.html#the-art-of-counting"><i class="fa fa-check"></i><b>5.1</b> The Art of Counting</a><ul>
+<li class="chapter" data-level="5.1.1" data-path="counting.html"><a href="counting.html#words"><i class="fa fa-check"></i><b>5.1.1</b> Words</a></li>
+<li class="chapter" data-level="5.1.2" data-path="counting.html"><a href="counting.html#multi-word-expressions-and-complex-queries"><i class="fa fa-check"></i><b>5.1.2</b> Multi-word expressions and complex queries</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="analysing-neighborhoods.html"><a href="analysing-neighborhoods.html"><i class="fa fa-check"></i><b>6</b> Analysing Neighborhoods</a><ul>
+<li class="chapter" data-level="6.1" data-path="analysing-neighborhoods.html"><a href="analysing-neighborhoods.html#getting-started"><i class="fa fa-check"></i><b>6.1</b> Getting started</a></li>
+<li class="chapter" data-level="6.2" data-path="analysing-neighborhoods.html"><a href="analysing-neighborhoods.html#initialization"><i class="fa fa-check"></i><b>6.2</b> Initialization</a></li>
+</ul></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Using Corpora in Social Science Research</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="counting" class="section level1">
+<h1><span class="header-section-number">5</span> Counting</h1>
+<div id="the-art-of-counting" class="section level2">
+<h2><span class="header-section-number">5.1</span> The Art of Counting</h2>
+<p>Counting is a very basic task when working with text. Counting is essentially simple: It is nothing but making statements how often a word, or words, or linguistic patterns occurr in a corpus, or a subcorpus. However, a social scientist counting words or linguistic patterns should see counting is measuring. Counts are stable and objective, the reliability and intersubjectivity of the measurement are minor problems. Words and linguistic patterns can be observed directly, many issues associated with measuring latent variables do not arise. But counting is not trivial. Without conscious reflection, what is actually measured by counting lexical items, without an awareness that counting is measuring and needs to meet standards of validity, a simple move “from words to numbers” (…) can violate fundamental concerns of social science. Counting without methodological reflection will lead to flawed and bad science.</p>
+<p>If done well, counting can be powerful instruments. Corpora offer efficient ways to extract information from vast amounts of text efficiently. In particular, when we move from counts of patterns in one subcorpus to the dispersion of counts in one or two dimensions, the basis for comparative statements that involve a synchronic or diachronic dimension can be generated quickly. Sometimes, simply counting single words may do. Often, we may want to count more complex linguistic patterns. The following sections will discuss the move from counts to dispersions.</p>
+<p>The corpus used for the examples is the GermaParl corpus. Before moving on, load the polmineR library, and activate the corpus.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(polmineR)
+<span class="kw">use</span>(<span class="st">&quot;GermaParl&quot;</span>)</code></pre></div>
+<pre><code>## ... resetting CORPUS_REGISTRY environment variable:</code></pre>
+<pre><code>## ... setting registry: /Library/Frameworks/R.framework/Versions/3.4/Resources/library/GermaParl/extdata/cwb/registry</code></pre>
+<pre><code>## ... unloading rcqp library</code></pre>
+<pre><code>## ... reloading rcqp library</code></pre>
+<pre><code>## ... ... status: OK</code></pre>
+<div id="words" class="section level3">
+<h3><span class="header-section-number">5.1.1</span> Words</h3>
+<p>The method in the polmineR-package to perform counts, it is not necessarily a surprise, is called ‘count’. It can be used for a variety of scenarios. To learn about the uses of the count-method, call the documentation (i.e. the help page) for the method.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">?count</code></pre></div>
+<p>Count can be applied to different objects. We start by</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">count</span>(<span class="st">&quot;GERMAPARL&quot;</span>, <span class="dt">query =</span> <span class="st">&quot;Zuwanderer&quot;</span>)</code></pre></div>
+<pre><code>##         query count         freq
+## 1: Zuwanderer   540 5.345809e-06</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">auslaender &lt;-<span class="st"> </span><span class="kw">count</span>(<span class="st">&quot;GERMAPARL&quot;</span>, <span class="dt">query =</span> <span class="st">&quot;Ausländer&quot;</span>)[[<span class="st">&quot;count&quot;</span>]]
+zuwanderer &lt;-<span class="st"> </span><span class="kw">count</span>(<span class="st">&quot;GERMAPARL&quot;</span>, <span class="dt">query =</span> <span class="st">&quot;Zuwanderer&quot;</span>)[[<span class="st">&quot;count&quot;</span>]]
+einwanderer &lt;-<span class="st"> </span><span class="kw">count</span>(<span class="st">&quot;GERMAPARL&quot;</span>, <span class="dt">query =</span> <span class="st">&quot;Einwanderer&quot;</span>)[[<span class="st">&quot;count&quot;</span>]]
+migranten &lt;-<span class="st"> </span><span class="kw">count</span>(<span class="st">&quot;GERMAPARL&quot;</span>, <span class="dt">query =</span> <span class="st">&quot;Migranten&quot;</span>)[[<span class="st">&quot;count&quot;</span>]]
+gastarbeiter &lt;-<span class="st"> </span><span class="kw">count</span>(<span class="st">&quot;GERMAPARL&quot;</span>, <span class="dt">query =</span> <span class="st">&quot;Gastarbeiter&quot;</span>)[[<span class="st">&quot;count&quot;</span>]]</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">barplot</span>(
+  <span class="kw">c</span>(auslaender, zuwanderer, einwanderer, migranten),
+  <span class="dt">names.arg =</span> <span class="kw">c</span>(<span class="st">&quot;Ausländer&quot;</span>, <span class="st">&quot;Zuwanderer&quot;</span>, <span class="st">&quot;Einwanderer&quot;</span>, <span class="st">&quot;Migranten&quot;</span>),
+  <span class="dt">las =</span> <span class="dv">2</span>, <span class="dt">cex.axis =</span> <span class="dv">1</span>, 
+)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">y &lt;-<span class="st"> </span><span class="kw">dispersion</span>(<span class="st">&quot;GERMAPARL&quot;</span>, <span class="dt">query =</span> <span class="st">&quot;Flüchtlinge&quot;, sAttribute = &quot;</span>year<span class="st">&quot;)</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cdu &lt;-<span class="st"> </span><span class="kw">partition</span>(<span class="st">&quot;GERMAPARL&quot;</span>, <span class="dt">party =</span> <span class="st">&quot;CDU&quot;</span>)</code></pre></div>
+<pre><code>## ... Setting up partition</code></pre>
+<pre><code>## ... type of the corpus is plpr</code></pre>
+<pre><code>## ... get encoding: latin1</code></pre>
+<pre><code>## ... get cpos and strucs</code></pre>
+<pre><code>## ... get partition size</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">gruene &lt;-<span class="st"> </span><span class="kw">partition</span>(<span class="st">&quot;GERMAPARL&quot;</span>, <span class="dt">party =</span> <span class="st">&quot;GRUENE&quot;</span>)</code></pre></div>
+<pre><code>## ... Setting up partition</code></pre>
+<pre><code>## ... type of the corpus is plpr</code></pre>
+<pre><code>## ... get encoding: latin1</code></pre>
+<pre><code>## ... get cpos and strucs</code></pre>
+<pre><code>## ... get partition size</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cnt_cdu &lt;-<span class="st"> </span><span class="kw">count</span>(
+  cdu,
+  <span class="dt">query =</span> <span class="kw">c</span>(<span class="st">&quot;Ausländer&quot;</span>, <span class="st">&quot;Zuwanderer&quot;</span>, <span class="st">&quot;Einwanderer&quot;</span>, <span class="st">&quot;Migranten&quot;</span>, <span class="st">&quot;Flüchtlinge&quot;)</span>
+<span class="st">  )</span>
+<span class="st">cnt_gruene &lt;- count(</span>
+<span class="st">  gruene,</span>
+<span class="st">  query = c(&quot;</span>Ausländer<span class="st">&quot;, &quot;</span>Zuwanderer<span class="st">&quot;, &quot;</span>Einwanderer<span class="st">&quot;, &quot;</span>Migranten<span class="st">&quot;, &quot;</span>Flüchtlinge&quot;)
+  )
+
+<span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
+<span class="kw">barplot</span>(
+  cnt_cdu[[<span class="st">&quot;count&quot;</span>]], <span class="dt">names.arg =</span> cnt_cdu[[<span class="st">&quot;query&quot;</span>]], <span class="dt">las =</span> <span class="dv">2</span>,
+  <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">2000</span>), <span class="dt">main =</span> <span class="st">&quot;CDU&quot;</span>
+  )
+<span class="kw">barplot</span>(
+  cnt_gruene[[<span class="st">&quot;count&quot;</span>]], <span class="dt">names.arg =</span> cnt_gruene[[<span class="st">&quot;query&quot;</span>]], <span class="dt">las =</span> <span class="dv">2</span>,
+  <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">2000</span>), <span class="dt">main =</span> <span class="st">&quot;Grüne&quot;</span>
+<span class="st">  )</span></code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>Now we move to regular expressions.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">count</span>(<span class="st">&quot;GERMAPARL&quot;</span>, <span class="st">&#39;&quot;Multikult.*&quot;&#39;</span>, <span class="dt">cqp =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<pre><code>##            query count         freq
+## 1: &quot;Multikult.*&quot;   101 9.998643e-07</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">count</span>(<span class="st">&quot;GERMAPARL&quot;</span>, <span class="st">&#39;&quot;Multikult.*&quot;&#39;</span>, <span class="dt">cqp =</span> <span class="ot">TRUE</span>, <span class="dt">breakdown =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<pre><code>##             query                       match count share
+##  1: &quot;Multikult.*&quot;                  Multikulti    48 47.52
+##  2: &quot;Multikult.*&quot;           Multikulturalität     6  5.94
+##  3: &quot;Multikult.*&quot;          Multikultiromantik     5  4.95
+##  4: &quot;Multikult.*&quot;            Multikultidenken     3  2.97
+##  5: &quot;Multikult.*&quot;      Multikultigesellschaft     3  2.97
+##  6: &quot;Multikult.*&quot;          Multikulturalismus     3  2.97
+##  7: &quot;Multikult.*&quot;        Multikulti-Ideologie     2  1.98
+##  8: &quot;Multikult.*&quot;             Multikultibasar     2  1.98
+##  9: &quot;Multikult.*&quot;         Multikultiideologie     2  1.98
+## 10: &quot;Multikult.*&quot;           Multikultipolitik     2  1.98
+## 11: &quot;Multikult.*&quot;         Multikultiseligkeit     2  1.98
+## 12: &quot;Multikult.*&quot;            Multikultitruppe     2  1.98
+## 13: &quot;Multikult.*&quot;        Multikulti-fantasien     1  0.99
+## 14: &quot;Multikult.*&quot;         Multikulti-Gesäusel     1  0.99
+## 15: &quot;Multikult.*&quot;             Multikulti-Gout     1  0.99
+## 16: &quot;Multikult.*&quot;           Multikulti-Irrtum     1  0.99
+## 17: &quot;Multikult.*&quot; Multikulti-Kuschelpädagogik     1  0.99
+## 18: &quot;Multikult.*&quot;       Multikulti-Mannschaft     1  0.99
+## 19: &quot;Multikult.*&quot;       Multikulti-Mischmasch     1  0.99
+## 20: &quot;Multikult.*&quot;        Multikulti-Spektakel     1  0.99
+## 21: &quot;Multikult.*&quot;        Multikulti-Sportclub     1  0.99
+## 22: &quot;Multikult.*&quot;          Multikultidelirium     1  0.99
+## 23: &quot;Multikult.*&quot;       Multikultiexperimente     1  0.99
+## 24: &quot;Multikult.*&quot;         Multikultigläubigen     1  0.99
+## 25: &quot;Multikult.*&quot;          Multikultikonzepte     1  0.99
+## 26: &quot;Multikult.*&quot;        Multikultimannschaft     1  0.99
+## 27: &quot;Multikult.*&quot;       Multikultiseligkeiten     1  0.99
+## 28: &quot;Multikult.*&quot;           Multikultisierung     1  0.99
+## 29: &quot;Multikult.*&quot;            Multikultiträume     1  0.99
+## 30: &quot;Multikult.*&quot;       Multikultiträumereien     1  0.99
+## 31: &quot;Multikult.*&quot;                 Multikultur     1  0.99
+## 32: &quot;Multikult.*&quot;              Multikulturell     1  0.99
+## 33: &quot;Multikult.*&quot;             Multikulturhaus     1  0.99
+##             query                       match count share</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sAttributes</span>(<span class="st">&quot;GERMAPARL&quot;</span>, <span class="st">&quot;party&quot;</span>)</code></pre></div>
+<pre><code>##  [1] &quot;CDU&quot;          &quot;FDP&quot;          &quot;SPD&quot;          &quot;CSU&quot;         
+##  [5] &quot;GRUENE&quot;       &quot;PDS&quot;          &quot;&quot;             &quot;parteilos&quot;   
+##  [9] &quot;LINKE&quot;        &quot;fraktionslos&quot;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">csu &lt;-<span class="st"> </span><span class="kw">partition</span>(<span class="st">&quot;GERMAPARL&quot;</span>, <span class="dt">party =</span> <span class="st">&quot;CSU&quot;</span>)</code></pre></div>
+<pre><code>## ... Setting up partition</code></pre>
+<pre><code>## ... type of the corpus is plpr</code></pre>
+<pre><code>## ... get encoding: latin1</code></pre>
+<pre><code>## ... get cpos and strucs</code></pre>
+<pre><code>## ... get partition size</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cdu &lt;-<span class="st"> </span><span class="kw">partition</span>(<span class="st">&quot;GERMAPARL&quot;</span>, <span class="dt">party =</span> <span class="st">&quot;CDU&quot;</span>)</code></pre></div>
+<pre><code>## ... Setting up partition</code></pre>
+<pre><code>## ... type of the corpus is plpr</code></pre>
+<pre><code>## ... get encoding: latin1</code></pre>
+<pre><code>## ... get cpos and strucs</code></pre>
+<pre><code>## ... get partition size</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">spd &lt;-<span class="st"> </span><span class="kw">partition</span>(<span class="st">&quot;GERMAPARL&quot;</span>, <span class="dt">party =</span> <span class="st">&quot;SPD&quot;</span>)</code></pre></div>
+<pre><code>## ... Setting up partition</code></pre>
+<pre><code>## ... type of the corpus is plpr</code></pre>
+<pre><code>## ... get encoding: latin1</code></pre>
+<pre><code>## ... get cpos and strucs</code></pre>
+<pre><code>## ... get partition size</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">gru &lt;-<span class="st"> </span><span class="kw">partition</span>(<span class="st">&quot;GERMAPARL&quot;</span>, <span class="dt">party =</span> <span class="st">&quot;GRUENE&quot;</span>)</code></pre></div>
+<pre><code>## ... Setting up partition</code></pre>
+<pre><code>## ... type of the corpus is plpr</code></pre>
+<pre><code>## ... get encoding: latin1</code></pre>
+<pre><code>## ... get cpos and strucs</code></pre>
+<pre><code>## ... get partition size</code></pre>
+</div>
+<div id="multi-word-expressions-and-complex-queries" class="section level3">
+<h3><span class="header-section-number">5.1.2</span> Multi-word expressions and complex queries</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">count</span>(<span class="st">&quot;GERMAPARL&quot;</span>, <span class="dt">query =</span> <span class="st">&#39;&quot;Menschen&quot; &quot;mit&quot; &quot;Migrationshintergrund&quot;&#39;</span>)</code></pre></div>
+<pre><code>##                                       query count         freq
+## 1: &quot;Menschen&quot; &quot;mit&quot; &quot;Migrationshintergrund&quot;   302 2.989693e-06</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cnt &lt;-<span class="st"> </span><span class="kw">count</span>(<span class="st">&quot;GERMAPARL&quot;</span>, <span class="dt">query =</span> <span class="st">&#39;[pos = &quot;ADJA&quot;] &quot;Integration&quot;&#39;</span>, <span class="dt">breakdown =</span> <span class="ot">TRUE</span>)
+<span class="kw">head</span>(cnt, <span class="dv">10</span>)</code></pre></div>
+<pre><code>##                            query                         match count share
+##  1: [pos = &quot;ADJA&quot;] &quot;Integration&quot;      europäischen Integration   482 19.55
+##  2: [pos = &quot;ADJA&quot;] &quot;Integration&quot;       europäische Integration   421 17.07
+##  3: [pos = &quot;ADJA&quot;] &quot;Integration&quot;      erfolgreiche Integration    81  3.28
+##  4: [pos = &quot;ADJA&quot;] &quot;Integration&quot;           bessere Integration    70  2.84
+##  5: [pos = &quot;ADJA&quot;] &quot;Integration&quot;           soziale Integration    64  2.60
+##  6: [pos = &quot;ADJA&quot;] &quot;Integration&quot;         gelungene Integration    47  1.91
+##  7: [pos = &quot;ADJA&quot;] &quot;Integration&quot;          sozialen Integration    38  1.54
+##  8: [pos = &quot;ADJA&quot;] &quot;Integration&quot;      europäischer Integration    36  1.46
+##  9: [pos = &quot;ADJA&quot;] &quot;Integration&quot;        politische Integration    35  1.42
+## 10: [pos = &quot;ADJA&quot;] &quot;Integration&quot; gesellschaftliche Integration    34  1.38</code></pre>
+
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="queries.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="analysing-neighborhoods.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"google": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"download": null,
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>

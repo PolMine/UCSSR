@@ -1,16 +1,4 @@
----
-title: "Counting"
-author: "Andreas Blaette"
-date: "15 1 2018"
-output: html_document
----
-
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-
-## The Art of Counting
+# The Art of Counting
 
 Counting is a very basic task when working with text. Counting is essentially simple: It is nothing but making  statements how often a word, or words, or linguistic patterns occurr in a corpus, or a subcorpus. However, a social scientist counting words or linguistic patterns should see counting is measuring. Counts are stable and objective, the reliability and intersubjectivity of the measurement are minor problems. Words and linguistic patterns can be observed directly, many issues associated with measuring latent variables do not arise. But counting is not trivial. Without conscious reflection, what is actually measured by counting lexical items, without an awareness that counting is measuring and needs to meet standards of validity, a simple move "from words to numbers" (...) can violate fundamental concerns of social science. Counting without methodological reflection will lead to flawed and bad science.
 
@@ -24,7 +12,9 @@ use("GermaParl")
 ```
 
 
-### Words
+## The Basics of Counting
+
+## Counting Words
 
 The method in the polmineR-package to perform counts, it is not necessarily a surprise, is called 'count'. It can be used for a variety of scenarios. To learn about the uses of the count-method, call the documentation (i.e. the help page) for the method.
 
@@ -45,10 +35,6 @@ zuwanderer <- count("GERMAPARL", query = "Zuwanderer")[["count"]]
 einwanderer <- count("GERMAPARL", query = "Einwanderer")[["count"]]
 migranten <- count("GERMAPARL", query = "Migranten")[["count"]]
 gastarbeiter <- count("GERMAPARL", query = "Gastarbeiter")[["count"]]
-flüchtlinge
-geflüchtete
-asylbewerber
-asylbetrüger
 ```
 
 ```{r}
@@ -102,7 +88,7 @@ gru <- partition("GERMAPARL", party = "GRUENE")
 ```
 
 
-### Multi-word expressions and complex queries
+## Multi-word expressions and complex queries
 
 ```{r}
 count("GERMAPARL", query = '"Menschen" "mit" "Migrationshintergrund"')
@@ -113,5 +99,11 @@ cnt <- count("GERMAPARL", query = '[pos = "ADJA"] "Integration"', breakdown = TR
 head(cnt, 10)
 ```
 
+### From Counts to Dispersion
 
+### Visualising Dispersions
+
+#### Comparing Subcorpora
+
+#### Time-Series Analysis
 

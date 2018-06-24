@@ -1,0 +1,9 @@
+# Dictionaries
+
+## Available Resources
+
+## Developing Dictionaries
+
+## Scoring Texts Using Dictionaries
+
+## Use Case: Sentiment Analysis

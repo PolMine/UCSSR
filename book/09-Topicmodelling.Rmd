@@ -1,0 +1,7 @@
+# Topicmodelling
+
+## Optimizing Topicmodels
+
+## Validating Topicmodels
+
+## From Unsupervised to Supervised Learning
