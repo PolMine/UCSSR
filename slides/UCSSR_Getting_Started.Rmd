@@ -1,0 +1,56 @@
+---
+title: "Using Corpora in Social Science Research (UCSSR)"
+subtitle: 'Getting Started with polmineR'
+author: "Andreas Blaette"
+date: "28 Mai 2018"
+output:
+  slidy_presentation:
+    footer: Copyright (c) 2018, Andreas Blaette
+  beamer_presentation: default
+  ioslides_presentation: default
+editor_options: 
+  chunk_output_type: console
+---
+
+
+## Installation von polmineR: Windows
+
+Das offizielle Release ist verfügbar über CRAN und kann mit der Funktion `install.packages` installiert werden.
+
+```{r, eval = FALSE}
+install.packages("polmineR")
+```
+
+Die aktuelle Entwicklungsversion ist über GitHub verfügbar. Installation mit `install_github` aus dem `devtools`-package.
+
+```{r, eval = FALSE}
+install.packages("devtools")
+devtools::install_github("PolMine/polmineR", ref = "dev")
+```
+
+
+----
+
+
+## Installation von polmineR: Mac
+
+
+----
+
+## Installation von GermaParl
+
+```{r, eval = FALSE}
+install.packages("drat")
+drat::addRepo("polmine") # in diesem Fall: 'polmine' klein geschrieben
+install.packages("cwbtools")
+install.packages("GermaParl")
+library("GermaParl")
+germaparl_download_corpus()
+```
+
+```{r,eval = FALSE}
+library(polmineR)
+library("GermaParl")
+use("GermaParl")
+corpus()
+```
