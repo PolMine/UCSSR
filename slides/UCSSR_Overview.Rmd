@@ -1,0 +1,22 @@
+---
+title: "Using Corpora in Social Science Research (UCSSR)"
+subtitle: 'Die Foliensätze im Überblick'
+author: "Andreas Blaette"
+date: "15. Juli 2018"
+output:
+  slidy_presentation:
+    footer: Copyright (c) 2018, Andreas Blaette
+  beamer_presentation: default
+  ioslides_presentation: default
+editor_options: 
+  chunk_output_type: console
+---
+
+
+## Die Foliensätze der UCSSR-Serie
+
+  * [Installation von _polmineR_ und _GermaParl_](https://polmine.github.io/UCSSR/UCSSR_Getting_Started.html)
+  * [Nutzung von Konkordanzen in 'polmineR'](https://polmine.github.io/UCSSR/polmineR_KWIC.html)
+  * [Nutzung der CQP-Syntax mit polmineR](https://polmine.github.io/UCSSR/polmineR_CQP.html)
+  * [Analyse von Zeitreihen mit polmineR](https://polmine.github.io/UCSSR/polmineR_Zeitreihen.html)
+  * [Export tabellarischer Ergebnisse nach Excel](https://polmine.github.io/UCSSR/UCSSR_Interfacing_to_Excel.html)

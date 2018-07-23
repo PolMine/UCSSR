@@ -1,8 +1,8 @@
 ---
 title: 'Text as Linguistic Data'
-subtitle: 'Korpusanalyse mit polmineR'
+subtitle: 'Korpusanalyse mit polmineR im Überblick'
 author: "Andreas Blaette"
-date: "16 April 2018"
+date: "16. Juli 2018"
 output:
   slidy_presentation:
     footer: Copyright (c) 2018, Andreas Blaette
@@ -47,7 +47,6 @@ editor_options:
 #### Installation des CRAN-Relase
 
 ```{r, eval = FALSE}
-install.packages("polmineR.Rcpp", repos = "http://polmine.sowi.uni-due.de/packages", type = "win.binary")
 install.packages("polmineR")
 ```
 
@@ -71,7 +70,7 @@ Die Umgebungsvariable 'CORPUS_REGISTRY' kann folgendermaßen vorübergehend gese
 
 ```{r, eval = FALSE}
 Sys.getenv("CORPUS_REGISTRY")
-Sys.setenv(CORPUS_REGISTRY="/var/local/cwb/registry")
+Sys.setenv(CORPUS_REGISTRY = "/var/local/cwb/registry")
 ```
 
 Die dauerhafte Definition ist möglich über folgende Dateien:
@@ -81,16 +80,25 @@ Die dauerhafte Definition ist möglich über folgende Dateien:
 
 ### Installation von Korpora
 
-Über den PolMine-Webserver steht das GermaParl-Korpus zur Verfügung.
+Über ein ['drat'-Repositorium](https://cran.r-project.org/web/packages/drat/vignettes/DratFAQ.html) des PolMine-Projekts bei GitHub stehen Datenpakete mit Korpora zur Verfügung. Im Regelfall enthalten diese nur kleine Testdaten. Das eigentliche Korpus muss dann nachgeladen werden. Anhand des GermaParl-Pakets soll der Weg der Installation dieser Pakete beschrieben werden.
+
+```{r, eval = FALSE}
+install.packages("drat")
+drat::addRepo("polmine")
+install.packages("GermaParl")
+```
+
+Nachladen des Korpus dann folgendermaßen:
+
+```{r, eval = FALSE}
+library(GermaParl)
+germaparl_download_corpus()
+```
+
+Aktivierung der Korpora im GermaParl-Paket dann mit:
 
 ```{r, eval = FALSE}
 library(polmineR)
-install.corpus("GermaParl")
-```
-
-Aktivierung eines Korpus in einem R-Datenpaket:
-
-```{r, eval = FALSE}
 use("GermaParl")
 ```
 
@@ -108,7 +116,7 @@ kwic("GERMAPARL", '[pos = "ADJA"] "Integration"', cqp = TRUE, meta = "speaker")
 Zählung von Worthäufigkeiten ...
 
 ```{r, eval = FALSE}
-cnt <- count("GERMAPARL", pAttribute = "word")
+cnt <- count("GERMAPARL", p_attribute = "word")
 ```
 
 Arbeit mit komplexen Suchbegriffen (CQP Syntax)
@@ -120,7 +128,7 @@ count("GERMAPARL", query = '[pos = "ADJA"] "Integration"')
 Verteilung eines Suchbegriffs ...
 
 ```{r, eval = FALSE}
-d <- dispersion("GERMAPARL", query = "Aussiedler", sAttribute = "year")
+d <- dispersion("GERMAPARL", query = "Aussiedler", s_attribute = "year")
 ```
 
 ----
@@ -152,13 +160,13 @@ kwic(bt2002, "Islam", meta = c("year", "speaker", "party"), left = 30, right = 3
 Frequenzzählung
 
 ```{r, eval = FALSE}
-bt2002 <- partition("GERMAPARL", year = "2002", pAttribute = "word", type = "plpr")
+bt2002 <- partition("GERMAPARL", year = "2002", p_attribute = "word", type = "plpr")
 view(bt2002)
 ```
 
 
 ```{r, eval = FALSE}
-M <- enrich(merkel, pAttribute = c("word", "pos"))
+M <- enrich(merkel, p_attribute = c("word", "pos"))
 view(M)
 ```
 
@@ -175,7 +183,7 @@ use("GermaParl", verbose = FALSE)
 ```{r, eval = TRUE}
 M <- partition(
   "GERMAPARL", speaker = "Angela Merkel", date = "2005-11-30",
-  interjection = "FALSE", pAttribute = c("word", "pos"), verbose = FALSE
+  interjection = "FALSE", p_attribute = c("word", "pos"), verbose = FALSE
   )
 nouns <- subset(M, pos == "NN")
 nouns <- sort(nouns, "count")
@@ -207,8 +215,8 @@ wordcloud(
 
 ### Eine wichtige Unterscheidung
 
-- s-Attribute (parameter sAttributes)
-- p-Attribute (parameter pAttributes)
+- s-Attribute (parameter s_attributes)
+- p-Attribute (parameter p_attributes)
 
 
 ### Exploration eines Korpus
@@ -216,19 +224,19 @@ wordcloud(
 Finden verfügbarer p-Attribute
 
 ```{r, eval = TRUE}
-pAttributes("GERMAPARL")
+p_attributes("GERMAPARL")
 ```
 
 Finden verfügbarer s-Attribute 
 
 ```{r, eval = FALSE}
-sAttributes("GERMAPARL")
+s_attributes("GERMAPARL")
 ```
 
 Finden der Ausprägungen eines s-Attributes
 
 ```{r, eval = TRUE}
-speakers <- sAttributes("GERMAPARL", "speaker")
+speakers <- s_attributes("GERMAPARL", "speaker")
 head(speakers)
 ```
 
@@ -266,7 +274,7 @@ alternative Zeichen in eckigen Klammern
 ```{r, eval = FALSE}
 schroederPost911 <- partition(
   "GERMAPARL", speaker = "Gerhard Schröder",
-  date = c("2001-(09|10|11|12)-.*"), regex=TRUE
+  date = c("2001-(09|10|11|12)-.*"), regex = TRUE
   )
 sAttributes(schroederPost911, "date")
 ```
@@ -275,15 +283,15 @@ Partitionen bündeln!
 ---------------------
 
 ```{r, eval = FALSE}
-schroeder <- partitionBundle(
+schroeder <- partition_bundle(
   schroederPost911,
-  sAttribute = sAttributes(schroederPost911, "date"),
+  sAttribute = s_attributes(schroederPost911, "date"),
   type = "plpr"
 )
 summary(schroeder)
-read(schroeder, meta="speaker_date")
-label(schroeder, meta="speaker_date")
-1read(schroeder[[8]], meta="speaker_date")
+read(schroeder, meta = "speaker_date")
+label(schroeder, meta = "speaker_date")
+1read(schroeder[[8]], meta = "speaker_date")
 ```
 
 
@@ -293,12 +301,12 @@ Ein fortgeschrittenes Szenario
 ```{r, eval = FALSE}
 library(chron)
 library(magrittr)
-days <- sAttributes("GERMAPARL", "date")
+days <- s_attributes("GERMAPARL", "date")
 aftermath <- seq.dates(from = "11/09/2001", "11/03/2002", by = "days") %>%
   as.Date(format="%Y-%m-%d") %>%
   as.character
 sessionsAftermath <- days[days %in% aftermath]
-foo <- partition("GERMAPARL", date =sessionsAftermath, pAttribute="word")
+foo <- partition("GERMAPARL", date =sessionsAftermath, p_attribute="word")
 view(foo)
 ```
 
@@ -312,7 +320,6 @@ Einige weitere Möglichkeiten
 session
 corpus(session)
 corpus(session) <- "BT"
-partition(list(speaker_name="Angela Merkel"))
 ```
 
 
@@ -322,9 +329,9 @@ Frequenzzählungen
 ## count()
 
 ```{r, eval = FALSE}
-btByYears <- partitionBundle(
+btByYears <- partition_bundle(
   "BT",
-  def=list(speaker_type="speech"),
+  def = list(speaker_type="speech"),
   var=list(speaker_year=NULL)
   )
 islam <- count(

@@ -1,8 +1,8 @@
 ---
 title: "Using Corpora in Social Science Research (UCSSR)"
-subtitle: 'Getting Started with polmineR'
+subtitle: 'Installation von _polmineR_ und _GermaParl_'
 author: "Andreas Blaette"
-date: "28 Mai 2018"
+date: "15. Juli 2018"
 output:
   slidy_presentation:
     footer: Copyright (c) 2018, Andreas Blaette
@@ -13,44 +13,48 @@ editor_options:
 ---
 
 
-## Installation von polmineR: Windows
+## Installation von polmineR
 
-Das offizielle Release ist verfügbar über CRAN und kann mit der Funktion `install.packages` installiert werden.
+Das offizielle Release ist verfügbar über CRAN und kann mit der Funktion `install.packages` installiert werden. Windows-Nutzerinnen und Nutzer können dabei mit vorkompilierten Abhänigigkeiten arbeiten, so dass es 'out of the box' funktionieren sollte. Nutzerinnen und Nutzer von macOS beachten bitte den Hinweis am Ende dieser Folie.
 
 ```{r, eval = FALSE}
 install.packages("polmineR")
 ```
 
-Die aktuelle Entwicklungsversion ist über GitHub verfügbar. Installation mit `install_github` aus dem `devtools`-package.
+Die aktuelle Entwicklungsversion von polmineR ist über GitHub verfügbar. Sie enthält neue Funktionen, eine verbesserte Dokumentation. Die Installation erfolgt mit `install_github` aus dem `devtools`-package.
 
 ```{r, eval = FALSE}
 install.packages("devtools")
 devtools::install_github("PolMine/polmineR", ref = "dev")
 ```
 
+*Wichtig:* Nutzerinnen und Nutzer von macOS und Linux müssen vor der Installation von polmineR im Terminal für das RcppCWB-Paket die Bibliotheken pcre und GLib installieren. Bitte beachten Sie die Installationsanleitung zum polmineR-Paket, die Sie [hier](https://polmine.github.io/polmineR/index.html) finden.
 
-----
-
-
-## Installation von polmineR: Mac
-
-
-----
 
 ## Installation von GermaParl
 
+Für das GermaParl-Paket wird ein neuer Installtionsmechanismus verwendet. Zuerst wird ein (relativ kleines) Paket installiert, das nur Test- bzw. Demo-Daten enthält. Die eigentlichen Daten des GermaParl-Korpus werden dann nachgeladen. Dies erfolgt über das 'drat'-Repositorium des PolMine-Projekts bei GitHub. Daher wird zuerst das 'drat'-package installiert.
+
 ```{r, eval = FALSE}
 install.packages("drat")
-drat::addRepo("polmine") # in diesem Fall: 'polmine' klein geschrieben
+drat::addRepo("polmine") # in diesem Fall: 'polmine' muss klein geschrieben werden!
+
 install.packages("cwbtools")
 install.packages("GermaParl")
+```
+
+Jetzt können wir das GermaParl-Paket laden und die eigentlichen Daten holen.
+
+```{r, eval = FALSE}
 library("GermaParl")
 germaparl_download_corpus()
 ```
 
+Um zu testen, ob GermaParl verfügbar ist, laden wir polmineR und aktivieren das GermaParl-Korpus:
+
 ```{r,eval = FALSE}
 library(polmineR)
-library("GermaParl")
 use("GermaParl")
 corpus()
+size("GERMAPARL")
 ```
