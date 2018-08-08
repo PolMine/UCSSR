@@ -4,9 +4,9 @@ subtitle: 'Basics of Sentiment Analysis'
 author: "Andreas Blaette"
 date: "25. Juli 2018"
 output:
+  beamer_presentation: default
   slidy_presentation:
     footer: Copyright (c) 2018, Andreas Blaette
-  beamer_presentation: default
   ioslides_presentation: default
 editor_options: 
   chunk_output_type: console
