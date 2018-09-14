@@ -185,6 +185,35 @@ K
 ```
 
 
+---- 
+
+## Markieren von Worten im Wortumfeld
+
+Mit dem Argument `positivelist` kann die Liste der Ergebnisse auf jene Konkordanzen eingeschränkt werden, bei denen ein bestimmtes Wort, oder eine Liste definierter Worte im Wortumfeld der Treffer zu einem Suchbegriff auftritt. Mit der `highlight`-Methode können zudem Worte farblich markiert werden.
+
+```{r, eval = FALSE}
+K <- kwic(
+  "GERMAPARL", query = "Islam", s_attributes = c("party", "date"),
+  positivelist = "Terror"
+)
+K <- highlight(K, yellow = "Terror")
+K
+```
+
+
+```{r eval = TRUE, message = FALSE, echo = FALSE}
+K <- kwic(
+  "GERMAPARL", query = "Islam",
+  s_attributes = c("party", "date"),
+  left = 10, right = 10,
+  positivelist = "Terror"
+  )
+K <- highlight(K, yellow = "Terror")
+K <- as(K, "htmlwidget")
+K$x$options$pageLength <- 3L
+K
+```
+
 ----
 
 ## Von der Konkordanz zur Volltextanzeige
