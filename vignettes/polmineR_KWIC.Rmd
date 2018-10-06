@@ -168,20 +168,39 @@ options(polmineR.right = 10)
 
 ---- 
 
-## KWIC: Anzeige von Metadaten
-
-Merkmale eines Sprechers wie Fraktions- bzw. Parteizugehörigkeit (Parteiendifferenzthese!), Geschlecht werden oft einen Unterschied machen: Zeigen Sie die Metadaten zu einer Konkordanz mit dem Argument `s_attributes` an. Beachte: Mehrere Attribute müssen kombiniert werden über c(), das "c" steht hier für "combine".
-
-```{r, eval = FALSE}
-kwic(bt2005, query = "Ausländer", meta = "party")
-kwic(bt2005, query = "Ausländer", meta = c("party", "date"))
+```{r, echo = FALSE}
+options("polmineR.pagelength" = 5L)
+options("polmineR.left" = 5L)
+options("polmineR.right" = 5L)
 ```
 
-```{r, eval = TRUE, echo = FALSE, message = FALSE}
-K <- kwic(bt2005, query = "Ausländer", meta = c("party", "date"))
-K <- as(K, "htmlwidget")
-K$x$options$pageLength <- 3L
-K
+## KWIC: Anzeige von Metadaten
+
+Merkmale eines Sprechers wie Fraktions- bzw. Parteizugehörigkeit (Parteiendifferenzthese!), Geschlecht werden oft einen Unterschied machen: Zeigen Sie die Metadaten zu einer Konkordanz mit dem Argument `s_attributes` an. 
+
+```{r, eval = TRUE, render = knit_print}
+kwic(bt2005, query = "Ausländer", s_attributes = "party", verbose = FALSE)
+```
+
+----
+
+```{r, echo = FALSE}
+options("polmineR.pagelength" = 3L)
+```
+
+
+## KWIC: Anzeige von Metadaten (Fortsetzung)
+
+Mehrere Attribute werden kombiniert mit c(), das "c" steht hier für "combine".
+
+```{r, eval = TRUE, render = knit_print}
+kwic(bt2005, query = "Ausländer", s_attributes = c("party", "date"), verbose = FALSE)
+```
+
+Wenn Sie nicht sicher sind, welche Metadaten (s-attributes) zur Verfügung stehen, nutzen Sie die `s_attributes`-Methode, um diese zu ermitteln:
+
+```{r}
+s_attributes(bt2005)
 ```
 
 
