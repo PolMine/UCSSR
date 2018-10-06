@@ -1,0 +1,255 @@
+---
+title: "Nutzung der CQP-Syntax mit 'polmineR'"
+subtitle: 'Beispielanalysen mit dem GermaParl-Korpus'
+author: "Andreas Blaette"
+date: "28 Mai 2018"
+output:
+  slidy_presentation:
+    footer: Copyright (c) 2018, Andreas Blaette
+  beamer_presentation: default
+  ioslides_presentation: default
+editor_options: 
+  chunk_output_type: console
+vignette: >
+  %\VignetteIndexEntry{Nutzung der CQP-Syntax mit 'polmineR'}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}  
+---
+
+
+```{r, message = FALSE, results = "hide", echo = FALSE}
+# Dieser Code wird im Foliensatz nicht angezeigt und ist nur erforderlich,
+# um gegebenenfalls fehlende Pakete nachzuladen:
+# kable und kableExtra werden benötigt, um tabellarische Ausgaben zu generieren.
+if (!"knitr" %in% rownames(installed.packages())) install.packages("knitr")
+if (!"kableExtra" %in% rownames(installed.packages())) install.packages("kableExtra")
+```
+
+
+## Initialisierung
+
+Die Beispiele basieren auf dem GermaParl-Korpus. Der Datensatz in dem Paket muss nach dem Laden von polmineR mit dem `use`-Befehl aktiviert werden.
+
+```{r initialize, eval = TRUE, message=FALSE}
+library(polmineR)
+use("GermaParl")
+```
+
+Wenn Sie den Code der folgenden Beispiele auf Ihrem eigenen Rechner nachvollziehen möchten, können Sie das 'Rmarkdown'-Dokument, mit dem der Foliensatz generiert wurde, direkt in R laden:
+
+```{r get_code, eval = FALSE}
+if (!"RCurl" %in% rownames(installed.packages())) install.packages("RCurl")
+library(RCurl)
+script <- getURL(
+  "https://raw.githubusercontent.com/PolMine/polmineR.tutorials/master/polmineR_CQP.Rmd",
+  ssl.verifypeer = FALSE
+  )
+```
+
+
+Speichern Sie das Skript auf Ihrem Schreibtisch - oder an einem anderen Speicherort.
+
+```{r save_code, eval = FALSE}
+filename <- "~/Desktop/polmineR_CQP.Rmd"
+if (interactive()) writeLines(text = script, con = filename)
+```
+
+Wenn Sie jetzt das Dokument öffnen, können Sie den Code Schritt für Schritt nachvollziehen. Nutzen Sie den Code als Ausgnagspunkt für Ihre eigenen Analysen!
+
+----
+
+## CWB, CQP und 'polmineR'
+
+Das R-Paket nutzt für die Speicherung und die Abfrage von Daten die sogenannte *Corpus Workbench* (CWB). Die CWB ist ein Bündel von Tools mit der Funktionalität eines "indexing and query engine". Vergleichbare Software, die für industrielle Anwendungen Vorteile bietet, wären [Lucene](https://lucene.apache.org/) oder [Elasticsearch](https:://www.elastic.co) Ein großer Vorteil der CWB ist jedoch, dass sie vollständig quelloffen ist und in Software-Projekten genutzt und weiterentwickelt werden kann.
+
+Ein mächtiger Teil der CWB ist der sogenannte *Corpus Query Processor* (CQP) als Instrument, für große Korpora komplexe sprachlich Suchanfragen zur formulieren, die reguläre Ausdrücke und linguistische Annotationen von Korpora beinhalten können. Die CQP-Syntax kann bei allen Basis-Befehlen des polmineR-Pakets genutzt werden:
+
+  * `kwic` (Keyword-in-Context-Analysen / Abfrage von Konkordanzen);
+  * `count` (Häufigkeitszählung in Korpora und Sub-Korpora);
+  * `dispersion` (Verteilung von Suchtreffern über ein strukturelles Attribut);
+  * `cooccurrences` (Analyse von Kookkurrenzen im Wortumfeld eines Suchtreffers);
+
+In den folgenden Beispielen wird überwiegend ganz elementar mit der `count`-Methode gezeigt, wie die CQP-Syntax funktioniert. Denken Sie daran, dass  die anderen Funktionen auch CQP können! Im folgenden Tutorial wird zunächst kurz in die Nutzung regulärer Ausdrücke eingeführt. Dann wird die Nutzung linguistischer Merkmale eines Korpus erläutert.
+
+
+
+## Suche nach Worten
+
+Die CQP-Suchsyntax wird mit dem Parameter `query` an die Methoden übergegeben. Voreingestellt ist eine automatische Erkennung, ob die CQP-Syntax verwendet wird. Empfohlen ist jedoch, ausdrücklich über den logischen Parameter `cqp` anzugeben, dass CQP verwendet wird.
+
+Wichtig ist, dass einzelne Suchbegriffe ein Anführungszeichen gesetzt werden müssen und einfache Anführungszeichen den gesammten Suchbegriff umschließen.
+
+```{r}
+count("GERMAPARL", query = '"Diskriminierung"', cqp = TRUE)
+```
+
+Das *flag* %c kann genutzt werden, um die Differenzierung zwischen Groß- und Kleinschreibung aufzuheben. Das führt zum Beispiel bei allen regulär klein geschriebenen Worten (Adjektiven, Verben etc.) zu großen Unterschieden bei der Zählung, weil sie natürlich am Anfang eines Satzes groß geschrieben werden.
+
+```{r}
+count("GERMAPARL", query = c('"Liebe"', '"Liebe" %c'), cqp = TRUE)
+````
+
+
+----
+
+## Reguläre Ausdrücke: Zeichenklassen
+
+Zentral für die CQP-Syntax ist, dass bei der Suche nach einzelnen Worten der gesamte Apparat der regulären Ausdrücke genutzt werden kann. Reguläre Ausdrücke sind ein in quasi allen Programmiersprachen verfügbares, standardisiertes Instrument zur Suche nach Zeichenmustern in Text. 
+
+| Ausdruck | Beschreibung |
+|:-------:| --------------|
+| .       |Ein Punkt (".") steht für ein beliebiges Zeichen |
+| \\d | "digit" (Ziffer), d.h. 0 bis 9 |
+|?|Der voranstehende Ausdruck kommt kein- oder einmal vor.|
+|+|Der voranstehende Ausdruck tritt einmal oder mehrfach auf. |
+|*|Der voranstehende Ausdruck tritt keinmal oder beliebig oft auf.|
+|{n}|Der voranstehende Ausdruck tritt exakt n-fach auf.|
+|{min,}| Der voranstehende Ausdruck tritt mindestens min-fach auf.|
+|{min,max}|Der voranstehende Ausdruck tritt mindestens min-fach und maximal max-fach auf.|
+|{0,max}| Der voranstehende Ausdruck darf maximal max-fach vorkommen.|
+
+----
+
+## Reguläre Ausdrücke: Beispiele I
+
+Damit lassen sich bereits einfache Suchen gestalten:
+
+```{r}
+y <- count("GERMAPARL", query = '"Multikult.*"', cqp = TRUE, breakdown = TRUE)
+head(y, n = 3)
+```
+
+Wichtig ist, dass alternative Zeichen in eckigen Klammern angegeben werden können. Wenn wir nicht mit dem *flag* %c arbeiten möchten, können wir auch suchen ...
+
+```{r}
+y <- count("GERMAPARL", query = '"[mM]ultikult.*"', cqp = TRUE, breakdown = TRUE)
+head(y, n = 3)
+```
+
+
+## Reguläre Ausdrücke: Beispiele II
+
+Während in eckigen Klammern alternative einzelne Buchstaben angegeben werden könne, können in runden Klammern alternative Zeichenfolgen angegeben werden, die jeweils mit einem senkrechten Querstrich ("|") getrennt werden. 
+
+
+```{r}
+y <- count("GERMAPARL", query = '"(Zu|Ein|Aus)wanderung.*"', breakdown = TRUE)
+head(y)
+```
+
+```{r}
+y <- count("GERMAPARL", query = '"Asyl(suchende|berechtigte|ant|anti)"', cqp = TRUE, breakdown = TRUE)
+head(y)
+```
+
+----
+
+
+## CQP I: Grundlagen
+
+CQP erweitert die Syntax der regulären Ausdrücke um Möglichkeiten, über mehrere Worte ("Tokens") Abfragen zu formulieren. CQP kann die verschiedenen Annotationen eines linguistisch annotierten Korpus abfragen. Das Datenformat ist grundsätzlich tabellarisch. Das heißt, wenn neben der Ursprünglichen Wortform (p-Attribut "word") auch ein Wortarterkennung (sog. "Part-of-Speech"-Annotation, p-Attribut "pos") und eine Lemmatisierung (p-Attribute "lemma") durchgeführt wurde, so ist ein dreispaltiger *tokenstream* verfügbar, der zum Beispiel zu Anfang einer Plenardebatte wie folgt aussehen kann. Die erste Spalte gibt die *corpus position* ("cpos") wider:
+
+```{r, echo = FALSE, message = FALSE}
+P <- partition("GERMAPARL", speaker = "Angela Merkel", lp = "15")
+cpos_left <- P@cpos[1,1]
+pAttributes <- c("word", "pos", "lemma")
+tokenstream_list <- lapply(
+  pAttributes,
+  function(x) getTokenStream("GERMAPARL", pAttribute = x, encoding = "latin1", left = cpos_left, right = cpos_left + 9)
+)
+tokenstream_df <- as.data.frame(tokenstream_list)
+colnames(tokenstream_df) <- pAttributes
+tokenstream_df[["pos"]] <- gsub("^\\$", "\\\\$", tokenstream_df[["pos"]])
+tokenstream_df[["cpos"]] <- 0L:9L
+tokenstream_df <- tokenstream_df[, c("cpos", pAttributes)]
+K <- knitr::kable(tokenstream_df, format = "html", escape = TRUE)
+kableExtra::kable_styling(K, font_size = 18, position = "left")
+```
+
+---- 
+
+## CQP II: Suche im Tokenstream
+
+Wenn über die CQP-Syntax im p-Attribut "word" gesucht wird, muss der Suchbegriff nur in Anführungszeichen gesetzt werden. Um die anderen p-Attribute anzusteuern, wird in eckigen Klammern angegeben, auf welches Attribut man sich beziehen möchte. Mit dem folgenden Suchbegriff "Q" sucht man etwa Abfolgen von einem Nomen, dann "mit" und einem Wort, dass mit "Migrations" beginnt.
+
+
+```{r, eval = TRUE}
+use("GermaParl")
+Q <- '[pos = "NN"] "mit" "Migrations.*"'
+C <- count("GERMAPARL", query = Q, breakdown = TRUE)
+head(C[,c("match", "count", "share")])
+```
+
+----
+
+## CQP III: Quantoren
+
+Als Platzhalter für beliebige Worte dienen leere eckige Klammern. Beispielsweise ... 
+
+```{r}
+y <- count("GERMAPARL", query = '"(Bundesm|M)inisterium" [] [pos = "NN"]', cqp = TRUE, breakdown = TRUE)
+head(y[,c("match", "count", "share")], n = 3)
+```
+
+Entsprechend der bereits von den regulären Ausdrücken bekannten Notation kann in geschweiften Klammern angegeben werden, wie viele beliebige Worte auftreten sollen.
+
+```{r}
+y <- count("GERMAPARL", query = '"([Kk]riminell.*|Straftat.*)" []{0,5} "Asyl.*"', cqp = TRUE, breakdown = TRUE)
+head(y[,c("match", "count", "share")], n = 3)
+```
+
+
+---- 
+
+## CQP: Alle polmineR-Methoden können das
+
+Wie eingangs angesprochen steht die CQP-Syntax bei allen Basis-Methoden des polmineR-Pakets zur Verfügung.
+
+```{r}
+K <- kwic("GERMAPARL", query = '"Integration" []{0,5} ".*[Ss]cheiter.*"', cqp = TRUE)
+```
+
+```{r}
+D <- dispersion("GERMAPARL", query = '"[rR]assis.*"', sAttribute = "party")
+```
+
+```{r}
+C <- cooccurrences("GERMAPARL", query = '"([mM]uslim.|[iI]slam*)"', cqp = TRUE)
+```
+
+Natürlich ist das auch dann der Fall, wenn Sie diese Basis-Methoden auf Partitionen anwenden.
+
+```{r}
+post2001 <- partition("GERMAPARL", year = 2002:2009, verbose = FALSE)
+C <- cooccurrences(post2001, query = '"([mM]uslim.|[iI]slam*)"', cqp = TRUE)
+```
+
+CQP ist ein mächtiges Analysewerkzeug! Richtige Suchabfragen zu formulieren, erfordert allerdings etwas Übung. Beachten Sie hierbei insbesondere:
+
+  * Vergessen Sie nicht, CQP-Abfragen in einfache öffnende und schließende Anführungszeichen zu setzen!
+  
+  * Wenn Sie eine Fehlermeldung erhalten, prüfen Sie, ob öffnende Anführungszeichen, eckige oder geschweifte Klammern jeweils geschlossen werden!
+
+Viel Erfolg! 
+
+
+
+----
+
+## Anhang: Das Stuttgart-Tübingen-Tagset (Auszug)
+
+|Notation|Beschreibung|Beispiel|
+|:------:|------------|--------|
+|ADJA|attributives Adjektiv| [das] große [Haus]|
+|ART| bestimmter oder unbestimmter Artikel | der, die, das, ein, eine, ... |
+|NN| normales Nomen|Tisch, Herr, [das] Reisen|
+|NE|Eigennamen| Hans, Hamburg, HSV|
+|VVFIN|finites Verb, voll | [du] gehst, [wir] kommen [an] |
+|VVIMP|Imperativ, voll|komm [!]|
+|VVINF|Infinitiv, voll|gehen, ankommen|
+|VVIZU|Infinitiv mit ``zu'', voll| anzukommen, loszulassen|
+|VVPP|Partizip Perfekt, voll| gegangen, angekommen|
+|VAFIN|finites Verb, aux| [du] bist, [wir] werden | 
+
+
+

@@ -1,0 +1,536 @@
+---
+title: "Die Kunst des Zählens"
+subtitle: 'Analysen des GermaParl-Korpus mit polmineR'
+author: "Andreas Blaette"
+date: "Stand: 3. Oktober 2018"
+output:
+  ioslides_presentation:
+    css: css/stylesheet.css
+    logo: img/polmine.png
+    widescreen: yes
+  slidy_presentation: default
+editor_options:
+  chunk_output_type: console
+vignette: >
+  %\VignetteIndexEntry{Die Kunst des Zählens}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+## Die Kunst des Zählens {.smaller}
+
+- Die Möglichkeiten der Arbeit mit Korpora gehen weit über das Zählen hinaus. Worte (und komplexere lexikalische Einheiten) zu zählen, ist jedoch die grundlegende Operation für komplexere algorithmische Analysen und kann bereits selbst zu aussagekräftigen Analysen führen.
+
+- Das Zählen kann als Messvorgang verstanden werden. Wie bei allen anderen Auswertungsschritten sollte jede Zähloperation mit der Frage nach der Validität verbunden sein. Ist sichergestellt, dass ich messe, was ich meine zu messen? Gerade durch die Variation der Ausdrucksmöglichkeiten natürlicher Sprache ist das nicht trivial.
+
+- Es ist zu unterscheiden zwischen absoluten Häufigkeiten (`count`) und relativen Frequenzen (`frequencies`, Normalisierung der Häufigkeit durch Division mit Korpus- bzw. Subkorpusgröße, meist als `freq` abgekürzt). In Analysen ist inhaltlich zu begründen, weshalb man mit Häufigkeiten oder Frequenzen arbeitet.
+
+- Die grundlegenden hier erläuterten Methoden sind `count`, `dispersion` und `as.TermDocumentMatrix`. Wie alle anderen Basis-Methoden des polmineR-Pakets sind diese für Korpora  und `partition`-Objekte verfügbar.
+
+- Als Beispiele dienen u.a.: Die Gewinnung von Zeitreihen, die diktionärsbasierte Klassifikation von Partitione.
+ 
+
+## Initialisierung {.smaller}
+
+- Die Beispiele basieren auf dem GermaParl-Korpus. Der Datensatz in dem Paket muss nach dem Laden von polmineR mit der `use()`-Funktion aktiviert werden.
+
+```{r initialize, eval = TRUE, message=FALSE}
+library(polmineR)
+use("GermaParl")
+```
+
+- Außerdem werden die Pakege magrittr, data.table, xts und lubridate benutzt. Bei Bedarf werden diese installiert ... 
+
+```{r}
+for (pkg in c("magrittr", "data.table", "xts", "lubridate"))
+  if (!pkg %in% rownames(installed.packages())) install.packages(pkg)
+```
+
+... und geladen
+
+```{r, message = FALSE}
+library(magrittr)
+library(data.table)
+library(xts)
+```
+
+- nicht jedoch das *lubridate*-Paket, um Konflikte mit gleichlautenden Funktionen des *data.table*-Pakets zu vermeiden.
+
+
+## Grundlagen des Zählens: Die `count()`-Methode {.smaller}
+
+- Die einfachste Operation ist, mit der `count()`-Methode die Häufigkeit des Auftretens eines Begriffs (`query`) zu zählen.
+
+```{r, collapse = TRUE}
+count("GERMAPARL", query = "Fluchtursachen")
+```
+
+- Die Spalte `count` gibt die (absolute) Häufigkeit an, die Spalte `freq` die (relative) Frequenz. Die Frequenz ergibt sich, indem man  die Häufigkeit durch die Korpusgröße teilt.
+
+```{r, collapse = TRUE}
+count("GERMAPARL", query = "Fluchtursachen")[["count"]] / size("GERMAPARL")
+```
+
+- Als `query` kann auch ein `character`-Vektor mit mehreren Suchanfragen übergeben werden.
+
+```{r, collapse = TRUE}
+count("GERMAPARL", query = c("Fluchtursachen", "Herkunftsländer"))
+```
+
+
+## Nutzung der Ergebnisse eines Zählvorgangs {.smaller}
+
+- In einem kleinen Beispiel wollen wir ansehen, wie intensiv bestimmte Begriffe genutzt werden.
+
+```{r}
+queries <- c(
+  "Asylanten", "Asylbewerber", "Asylsuchende", "Aslyberechtigte",
+  "Flüchtlinge", "Geflüchtete", "Migranten", "Schutzsuchende"
+  )
+dt <- count("GERMAPARL", query = queries)
+```
+
+- Der Rückgabewert der `count()`-Methode ist ein `data.table`. Dieser kann verlustfrei in einen `data.frame` umgewandelt werden, den wir sortieren.
+
+```{r}
+df <- as.data.frame(dt)
+df <- df[order(df$count, decreasing = TRUE),] # Sortierung
+```
+
+- Damit sind wir auch schon so weit, ein Balkendiagramm erstellen zu können (folgende Folie).
+
+```{r, eval = FALSE}
+par(mar = c(8,4,2,2)) # Vergrößerung Rand unten => genug Platz für Beschriftung
+barplot(height = df$count, names.arg = df$query, las = 2)
+```
+
+
+## Häufigkeit von Begriffen zu Asyl und Flucht {.flexbox .vcenter}
+
+```{r, eval = TRUE, echo = FALSE}
+par(mar = c(8,3,2,2)) # Vergrößerung Rand unten => genug Platz für Beschriftung
+barplot(height = df$count, names.arg = df$query, las = 2)
+```
+
+
+## `count()`-Methode und `partition`-Objekte {.smaller}
+
+- Die `count()`-Methode kann auf `partition()`-Objekte genauso wie auf Korpora als Ganzes angewendet werden. 
+
+```{r, collapse = TRUE, message = FALSE}
+bt2015 <- partition("GERMAPARL", year = 2015)
+count(bt2015, query = "Flüchtlinge")
+```
+
+- Es ist möglich, die `partition()`-Methode und die `count()`-Methode in einer "Pipe" zu verbinden (Voraussetzung ist, dass das magrittr-Package geladen ist). Dies bedeutet, Funktionen oder Methoden mit dem Pipe-Operator ("%>%") zu verketten, wobei dann der Rückgabewert einer Methode zum (ersten) Argument der darauffolgenden Methode werden kann.
+
+```{r, collapse = TRUE, message = FALSE}
+partition("GERMAPARL", year = 2015) %>%
+  count(query = "Flüchtlinge")
+```
+
+
+## Beispiel: Variation des Sprachgebrauchs {.smaller}
+
+- Das illustrieren wir durch eine kleine Analyse der Variation des Sprachgebrauchs der Fraktionen zu Asyl und Flucht in 2015.
+
+```{r, eval = FALSE, echo = TRUE}
+queries <- c("Flüchtlinge", "Asylbewerber", "Asylsuchende", "Geflüchtete", "Migranten")
+
+par(
+  mar = c(8,5,2,2), # Anpassung Ränder => Beschriftung vollständig sichtbar
+  mfrow = c(2,2) # Ausgabe verschiedener Balkendiagramme in ein Feld
+)
+
+for (pg in c("CDU/CSU", "GRUENE", "SPD", "LINKE")){
+  dt <- partition("GERMAPARL", parliamentary_group = pg, year = 2016) %>%
+    count(p, query = queries)
+  barplot(
+    height = dt$freq * 100000, names.arg = dt$query, # Beschriftung mit Suchbegriffen
+    las = 2, # Drehung Beschriftung um 90 Grad für Lesbarkeit
+    main = pg,
+    xlab = "Frequenz der Begriffe (pro 100.000 Token)",
+    ylim = c(0, 50) # einheitliche Skalierung y-Achse für Vergleichbarkeit
+    )
+}
+```
+
+
+## Sprachliche Variation zwischen Parteien {.flexbox .vcenter}
+
+```{r, eval = TRUE, echo = FALSE, message = FALSE}
+queries <- c("Flüchtlinge", "Asylbewerber", "Asylsuchende", "Geflüchtete", "Migranten")
+
+par(
+  mar = c(6,5,2,2),
+  mfrow = c(2,2), 
+  cex = 0.6
+)
+
+for (pg in c("CDU/CSU", "GRUENE", "SPD", "LINKE")){
+  p <- partition(
+    "GERMAPARL",
+    parliamentary_group = pg, year = 2016, interjection = FALSE
+    )
+  dt <- count(p, query = queries)
+  barplot(
+    height = dt$freq * 100000, names.arg = dt$query, las = 2, main = pg,
+    ylim = c(0, 50)
+  )
+}
+```
+
+
+## Nutzung von regulären Ausdrücken und CQP {.smaller}
+
+- Die `count()`-Methode akzeptiert für das Argument `query` auch die Syntax des Corpus Query Processor (CQP). Diese wird in einem folgenden Foliensatz erklärt. In ihrer einfachsten Verwendung lassend sich mit CQP reguläre Ausdrücke verwenden. Der Suchbegriff wird dann in einfache Anführungszeichen gesetzt und das Argument `cqp` auf `TRUE` gesetzt.
+
+```{r, collapse = TRUE}
+count("GERMAPARL", query = "'Flüchtling.*'", cqp = TRUE) # mit CQP-Syntax
+```
+
+- Eine Aufschlüsselung, was mit einem regulären Ausdruck getroffen wird, erhält man, wenn das Argument `breakdown` auf `TRUE` gesetzt wird.
+
+```{r}
+dt <- count("GERMAPARL", query = "'Flüchtling.*'", cqp = TRUE, breakdown = TRUE)
+```
+
+- Dieses Ergebnis (Tabelle auf der folgenden Seite) ist eine Warnung, dass wir in den Beispielen zuvor mit den einfachen Suchbegriffen Variationdes Sprachgebrauchs sehr ungenau gemessen haben! Denn wir sehen hier - unter anderemdie Flektionen von "Flüchtling" (neben "Flüchtlinge": "Flüchtlingen", "Flüchtling" etc.).
+
+
+## Treffer für regulären Ausdruck {.smaller}
+
+```{r, echo = FALSE}
+DT::datatable(dt)
+```
+
+
+## Zählung über positionale Attribute {.smaller}
+
+- Es gibt zwei Lösungen für das Problem, dass die Worte in einem Korpus mit verschiedenen Flektionen auftreten können: Man kann mit der Lemmatisierung arbeiten, die über das positionale Attribute 'lemma' angesprochen werden kann, oder treffsichere reguläre Ausdrücke entwickeln.
+
+- Zur Erinnerung: "Lemmatisierung" bedeutet, dass eine Worform auf die nicht flektierte Grundform zurückgeführt wird. CWB-indizierte Korpora, das von polmineR verwendete Datenformat, können das positionale Attribut 'lemma' enthalten. Bei der `count()`-Methode wird auf dieses durch Angabe des Argument `p_attribute` (Wert: "lemma") zugegriffen.
+
+```{r, collapse = TRUE}
+count("GERMAPARL", query = "Flüchtling", p_attribute = "lemma")
+```
+
+- Dies entspricht - fast - den Varianten, die wir bei der Aufschlüsselung auf der vorgangegenangen Seit gesehen haben (durch `breakdown = TRUE`): Über das Lemma werden neben "Flüchtling" auch "Flüchtlinge", "Flüchtlingen" auch kleingeschriebene Varianten erfasst ("flüchtling", "flüchtlings", "flüchtlinge"), die über Unsauberkeiten im Korpus auftreten (vgl. Anhang).
+
+
+## Oder doch reguläre Ausdrücke? {.smaller}
+
+- Bei "Geflüchtete" treffen wir jedoch auf folgendes Problem. Bei Wortneuschöpfungen wie dieser ("Geflüchtete" tritt im Bundestag regelmäßig erst ab 2012 auf) ist die Lemmatisierung oftmals nicht erfolgreich. Dies sehen wir, wenn wir mit der klassischen `grep()`-Funktion in den auftretenden Wortformen bzw. den Lemmata suchen.
+
+```{r, collapse = TRUE}
+terms("GERMAPARL", p_attribute = "word") %>% grep("Geflüchtet", ., value = T)
+terms("GERMAPARL", p_attribute = "lemma") %>% grep("Geflüchtet", ., value = T)
+```
+
+- Die Flektionen von "der/die Geflüchtete" treffen wir am besten mit dem regulären Ausdruck "Geflüchtete(|r|n)". Wir erzielen so 266 Treffer (statt `r count("GERMAPARL", query = "Geflüchtete")[["count"]]` ohne CQP/regulären Ausdruck), was der Sache nach einen deutlichen Unterschied macht.
+
+```{r, collapse = TRUE}
+count("GERMAPARL", query = '"Geflüchtete(|r|n)"', cqp = TRUE)
+
+```
+
+
+## Sprachliche Variation: Matching von Flektionen {.smaller}
+
+- Das Beispiel von gerade eben führen nun noch einmal durch mit regulären Ausdrücken, die Flektionen erfassen. Vielleicht sind die Unterschiede doch etwas größer als zunächst angenommen?
+
+```{r, eval = FALSE, echo = TRUE, message = FALSE}
+queries <- c(
+  Flüchtlinge = '"Flüchtling(|e|s|en)"',
+  Asylbewerber = '"Asylbewerber(|s|n|in|innen)"',
+  Asylsuchende = '"Asylsuchende(|n|r)"',
+  Geflüchtete = '"^Geflüchtete(|r|n)$"',
+  Migranten = '"^Migrant(|en)$"'
+  )
+par(mar = c(6,5,2,2), mfrow = c(2,2),  cex = 0.6)
+for (pg in c("CDU/CSU", "GRUENE", "SPD", "LINKE")){
+  partition("GERMAPARL", parliamentary_group = pg, year = 2015:2016, interjection = FALSE) %>%
+    count(query = unname(queries), cqp = TRUE, p_attribute = "word") -> dt
+  barplot(
+    height = dt$freq * 100000,
+    names.arg = names(queries),
+    las = 2, main = pg,
+    ylim = c(0, 50)
+  )
+}
+```
+
+
+## Sprachliche Variation, Zweiter Anlauf  {.flexbox .vcenter}
+
+```{r, eval = TRUE, echo = FALSE, message = FALSE}
+queries <- c(
+  Flüchtlinge = '"[fF]lüchtling(|e|s|en)"',
+  Asylbewerber = '"Asylbewerber(|s|n|in|innen)"',
+  Asylsuchende = '"Asylsuchende(|n|r)"',
+  Geflüchtete = '"^Geflüchtete(|r|n)$"',
+  Migranten = '"^Migrant(|en)$"'
+  )
+
+par(mar = c(6,5,2,2), mfrow = c(2,2),  cex = 0.6)
+
+for (pg in c("CDU/CSU", "GRUENE", "SPD", "LINKE")){
+  partition("GERMAPARL", parliamentary_group = pg, year = 2015:2016, interjection = FALSE) %>%
+    count(query = unname(queries), cqp = TRUE, p_attribute = "word") -> dt
+  barplot(
+    height = dt$freq * 100000,
+    names.arg = names(queries),
+    las = 2, main = pg,
+    ylim = c(0, 50)
+  )
+}
+```
+
+
+## Zwischenfazit und "Learnings"
+
+- Worte zu zählen geht schnell und man hat schnell eine nette Visualisierung fabriziert. Valide Aussagen selbst über scheinbar einfache Dinge (wie sprachliche Variation zwischen Parteien oder Sprachwandel über Zeit) erfordern gleichwohl Sorgfalt, wie die vorangegangenen Beispiele zeigen.
+
+- Mit der Lemmatisierung im Korpus zu arbeiten, kann eine effiziente Lösung sein, um die Flektionen eines Wortes im Korpus zu erfassen. Ein mögliches Problem ist jedoch, dass Wortneuschöpfungen unter Umständen nicht lemmatisiert werden konnten.
+
+- Eine mögliche Alternative ist die sorgfältige Entwicklung regulärer Ausdrücke, mit denen verschiedene sprachliche Varianten zu erfassen. Die Potentiale der CQP-Syntax wurden hier nur angerissen. Relevant kann insbesondere noch die Möglichkeit sein, Mehrwort-Einheiten zu erfassen (z.B. "Menschen mit Migrationshintergrund").
+
+
+## Häufigkeitsverteilungen {.smaller}
+
+- Diachrone und synchrone Analysen von Sprache sind bei der Analyse von Korpora von grundlegender Bedeutung. Sie dienen der Untersuchung von Sprachwandel ("diachron", d.h. im Zeitverlauf) und der Varation des Sprachgebrauchs (zur gleichen Zeit, also "synchron") zwischen Akteuren.
+
+- Die `dispersion()`-Methode ermöglicht die effiziente Zählungen von Häufigkeiten über ein oder zwei Dimensionen (konkret: S-Attribute).
+
+
+```{r get_simple_dispersion}
+dt <- dispersion("GERMAPARL", query = "Flüchtlinge", s_attribute = "year")
+head(dt) # wir betrachten nur den Anfang der Tabelle
+```
+
+- Die Nutzung der CQP-Syntax und regulärer Ausdrücke ist bei der `dispersion()`-Methode wie bei der `count()`-Methode möglich.
+
+
+## Einfache Visualisierung der Häufigkeiten {.smaller}
+
+```{r, echo = FALSE}
+par(mfrow = c(1,1))
+```
+
+- Anders als bei der `count()`-Methode kann mit dem Argument `freq` angefordert werden, dass als Normalisierung (relative) Frequenzen berechnet werden sollen (`freq = TRUE`).
+
+```{r dispersion, message = FALSE}
+dt <- dispersion("GERMAPARL", query = "Flüchtlinge", s_attribute = "year", freq = TRUE)
+```
+
+- Der Rückgabewert die `dispersion`-Methode ist wie bei der `count()`-Methode ein `data.table`. Die verlustfreie Umwandlung mit `as.data.frame()` ist mögich.
+
+- Das Ergebnis der Verteilungsanalyse lassen sich schnell und einfach als Balkendiagramm visualisieren. (Aus der Abbildung auf der folgenden Folie geht die Resonanz des Themas Flucht und Asyl im Bundestag deutlich hervor.)
+
+```{r, eval = FALSE}
+barplot(
+  height = dt[["freq"]] * 100000,
+  names.arg = dt[["year"]],
+  las = 2, ylab = "Treffer pro 100.000 Worte"
+  )
+```
+
+
+
+## Flucht und Asyl im Bundestag, nach Jahren {.flexbox .vcenter}
+
+```{r, eval = TRUE, echo = FALSE}
+barplot(
+  height = dt[["freq"]] * 100000,
+  names.arg = dt[["year"]],
+  las = 2, ylab = "Treffer pro 100.000 Worte"
+  )
+```
+
+
+## Häufigkeitsverteilung über zwei Dimensionen {.smaller}
+
+- Der Analyse fügen wir jetzt noch als zweite Dimension eine Differenzierung nach Parteien hinzu.
+
+```{r}
+dt <- dispersion("GERMAPARL", query = '"[fF]lüchtling(|e|s|en)"', cqp = TRUE, s_attribute = c("year", "party"))
+```
+
+- Für die Arbeit mit Zeitreihen-Daten nutzen wir das `xts`-Paket. Wir erzeugen nun ein `xts`-Objekt auf Basis der vorliegenden Kreuztabelle mit den Häufigkeiten und schauen, wie das aussieht.
+
+```{r}
+ts <- xts(x = dt[,c("CDU", "CSU", "FDP", "GRUENE", "SPD")],
+          order.by = as.Date(sprintf("%s-01-01", dt[["year"]]))
+          )
+head(ts)
+```
+
+
+## Visualisierung mit `xts` {.columns-2}
+
+- Besser sind die Dinge über ein Zeitreihen-Diagramm zu erkennen.
+
+
+```{r, eval = TRUE, echo = TRUE, fig.height = 4, fig.width = 4}
+plot.xts(
+  ts,
+  multi.panel = TRUE,
+  col = c("black",
+          "black",
+          "blue",
+          "green",
+          "red"),
+  lwd = 2,
+  yaxs = "r"
+  )
+```
+
+
+## Eine datumsgenaue Zeitreihe {.smaller}
+
+```{r, fig.height = 2.5}
+par(mar = c(4,2,2,2))
+dt <- dispersion("GERMAPARL", query = '"[fF]lüchtling(|e|s|en)"', cqp = TRUE, s_attribute = "date")
+dt <- dt[!is.na(as.Date(dt[["date"]]))]
+ts <- xts(x = dt[["count"]], order.by = as.Date(dt[["date"]]))
+plot(ts)
+```
+
+- Ist das schon aussagekräftig genug? Wir sollten daher Zählung auf einen größeren Zeitraum zu aggregieren.
+
+
+## Aggregation nach Woche - Monat - Quartal - Jahr {.smaller}
+
+- Als Zeiteinheit für eine Aggregation über den einzelnen Tag hinaus werden wir Woche, Monat, Quartal und Jahr verwenden. Für die Wochen brauchen wir das `lubridate`-Paket.
+
+- Nun legen wir aggregierte Zeitreihenobjekte an. Der Code hierfür ist bewusst kompakt und vielleicht nicht auf Anhieb verständlich. Im Zweifelsfall ... per copy & paste nutzen!
+
+```{r}
+ts_week <- aggregate(ts, {a <- lubridate::ymd(paste(lubridate::year(index(ts)), 1, 1, sep = "-")); lubridate::week(a) <- lubridate::week(index(ts)); a})
+ts_month <- aggregate(ts, as.Date(as.yearmon(index(ts))))
+ts_qtr <- aggregate(ts, as.Date(as.yearqtr(index(ts))))
+ts_year <- aggregate(ts, as.Date(sprintf("%s-01-01", gsub("^(\\d{4})-.*?$", "\\1", index(ts)))))
+```
+
+- Welche Aggregation der Zeitreihe ist aussagekräftig? Dafür plotten wir die Zeitreihen in einem 2*2-Feld.
+
+```{r, eval = FALSE}
+par(mfrow = c(2,2), mar = c(2,2,3,1))
+plot(as.xts(ts_week), main = "Aggregation: Woche")
+plot(as.xts(ts_month), main = "Aggregation: Monat");
+plot(as.xts(ts_qtr), main = "Aggregation: Quartal")
+plot(as.xts(ts_year), main = "Aggregation: Jahr")
+```
+
+
+## Aggregation nach Woche - Monat - Quartal - Jahr {.flexbox .vcenter}
+
+```{r, eval = TRUE, echo = FALSE, fig.width = 10}
+par(mfrow = c(2,2), mar = c(2,2,3,1))
+plot(as.xts(ts_week), main = "Aggregation: Woche")
+plot(as.xts(ts_month), main = "Aggregation: Monat");
+plot(as.xts(ts_qtr), main = "Aggregation: Quartal")
+plot(as.xts(ts_year), main = "Aggregation: Jahr")
+```
+
+
+## Arbeit mit Zeitreihen: "Learnings" {.smaller}
+
+- Die Analyse von Verteilungen nach verschiedenen S-Attributen ist Grundlage diachroner und synchroner Analysen. Schwerpunkt der Beispiele waren Zeitreihen-Daten. Hierfür empfiehlt es sich, mit spezialisierten Paketen (wie `xts` oder `zoo`) zu arbeiten.
+
+- Sprachliche Zeitreihen-Daten sind Beobachtungen, die unregelmäßig gemacht werden. Temperatur-Messungen werden täglich durchgeführt, doch der Bundestag tagt nicht täglich und Zeitungen erscheinen meist an Sonn- und Feiertagennicht. Daher ist es für die Analyse und Visualisierung relevant, eine Aggregation der Daten für ein größeres Zeitintervall als den Tag durchzuführen (Woche, Monat, Quartal, Jahr). Auch deswegen empfiehlt es sich, spezialisierte Pakete (`xts` oder `zoo`) zu verwenden.
+
+- Gerade diachrone Analysen sollten den möglichen Bedeutungswandel von Begriffen im Blick behalten: War vor zehn oder zwanzig mit einem politischen Schlagwort das gemeint, was heute darunter verstanden wird? Mit Zählungen valide zu messen, wird oft auch bedeuten, eben nicht nur zu zählen, sondern zumindest über stichprobenartige Konkordanzanalysen sicherzustellen, dass relevanter Bedeutungswandel nicht übersehen wird.
+
+
+## Diktionärsbasierte Klassifikation I {.smaller}
+
+- Zählungen können nicht nur über Korpora und `partition`-Objekte durchgeführt werden, sondern auch über `partition_bundle`-Objekte. Dafür gibt es verschiedene Einsatzszenarien. Hier wird ein Basis-Rezept für eine diktionärsbasierte Klassifikation angeboten.
+
+- Der erste Schritt ist, ein `partition_bundle` mit den nach Daten und Tagesordnungspunkten unterteilten Partitionen eines Korpus aufzubereiten (hier nur für 2016).
+
+```{r, message = FALSE, fig.width = 4}
+bt2016 <- partition("GERMAPARL", year = 2016)
+pb <- partition_bundle(bt2016, s_attribute = "date")
+nested <- lapply(
+  pb@objects,
+  function(x) partition_bundle(x, s_attribute = "agenda_item", verbose = F)
+)
+debates <- flatten(nested)
+names(debates) <- paste(
+  blapply(debates, function(x) s_attributes(x, "date")),
+  blapply(debates, function(x) name(x)), 
+  sep = "_"
+)
+```
+
+
+## Diktionärsbasierte Klassifikation II {.smaller}
+
+- Als (Pseudo-)Diktionär verwenden wir hier eine primitive Liste mit vier Schlagworten.
+
+```{r}
+dict <- c("Asyl", "Flucht", "Flüchtlinge", "Geflüchtete")
+```
+
+- Wir führen eine Zählung über das "debates"-`partition_bundle` durch und sortieren das daraus resultierende `data.table` in absteigender Reihenfolge. Das `partition_bundle` mit allen Debatten kann mit den Namen jener Partitionen indiziert werden, die einen Diktionäres-Score über einem Schwellenwert (hier: 25) liegen.
+
+```{r, message = FALSE}
+dt <- count(debates, query = dict) %>% setorderv(cols = "TOTAL", order = -1L)
+debates_mig <- debates[[ subset(dt, TOTAL >= 25)[["partition"]] ]]
+```
+
+- Für die Festlegung eines Schwellenwerts zwischen einschlägigen und nicht-einschlägigen Debatten kann es hilfreich sein, eine Visualisierung (z.B. Balkendiagramm, `barplot(height = dt[["TOTAL"]])`) heranzuziehen. Eine Volltextanzeige mit Hervorhebung von Termen eines Diktionärs kann am Ende zur Validierung der Auswahlentscheidungen herangezogen werden.
+
+```{r, eval = FALSE}
+debates_mig[[1]] %>% read() %>% highlight(yellow = dict)
+```
+
+
+## Zählen aller Worte in Korpus / Partition {.smaller}
+
+- Wird bei der `count()`-Methode das Argument `query` nicht angegeben, so wird eine Zählung über das gesamte Korpus bzw. ein `partition`-Objekt durchgeführt. Mit dem Argument `p_attribute` wird angegeben, über welches positionales Attribut gezählt werden soll. Der Rückgabewert einer solchen Zählung ist ein `count`-Objekt der `textstat`-Klasse
+
+```{r, message = FALSE, collapse = TRUE}
+p <- partition("GERMAPARL", year = 2008, interjection = FALSE)
+cnt <- count(p, p_attribute = "word")
+sum(cnt[["count"]]) == size(p)
+```
+
+- Es ist möglich, mehr als nur ein P-Attribute bei dem Argument `p_attribute` anzugeben. Meist wird das eine Kombination von "word" und "pos", oder von "lemma" und "pos" sein. Eine solche Zählung kann mit der `subset()`-Methode gefiltert werden, siehe dazu das folgende Beispiel.
+
+```{r, eval = FALSE, message = FALSE}
+bt2008 <- partition("GERMAPARL", year = 2008, interjection = FALSE)
+dt <- count(bt2008, p_attribute = c("word", "pos")) %>% subset(pos %in% c("NN", "ADJA")) %>%
+  as.data.table(cnt2008min) %>% setorderv(dt, cols = "count", order = -1L) %>% head()
+```
+
+
+## Gekonnt Zählen (nicht nur) für Algorithmen {.smaller}
+
+- Zählungen aller Token in einer Partitionen sind Grundlage zum Beispiel für Verfahren der Term-Extraktion, oder können Grundlage für die Aufbereitung von Term-Dokument-Matrizen sein, die etwa als Ausgangspunkt einer Anwendung von topicmodel-Algorithmen dienen.
+
+- Im polmineR-Paket ist die `as.TermDocumentMatrix()`-Methode der Standard-Weg zur Aufbereitung von Term-Dokument-Matrizen. Die Methode kann auf `count_bundle`- oder `partition_bundle`-Objekte angewendet werden, oder auf einen `character`-Vektor, der ein Korpus angibt. Siehe hierzu die Dokumentation der genannten Methoden!
+
+- Das Zählen ist von grundlegender Bedeutung bei der Analyse von Korpora. Diese Folien sollten vermitteln, wie das mit polmineR umgesetzt wird. Die wichtige Botschaft: Such diese scheinbar einfache Operation kann ohne konzeptionelle Überlegungen und sprachliches Fingerspitzengespür zu schlechter Forschung ohne Validitätsanspruch führen.
+
+- Für die Validierung von Zählergebnissen kann die Nutzung von Konkordanzen (nächster Foliensatz) entscheidend sein. Die CQP-Syntax, die hier nur angerissen wurde, wird im übernächsten Foliensatz erläutert.
+
+
+## Anhang {.smaller}
+
+- Welche Wortformen werden von einem Lemma erfasst?
+
+```{r, eval = FALSE}
+word <- get_token_stream("GERMAPARL", p_attribute = "word")
+Encoding(word) <- registry_get_encoding("GERMAPARL")
+lemma <- get_token_stream("GERMAPARL", p_attribute = "lemma")
+Encoding(lemma) <- registry_get_encoding("GERMAPARL")
+
+dt <- data.table(word = word, lemma = lemma)
+
+token <- "Flüchtling"
+q <- iconv(token, from = "UTF-8", to = "latin1")
+dt2 <- dt[lemma == q]
+dt2[, .N, by = .(word)]
+```

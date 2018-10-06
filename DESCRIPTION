@@ -1,0 +1,29 @@
+Package: UCSSR
+Type: Package
+Title: Using Corpora in Social Science Research
+Version: 0.0.0.9001
+Date: 2018-10-06
+Authors@R: person("Andreas", "Blaette", role = c("aut", "cre"), email = "andreas.blaette@uni-due.de")
+Description: Slides to introduce polmineR and GermaParl.
+Imports:
+  polmineR,
+  magrittr,
+  RCurl,
+  zoo
+Suggests:
+  data.table,
+  xts,
+  lubridate,
+  knitr,
+  rmarkdown,
+  DT,
+  annolite,
+  kableExtra,
+  klippy,
+  vembedr,
+  widgetframe,
+  devtools
+LazyData: yes
+License: CC BY-NC-SA 4.0
+VignetteBuilder: knitr
+RoxygenNote: 6.0.1

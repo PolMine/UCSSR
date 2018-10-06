@@ -1,0 +1,342 @@
+---
+title: "Diktionäre und Sentiment-Analysen"
+subtitle: 'GermaParl - polmineR - SentiWS'
+author: "Andreas Blaette"
+date: "25. Juli 2018"
+output:
+  ioslides_presentation:
+    css: css/stylesheet.css
+    logo: img/polmine.png
+    widescreen: yes
+  slidy_presentation: default
+editor_options:
+  chunk_output_type: console
+vignette: >
+  %\VignetteIndexEntry{Diktionäre und Sentiment-Analysen}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r klippy, echo=FALSE, include=TRUE}
+klippy::klippy()
+```
+
+## Grundlagen der Sentiment-Analyse {.smaller}
+
+Sentiment-Analysen erfreuen sich großer Beliebtheit. Text Mining-Blogs zeigen in vielen Varianten die Möglichkeiten, die Variation von Bewertungen von Texten mit einem numerischen Indikator zu erfassen und Veränderungen im Zeitverlauf zu analysieren und darzustellen.
+
+Welche Kinofilme werden besonders gut oder besonders schlecht bewertet? Dies lässt sich anhand von Filmbesprechungen untersuchen. Wie ist die Resonanz von Kunden auf ein neu in den Markt eingeführtes Produkt? Dazu lassen sich Kommentare in sozialen Medien untersuchen. Es gibt sicherlich eine Palette nützlicher Einsatzszenarien für Sentiment-Analysen, gerade auch jenseits der Wissenschaft.
+
+Welchen Nutzen haben Sentiment-Analysen in wissenschaftlichen Arbeiten? Zentrale Fragen sind hier, was man eigentlich misst, wenn man "Sentiments" misst. Ist die Validität der Messung gegeben, misst man was man glaubt zu messen? Aus den Antworten leitet sich ab, wann und wie Sentiment-Analysen gut begründet als Forschungsinstrument eingesetzt werden können. Wesentlich ist dabei folgender Unterschied: (a) _Diktionärsbasierte_ Verfahren messen anhand von Listen mit positivem / negativem Vokabular. (b) _Machine Learning_-basierte Verfahren gehen aus von Trainingsdaten mit bekannten Bewertungen und treffen qua Algorithmus Ableitungen für neu zu bewertende Texte. 
+  
+In dieser Anleitung arbeiten wir mit einem - deutlich einfacheren - diktionärsbasierten Verfahren und einem klassischen Diktionär, "SentiWS".
+
+
+## Erforderliche Installationen / Pakete {.smaller}
+
+Die folgenden Erläuterungen nutzen das `polmineR`-Paket und das `GermaParl`-Korpus. Die Installation wird in einem eigenen Foliensatz erläutert. Ergänzend nutzen wir die folgenden Pakete:
+
+  * `zoo`: Ein Paket zur Arbeit mit Zeitreihen-Daten;
+  * `magrittr`: Tools, um R-Befehle in einer "Pipe"" hintereinander zu verketten (s.u.);
+  * `devtools`: Entwicklertools, wir nutzen einen Befehl für den Download einer einzelnen Funktion;
+
+Der folgende Code prüft, ob diese Pakete installiert sind und nimmt die Installation vor, falls erforderlich.
+
+```{r install_required_packages, eval = TRUE}
+required_packages <- c("zoo", "magrittr", "devtools")
+for (pkg in required_packages)
+  if (!pkg %in% rownames(installed.packages())) install.packages(pkg)
+```
+
+Bitte beachten Sie, dass die Funktionalität für den folgenden Workflow erst mit polmineR-Version `r as.package_version("0.7.9.9005")` zur Verfügung steht. Installieren Sie bei Bedarf die aktuelle Entwicklungsversion von polmineR.
+
+```{r update_polmineR, eval = TRUE}
+if (packageVersion("polmineR") < as.package_version("0.7.9.9005"))
+  devtools::install_github("PolMine/polmineR", ref = "dev")
+```
+
+
+## Los geht's {.smaller}
+
+Die erforderlichen Pakete werden nun geladen.
+
+```{r load_libraries, eval = TRUE}
+library(zoo, quietly = TRUE, warn.conflicts = FALSE)
+library(devtools)
+library(magrittr)
+library(data.table)
+library(xts)
+```
+
+Wir laden auch polmineR und aktivieren das GermaParl-Korpus, das über das GermaParl-Paket verfügbar ist.
+
+```{r load_polmineR, eval = TRUE, message = FALSE}
+library(polmineR)
+use("GermaParl")
+```
+
+
+## Wir holen 'get_sentiws' von GitHub {.smaller}
+
+Als Diktionär nutzen wir in der folgenden exemplarischen Analyse den SentimentWortschatz des Leipziger Wortschatz-Projekts, kurz "SentiWS". Eine Erläuterung finden Sie [hier](http://wortschatz.uni-leipzig.de/de/download). Die Daten stehen unter einer CC-BY-SA-NC Lizenz zur Verfügung und können im wissenschaftlichen Kontext ohne lizenzrechtliche Einschränkungen verwendent werden. Erforderlich ist selbstverständlich, dass die Daten korrekt zitiert werden.
+
+SentWS kann als zip-Datei heruntergeladen werden. Um die Dinge weiter zu vereinfachen ist als Gist bei der GitHub-Präsenz des PolMine-Projekts eine Funktion hinterlegt, die den Download erledigt und automatisch eine tabellarische Datenstruktur generiert, wie wir sie benötigen werden.
+
+```{r get_senti_ws, eval = TRUE, message = FALSE}
+gist_url <- "https://gist.githubusercontent.com/PolMine/70eeb095328070c18bd00ee087272adf/raw/c2eee2f48b11e6d893c19089b444f25b452d2adb/sentiws.R"
+devtools::source_url(gist_url) # danach ist Funktion verfügbar
+SentiWS <- get_sentiws()
+```
+
+Damit ist mit dem Objekt `SentiWS` das Diktionär verfügbar.
+
+
+## SentiWS: Ein Blick in die Daten {.smaller}
+
+Das SentiWS-Objeckt ist ein `data.table`. Wir nutzen das anstelle eines klassischen `data.frame`, weil das später das Matching der Daten (Worte im Korpus und Worte im Diktionär) erleichtert und beschleunigt. Damit wir verstehen, womit wir arbeiten, werfen wir einen schnellen Blick in die Daten.
+
+```{r inspect_senti_ws, eval = TRUE}
+head(SentiWS, 10)
+```
+
+
+## SentiWS: Ein Blick in die Daten, Teil 2 {.smaller}
+
+In der letzten Spalte ("weight") sehen Sie, dass Worten im Diktionär eine Gewichtung zugewiesen ist. Diese kann positiv sein (bei "positivem" Vokabular) oder negativ (bei "negativen" Worten). Außerdem sehen Sie, dass neben der Wortform ("word"-Spalte) auch Lemmata aufgeführt sind sowie eine Part-of-Speech-Klassifikation. Letzteres macht eine eindeutige Zuordnung möglich. Die Spalte "base" mit einem logischen Wert (TRUE/FALSE) ergibt sich technischer aus der Umwandlung der vom Leipziger Wortschatzprojekt heruntergeladenen Tabelle in die extensive Form: In der Roh-Tabelle findet sich in jeder Zeile ein Lemma. Dementsprechend können wir prüfen, wie viele positive bzw. negative Worte als Grundform in der Tabelle sind.
+
+```{r, eval = TRUE}
+vocab <- c(
+  positive = nrow(SentiWS[base == TRUE][weight > 0]),
+  negative = nrow(SentiWS[base == TRUE][weight < 0])
+  )
+vocab
+```
+
+
+## Positives/negatives Vokabular in Wortkontext {.smaller}
+
+- Wir untersuchen nun das Wortumfeld eines interessanten Begriffs. Weil es so einfach, relevant und plakativ ist, stellen wir die Frage, wie sich die positiven/negativen Konnotationen des "Islams" im Zeitverlauf entwickelt haben.
+
+- Eine Vorfrage ist, wie groß der linke und rechte Wortkontext sein soll, der untersucht wird. In linguistischen Untersuchungen ist ein Kontext von fünf Worten links und rechts gängig. Für politische Bedeutungszuweisungen mag mehr erforderlich sein. Wir gehen von 10 Worten aus und setzen dies folgendermaßen für unsere R-Sitzung fest.
+
+```{r}
+options("polmineR.left" = 10L)
+options("polmineR.right" = 10L)
+```
+
+- Über eine "Pipe" generieren wir nun einen `data.frame` ("df") mit den Zählungen des SentiWS-Vokabulars im Wortumfeld von "Islam". Die Pipe ermöglicht es, die Schritte nacheinander durchzuführen, ohne Zwischenergebnisse zu speichern.
+
+```{r, echo = FALSE}
+df <- context("GERMAPARL", query = "Islam", p_attribute = c("word", "pos"), verbose = FALSE) %>%
+  partition_bundle(node = FALSE) %>%
+  set_names(s_attributes(., s_attribute = "date")) %>%
+  weigh(with = SentiWS) %>%
+  summary()
+```
+
+
+## Die tabellarischen Daten der Sentiment-Analyse {.smaller}
+
+Der df-data.frame führt die Statistik des Wortumfelds eines jeden Auftretens von "Islam" im Korpus auf. Um die Dinge einfach zu halten, arbeiten wir zunächst nicht mit den Gewichtungen, sondern nur mit dem positiven bzw. negativen Worten. Wir vereinfachen die Tabelle entsprechend und sehen sie an.
+
+```{r}
+df <- df[, c("name", "size", "positive_n", "negative_n")] 
+head(df, n = 12)
+```
+
+
+## Aggregation {.smaller}
+
+- Als Namen eines Wortkontexts haben wir oben das Datum des Auftretens unseres Suchbegriffs genutzt. Das ermöglicht es, anhand des Datums für das Jahr hochzuaggregieren.
+
+```{r}
+df[["year"]] <- as.Date(df[["name"]]) %>% format("%Y-01-01")
+df_year <- aggregate(df[,c("size", "positive_n", "negative_n")], list(df[["year"]]), sum)
+colnames(df_year)[1] <- "year"
+```
+
+- Es ist allerdings nicht sinnvoll, mit den absoluten Häufigkeiten zu arbeiten. Daher fügen wir Spalten ein, die den Anteil des negativen bzw. positiven Vokabulars angeben.
+
+```{r}
+df_year$negative_share <- df_year$negative_n / df_year$size
+df_year$positive_share <- df_year$positive_n / df_year$size
+```
+
+- Dies wandeln wir in ein Zeitreihen-Objekt im eigentlichen Sinne um.
+
+```{r}
+Z <- zoo(
+  x = df_year[, c("positive_share", "negative_share")],
+  order.by = as.Date(df_year[,"year"])
+)
+```
+
+
+## Visualisierung {.smaller}
+
+```{r}
+plot(
+  Z, ylab = "polarity", xlab = "year", main = "Word context of 'Islam': Share of positive/negative vocabulary",
+  cex = 0.8, cex.main = 0.8
+)
+```
+
+
+## Wie gut sind eigentlich die Ergebnisse? {.smaller}
+
+Aber was verbirgt sich eigentlich hinter den numerischen Werten der ermittelten Sentiment-Scores? Um dem nachzugehen, nutzen wir die Möglichkeit von polmineR, eine KWIC-Ausgabe entsprechend einer Positiv-Liste (Vektor mit erforderlichen Worten) zu reduzieren, Worte farblich zu codieren und über Tooltips (hier: Wortgewichte) weitergehende Informationen einzublenden. Also: Fahren Sie auch mit der Maus auf die angemarkerten Worte!
+
+```{r, eval = TRUE}
+words_positive <- SentiWS[weight > 0][["word"]]
+words_negative <- SentiWS[weight < 0][["word"]]
+```
+
+```{r, eval = FALSE, message = FALSE}
+kwic("GERMAPARL", query = "Islam", positivelist = c(words_positive, words_negative)) %>%
+  highlight(lightgreen = words_positive, orange = words_negative) %>%
+  tooltips(setNames(SentiWS[["word"]], SentiWS[["weight"]]))
+```
+
+Das Ergebnis (ein 'htmlwidget') folgt auf der nächsten Folie.
+
+
+## Sentiment-Analyse: Qualitative Evaluation {.smaller}
+
+```{r, eval = TRUE, echo = FALSE, message = FALSE, render = knit_print}
+options("polmineR.pagelength" = 7L)
+kwic("GERMAPARL", query = "Islam", positivelist = c(words_positive, words_negative)) %>%
+  highlight(lightgreen = words_positive, orange = words_negative) %>%
+  tooltips(setNames(SentiWS[["word"]], SentiWS[["weight"]]))
+```
+
+
+## Rezept: Sentiment-Analyse über Partition {.smaller}
+
+- Die strukturelle Annotation CWB-indizierter Korpora macht es in Kombination mit der `partition()`-Methode leicht, das skizziert Verfahren für die Sentiment-Analyse auf Subkorpora anzuwenden, so dass Bewertungsunterschiede (z.B. zwischen Fraktionen und Parteien) analysiert werden können. Im folgenden Beispiel schränken wir das GermaParl-Korpus auf die Redner von CDU und CSU ein.
+
+```{r, message = FALSE}
+p <- partition("GERMAPARL", parliamentary_group = "CDU/CSU", interjection = FALSE)
+```
+
+- In einem etwas gestrafften Verfahren generieren wird die Daten für die Sentiment-Analyse. Zuerst generieren wir den `data.frame` mit den absoluten Zählungen.
+
+```{r}
+df <- context(p, query = "Islam", p_attribute = c("word", "pos"), verbose = FALSE) %>%
+  partition_bundle(node = FALSE) %>%
+  set_names(s_attributes(., s_attribute = "date")) %>%
+  weigh(with = SentiWS) %>%
+  summary() %>%
+  subset(select = c("name", "size", "positive_n", "negative_n"))
+```
+
+
+## Aggregation {.smaller}
+
+- Daraus wird nun ein Zeitreihen-Objekt.
+
+```{r}
+time_index <- as.Date(df[["name"]]) # 
+df[["name"]] <- NULL # Spalte 'name' nicht mehr benötig, wird gelöscht
+tseries <- as.xts(df, order.by = time_index) # Umwandlung in Zeitreihen-Objekt
+```
+
+- Wir führen jetzt eine wiederverwendbare Funktion zur Aggregation der Zeitreihen ein. Mit dieser kann man nach "week", "month", "quarter" oder "year" aggregieren.
+
+```{r}
+aggregate_time_series <- function(x, aggregation){
+  y <- switch(
+    aggregation,
+    week = aggregate(x, {a <- lubridate::ymd(paste(lubridate::year(index(x)), 1, 1, sep = "-")); lubridate::week(a) <- lubridate::week(index(x)); a}),
+    month = aggregate(x, as.Date(as.yearmon(index(x)))),
+    quarter = aggregate(x, as.Date(as.yearqtr(index(x)))),
+    year = aggregate(x, as.Date(sprintf("%s-01-01", gsub("^(\\d{4})-.*?$", "\\1", index(x)))))
+    )
+  y$negative_share <- -1 * (y$negative_n / y$size)
+  y$positive_share <- y$positive_n / y$size
+  as.xts(y)
+}
+```
+
+
+## Aggregationsniveau Jahr {.smaller}
+
+<div class="columns-2">
+
+- In einem ersten Durchlauf sehen wir das Ergebnis auf dem Ergebnis des Aggregationsniveau eines Jahres an.
+
+```{r}
+aggr <- aggregate_time_series(tseries, "year")
+```
+
+- Wir erzeugen ein Zeitreihen-Digramm.
+
+```{r, fig.height = 4, fig.width = 4}
+plot(
+  aggr[,c("positive_share", "negative_share")],
+  multi.panel = FALSE,
+  ylab = "polarity",
+  xlab = "year",
+  main = "year",
+  cex = 0.5,
+  cex.main = 0.5,
+  ylim = c(-0.05, 0.05)
+  )
+```
+
+</div>
+
+## Verschiedene Aggregationen {.smaller}
+
+- Um den Vergleich verschiedener Aggregationen zu haben zeigt die folgende Folie die Aggregation nach Woche, Monat, Quartal und Jahr.
+
+```{r, eval = FALSE}
+par(mfrow = c(2,2))
+for (aggregation_level in c("week", "month", "quarter", "year")){
+  x <- aggregate_time_series(tseries, aggregation_level)
+  x <- x[,c("positive_share", "negative_share")]
+  
+  y <- plot(
+    x,
+    multi.panel = FALSE,
+    ylab = "polarity",
+    xlab = "year",
+    main = aggregation_level,
+    cex = 0.3,
+    cex.main = 0.3,
+    ylim = c(-0.05, 0.05),
+    type = "l"
+  )
+  show(y)
+}
+```
+
+
+## Sentiment-Analyse zu "Islam" | Aggregation nach Woche, Monat, Quartal, Jahr {.flexbox .vcenter}
+
+```{r, echo = FALSE, fig.height = 4}
+par(mfrow = c(2,2))
+for (aggregation_level in c("week", "month", "quarter", "year")){
+  x <- aggregate_time_series(tseries, aggregation_level)
+  x <- x[,c("positive_share", "negative_share")]
+  
+  y <- plot(
+    x,
+    multi.panel = FALSE,
+    ylab = "polarity",
+    xlab = "year",
+    main = aggregation_level,
+    cex = 0.3,
+    cex.main = 0.3,
+    ylim = c(-0.05, 0.05),
+    type = "l"
+  )
+  show(y)
+}
+```
+
+
+## Diskussion
+
+  * Wir interpretieren Sie die Ergebnisse der Zeitreihen-Analyse?
+  * Wie valide sind die Ergebnisse?
+  * Ist der Übergang zur Arbeit mit Wort-Gewichten sinnvoll oder erforderlich?
