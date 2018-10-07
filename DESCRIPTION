@@ -2,7 +2,7 @@ Package: UCSSR
 Type: Package
 Title: Using Corpora in Social Science Research
 Version: 0.0.0.9001
-Date: 2018-10-06
+Date: 2018-10-0
 Authors@R: person("Andreas", "Blaette", role = c("aut", "cre"), email = "andreas.blaette@uni-due.de")
 Description: Slides to introduce polmineR and GermaParl.
 Imports:
