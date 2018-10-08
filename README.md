@@ -14,14 +14,14 @@ several vignettes which render into html slides. The slides are also
 hosted at the [GitHub Pages of the UCSSR
 package](https://polmine.github.io/UCSSR).
 
-It relies on the polmineR package and requires users to have basic R
+UCSSR relies on the polmineR package and requires users to have basic R
 knowledge. At this stage of its development, the data used in examples
 is GermaParl, a corpus of debates in the German Bundestag. The language
 of the slides is German.
 
 ## Installation
 
-There are two reasons for installing the package:
+Slides are online, but there are two reasons for installing the package:
 
   - you want to work with the slides offline;
   - you want to have convenient access to the Rmarkdown files the slides
@@ -88,9 +88,27 @@ around with it, or re-use it for your own analysis, it may be convenient
 to open the Rmarkdown file the slide has been generated from. The
 function requires that you work in an RStudio session.
 
+To learn which Rmarkdown files are available, call `open_rmarkdown()`
+without any
+    argument.
+
 ``` r
 UCSSR::open_rmarkdown()
 ```
+
+    ## Please indicate a topic. Available Rmarkdown files that the vignettes in this package are based on are:
+    ## index.Rmd / corpora.Rmd / subcorpora.Rmd / counting.Rmd / kwic.Rmd / cqp.Rmd / sentiments.Rmd
+
+Specify the topic of the Rmarkdown document to open it in your RStudio
+session. The file extensions can be omitted.
+
+``` r
+UCSSR::open_rmarkdown("kwic")
+```
+
+Once you start modifying code in the examples, we strongly advise to
+save it to a different file, to avoid confusion if modified does not
+work any more.
 
 ## Further development
 
