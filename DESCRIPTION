@@ -10,7 +10,7 @@ Imports:
   magrittr,
   RCurl,
   zoo,
-  rstudioap
+  rstudioapi
 Suggests:
   data.table,
   xts,
