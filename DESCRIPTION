@@ -9,7 +9,8 @@ Imports:
   polmineR,
   magrittr,
   RCurl,
-  zoo
+  zoo,
+  rstudioap
 Suggests:
   data.table,
   xts,
