@@ -1,6 +1,6 @@
 ---
-title: "Mining Migration Debates"
-subtitle: 'Folien zur Vorbereitung des ersten MigTex-Workshops'
+title: "UCSSR"
+subtitle: 'Using Corpora in Social Science Research'
 author: "Andreas Blaette"
 date: "Stand: 15. September 2018"
 output:
