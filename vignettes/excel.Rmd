@@ -1,0 +1,130 @@
+---
+title: "UCSSR"
+subtitle: 'Exporting Data to Excel'
+author: "Andreas Blaette"
+date: "10. Oktober 2018"
+output:
+  ioslides_presentation:
+    css: css/stylesheet.css
+    logo: img/polmine.png
+    widescreen: yes
+  slidy_presentation: default
+editor_options:
+  chunk_output_type: console
+vignette: >
+  %\VignetteIndexEntry{Exporting Data to Excel}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+
+## Export von Tabellen
+
+Technische Grenzen bei der Arbeit mit Textdaten setzt R nicht unbedingt. Aber manche Schritte der Analyse können schneller und/oder flüssiger mit einem anderen Programm wie z.B. Excel gemacht werden: Excel kann für die Aufbereitung von Tabellen für Forschungsberichte und Publikationen vielleicht nicht den gleichen Grad der Reproduzierbarkeit wie R bieten, dafür aber mehr Komfort. Das polmineR-Paket sieht dementsprechend Funktionen für den Export nach Excel vor.
+
+Dabei handelt es sich um die Methoden
+
+  * `store()` - für das Speichern tabellarischer Ergebnisse im Excel-Format, und
+  * `mail()`- um sich diese Tabellen komfortabel per Mail zuzuschicken.
+  
+
+## Installation 
+
+Während die `mail()`-Methode schon früh Teil des polmineR-Pakets war, ist `store()` erst später hinzugekommen. Dabei wurde `mail()` grundlegend überarbeitet. Sie brauchen mindestens Version `r as.package_version("0.7.9.9004")`, damit die im folgenden Schritte funktionieren. Welche Version des Pakets Sie installiert haben, prüfen Sie durch den Aufruf von `packageVersion("polmineR")`.
+
+Sollten Sie eine ältere Version installiert haben, installieren Sie bitte die aktuelle Version von polmineR, die über GitHub verfügbar ist.
+
+```{r install_recent_polmineR_version, eval = FALSE}
+devtools::install_github("PolMine/polmineR", ref = "dev")
+```
+
+
+## Tabellarische Ergebnisse lokal speichern (I)
+
+Das polmineR-Paket geht von zwei Standard-Szenarien aus: Man will entweder eine textstatistische Auswertung wie eine Häufigkeitszählung, eine Häufigkeitsverteilung, eine Kookkurrenz-Analyse und das Ergebnis einer Term-Extraktion als Excel-Dokuemt speichern. Oder man will mit einer Tabelle mit Keyword-in-Context-Anzeigen in Excel weiter arbeiten. In den folgenden Beispielen geben wir als Dateinamen eine Datei auf dem Desktop an. Natürlich können Sie das beliebig an Ihre Bedürfnisse anpassen.
+
+In den Beispielen nutzen wir kleine Auswertungen auf Basis des GermaParl-Korpus. Nach dem Laden des polmineR-Pakets, aktivieren wir das Korpus.
+
+```{r, eval = FALSE}
+library(polmineR)
+use("GermaParl")
+```
+
+
+## Speichern als Excel-Datei
+
+Als erstes Beispiel sichern wir das Ergebnis einer Kookkurrenz-Analyse als Excel-Datei.
+
+```{r, eval = FALSE}
+result <- cooccurrences("GERMAPARL", query = "Islam")
+store(result, filename = "~/Desktop/cooccurrences.xlsx")
+```
+
+Im zweiten Beispiel sichern wir eine Verteilungsanalyse.
+
+```{r, eval = FALSE}
+result <- dispersion("GERMAPARL", query = "Islam", s_attribute = "year")
+store(result, filename = "~/Desktop/dispersion.xlsx")
+```
+
+
+## Tabellarische Ergebnisse lokal speichern (II)
+
+Im dritten Beispiel nun die Ergebnisse einer Term-Extraktion.
+
+```{r, eval = FALSE}
+bt2008 <- partition("GERMAPARL", year = "2008", interjection = "FALSE", p_attribute = "word")
+merkel2008 <- partition(
+  "GERMAPARL", year = "2008", speaker = "Angela Merkel", interjection = FALSE, p_attribute = "word"
+  )
+merkel_terms <- features(bt2008, merkel2008, included = TRUE)
+store(merkel_terms, filename = "~/Desktop/merkel_terms_2008.xlsx")
+```
+
+Ein wichtiger Hinweis: Die Tabellen textstatistischer Auswertungen haben oft viele Zeilen. Um unnötigen Speicherverbrauch zu verhindern, wird die Zahl der gespeicherten bzw. exportierten Zeilen auf 250 begrenzt. Die zu speichernden Zeilen könne Sie über das Argument `rows` explizit angeben.
+
+```{r, eval = FALSE}
+store(merkel_terms, filename = "~/Desktop/merkel_terms_2008.xlsx", rows = 1:50)
+```
+
+
+## Speichern von KWIC-Analysen
+
+Das Speichern von Keyword-in-Context-Tabellen funktioniert analog zum vorher eingeführten Verfahren.
+
+```{r, eval = FALSE}
+K <- kwic("GERMAPARL", "Flüchtlinge")
+store(K, filename = "~/Desktop/kwic.xlsx")
+```
+
+Bei den KWIC-Ergebnissen werden als Standard alle Treffer exportiert. Bei Bedarf können Sie wie im vorangegangenen Beispiel eine Auswahl der exportierten Zeilen vornehmen.
+
+
+## Export von KWIC-Ergebnissen per Mail
+
+Die von polmineR für den Export aufbereiteten Excel-Dateien können Sie sich auch per Mail kommen lassen. Wichtig ist als Voraussetzung, dass Sie den Server für den Versand von Mails konfigurieren. Hier sehen Sie eine Beispiel-Konfiguration für Mitglieder der Universität Duisburg-Essen.
+
+Bitte beachten Sie, dass der Versand von Mails in diesem Fall ausschließlich dann funktioniet, wenn Sie per VPN in das Uni-Netz eingewählt sind.
+
+```{r}
+options("polmineR.mail" = "max.mustermann@uni-due.de") # Hier muss natürlich eine echte Adresse stehen!
+options("polmineR.smtp_server" = "mail.uni-due.de")
+options("polmineR.smtp_port" = "587")
+```
+
+
+## Ergebnisse per Mail versenden
+
+Wenn Sie die Mail-Konfiguration vorgenommen haben, können Sie die `mail()`-Methode genauso verwenden wie die `store()`-Methode.
+
+```{r, eval = FALSE}
+mail(merkel_terms)
+mail(K)
+mail(K, rows = 1:50)
+```
+
+Mit etwas Geschick ist es möglich, die Mail-Konfiguration dauerhaft zu speichern, so dass diese beim Start von R automatisch verfügbar ist. Dafür müssen die oben genannten Adaptionen der R- bzw. polmineR-Optionen in den Daten .Renviron oder .Renviron.site vorgenommen werden -  vergleiche hierzu die Hilfe, die über `?Startup` aufgerufen werden kann. Vermutlich bleibt dies etwas fortgeschrittenen Nutzerinnen und Nutzern vorbehalten.
+
+
+
+

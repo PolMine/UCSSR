@@ -45,4 +45,4 @@ vignette: >
 
 ## Anhänge
 
-[A01. Export tabellarischer Ergebnisse nach Excel](img/under_construction.png) (in Vorbereitung)
+[A01. Export tabellarischer Ergebnisse nach Excel](excel.html)
