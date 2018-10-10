@@ -3139,17 +3139,17 @@ background-size: 125px 41px;
       <h1 data-config-title><!-- populated from slide_config.json --></h1>
       <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
       <p data-config-presenter><!-- populated from slide_config.json --></p>
-            <p style="margin-top: 6px; margin-left: -2px;">Stand: 31. September 2018</p>
+            <p style="margin-top: 6px; margin-left: -2px;">Stand: 10. Oktober 2018</p>
           </hgroup>
   </slide>
 
-<slide class=""><hgroup><h2>Subkorpora und Partitionen</h2></hgroup><article  class="smaller" id="subkorpora-und-partitionen">
+<slide class=""><hgroup><h2>Subkorpora und Partitionen</h2></hgroup><article  id="subkorpora-und-partitionen" class="smaller">
 
 <ul>
-<li><p>Bei der Analyse von Korpora ist regelmäßig die synchrone Variation von Sprache (als Träger von Bedeutungen, Deutungsmustern etc.) von Interesse oder der (diachrone) Wandel im Zeitverlauf. Dementsprechend ist die Erstellung von Subkorpora zentral für den sinnvollen Einsatz von Korpora im Forschungsprozess.</p></li>
-<li><p>In der Diktion des polmineR-Pakets wird an Stelle von &ldquo;Subkorpora&rdquo; (subcorpus) der Begriff der &ldquo;Partitionen&rdquo; (partitions) verwendet. Dies schließt zum einen an die Begrifflichkeit der französischen lexikometrischen Forschung an. Vor allem aber kann &lsquo;partition&rsquo; sowohl als Verb als auch als Nomen verstanden werden. Die <code>partition()</code>-Methode wird dementsprechend verwendet, um ein Objekt der Klasse <code>partition</code> zu erzeugen, welches die relevanten Informationen zur Beschreibung einer Partition enthält.</p></li>
-<li><p>Die Erzeugung einer Partition erfolgt anhand von S-Attributen. Diese Attribute können als Metadaten auf der Textebene angesiedelt sein. Weil sie aber sehr flexibel Text-Regionen auszeichnen können, können S-Attribute zum Beispiel auch Annotationen von Textpassagen markieren.</p></li>
-<li><p>Welche S-Attribute in einem Korpus vorhanden sind und welche Werte diese Annehmen, lässt sich mit der <code>s_attributes</code>-Methode ermitteln. (Siehe hierzu der vorangegangene Foliensatz zu Korpora.)</p></li>
+<li><p>Bei der Analyse von Korpora ist regelmäßig die synchrone Variation von Sprache (als Trägerin von Bedeutungen, Deutungsmustern etc.) von Interesse oder der (diachrone) Wandel im Zeitverlauf. Dementsprechend ist die Erstellung von Subkorpora zentral für den sinnvollen Einsatz von Korpora im Forschungsprozess.</p></li>
+<li><p>In der Terminologie des <em>polmineR</em>-Pakets wird an Stelle von &ldquo;Subkorpus&rdquo; (<em>subcorpus</em>) der Begriff der &ldquo;Partition&rdquo; (<em>partition</em>) verwendet. Dies ist zum einen in der französischen lexikometrischen Forschung üblich. Vor allem aber kann <em>partition</em> sowohl als Verb als auch als Nomen auftreten: In der Programmierung gilt es als gute Praxis, wenn für Methoden Verben verwendet werden. Die <code>partition()</code>-Methode partitioniert ein Korpus und erzeugt ein Objekt der Klasse <code>partition</code>, welches die relevanten Informationen zur Beschreibung einer Partition enthält.</p></li>
+<li><p>Die Erzeugung einer Partition erfolgt anhand von S-Attributen (strukturellen Attributen). Diese Attribute können als Metadaten auf der Textebene angesiedelt sein. Weil sie aber sehr flexibel Text-Regionen auszeichnen können, können S-Attribute etwa auch Annotationen von Textpassagen unterhalb der Textebene sein.</p></li>
+<li><p>Welche S-Attribute in einem Korpus vorhanden sind und welche Werte diese annehmen, lässt sich mit der <code>s_attributes</code>-Methode ermitteln. (Siehe hierzu der vorangegangene Foliensatz zu Korpora.)</p></li>
 </ul>
 
 </article></slide><slide class=""><hgroup><h2>Erforderliche Installationen und Initialisierung</h2></hgroup><article  id="erforderliche-installationen-und-initialisierung">
@@ -3165,10 +3165,10 @@ use(&quot;GermaParl&quot;)</pre>
 
 <pre class = 'prettyprint lang-r'>library(magrittr)</pre>
 
-</article></slide><slide class=""><hgroup><h2>Anlegen einer <code>partition</code>: Grundlagen</h2></hgroup><article  class="smaller" id="anlegen-einer-partition-grundlagen">
+</article></slide><slide class=""><hgroup><h2>Anlegen einer <code>partition</code>: Grundlagen</h2></hgroup><article  id="anlegen-einer-partition-grundlagen" class="smaller">
 
 <ul>
-<li><p>Ziel des ersten Beispiels ist es, eine Partition mit all jenen Reden im Bundestag anzulegen, die von Abgeordneten und VertrerInnen der Regierung im Jahr der Finanzmarktkrise, 2008 gehalten wurden.</p></li>
+<li><p>Ziel des ersten Beispiels ist es, eine Partition mit all jenen Reden im Bundestag anzulegen, die von Abgeordneten und RegierungsvertreterInnen im Jahr der Finanzmarktkrise, 2008 gehalten wurden.</p></li>
 <li><p>Zunächst ermitteln wir mit der <code>s_attributes()</code>-Methode, welche Werte für das S-Attribute <code>year</code> verfügbar sind.</p></li>
 </ul>
 
@@ -3179,12 +3179,12 @@ use(&quot;GermaParl&quot;)</pre>
 ## [21] &quot;2016&quot;</pre>
 
 <ul>
-<li>Eine Partition auf Basis eines Korpus legt man an, in dem als erstes Argument (<code>.Object</code>) die großegeschriebene ID des Korpus angibt. Dann können die Namen von S-Attributen als Argumente genutzt werden, denen der erwünschte Wert (oder erwünschte Werte in Form eines Vektors) zugewiesen werden.</li>
+<li>Eine Partition auf Basis eines Korpus legt man an, in dem als erstes Argument (<code>.Object</code>) die (stets großgeschriebene) ID des Korpus angibt. Dann können die Namen von S-Attributen als Argumente genutzt werden, denen der erwünschte Wert (oder erwünschte Werte in Form eines Vektors) zugewiesen werden.</li>
 </ul>
 
 <pre class = 'prettyprint lang-r'>bt2008 &lt;- partition(&quot;GERMAPARL&quot;, year = &quot;2008&quot;)</pre>
 
-</article></slide><slide class=""><hgroup><h2>Anlegen einer <code>partition</code>: Fortsetzung</h2></hgroup><article  class="smaller" id="anlegen-einer-partition-fortsetzung">
+</article></slide><slide class=""><hgroup><h2>Anlegen einer <code>partition</code>: Fortsetzung</h2></hgroup><article  id="anlegen-einer-partition-fortsetzung" class="smaller">
 
 <ul>
 <li>Für die für S-Attribute angegebenen Werte können auch numerische oder logische Werte sein. Die für die interne Verarbeitung erforderliche Umwandlung in einen <code>character</code>-Vektor erfolgt automatisch.</li>
@@ -3208,7 +3208,7 @@ use(&quot;GermaParl&quot;)</pre>
 <li>Zwischenrufe nicht aus der Analyse auszuschließen, wo erforderlich, kann zu unerwünschten Verzerrungen führen. Machen Sie sich gut mit ihren Daten vertraut!</li>
 </ul>
 
-</article></slide><slide class=""><hgroup><h2>Anlegen einer <code>partition</code>: Fortsetzung</h2></hgroup><article  class="smaller" id="anlegen-einer-partition-fortsetzung-1">
+</article></slide><slide class=""><hgroup><h2>Anlegen einer <code>partition</code>: Fortsetzung</h2></hgroup><article  id="anlegen-einer-partition-fortsetzung-1" class="smaller">
 
 <ul>
 <li><p>Unser Ziel war es, nur die Reden von Abgeordneten und von Regierungsmitgliedern zu analysieren. Nicht die Redeanteile der Parlamentspräsidenten!</p></li>
@@ -3220,12 +3220,12 @@ use(&quot;GermaParl&quot;)</pre>
 ## [1] &quot;presidency&quot;      &quot;government&quot;      &quot;mp&quot;              &quot;federal_council&quot;</pre>
 
 <ul>
-<li>Da wir nur Abgeordnete und die Sprecher der Regierung in unserer <code>partition</code> haben wollten:</li>
+<li>Da wir nur Abgeordnete und die SprecherInnen der Regierung in unserer <code>partition</code> haben wollten:</li>
 </ul>
 
 <pre class = 'prettyprint lang-r'>bt2008min &lt;- partition(&quot;GERMAPARL&quot;, year = 2008, interjection = FALSE, role = c(&quot;government&quot;, &quot;mp&quot;))</pre>
 
-</article></slide><slide class=""><hgroup><h2>Anlegen einer <code>partition</code>: &ldquo;Zoomen&rdquo;</h2></hgroup><article  class="smaller" id="anlegen-einer-partition-zoomen">
+</article></slide><slide class=""><hgroup><h2>Anlegen einer <code>partition</code>: &ldquo;Zoomen&rdquo;</h2></hgroup><article  id="anlegen-einer-partition-zoomen" class="smaller">
 
 <ul>
 <li><p>Wenn Sie die Hilfe zur <code>partition()</code>-Methode aufrufen (mit <code>?partition</code>), sehen Sie, dass die <code>partition()</code>-Methode auch auf <code>partition</code>-Objekte angewendet werden kann.</p></li>
@@ -3244,7 +3244,7 @@ c &lt;- partition(b, role = c(&quot;mp&quot;, &quot;government&quot;))</pre>
 
 <pre >## [1] TRUE</pre>
 
-</article></slide><slide class=""><hgroup><h2>Die <code>partition()</code>-Methode in einer Pipe</h2></hgroup><article  class="smaller" id="die-partition-methode-in-einer-pipe">
+</article></slide><slide class=""><hgroup><h2>Die <code>partition()</code>-Methode in einer Pipe</h2></hgroup><article  id="die-partition-methode-in-einer-pipe" class="smaller">
 
 <ul>
 <li>Die Funktionsweise der meisten Methoden des polmineR-Pakets ermöglicht es, diese in einer sogenannten &ldquo;Pipe&rdquo; zu verbinden. Mittels des Pipe-Operators des magrittr-Pakets können wir die <code>partition</code> von eben auch so erzeugen:</li>
@@ -3267,10 +3267,10 @@ c &lt;- partition(b, role = c(&quot;mp&quot;, &quot;government&quot;))</pre>
 <li>Verständlichen und gut lesbaren Code zu schreiben, ist eine Kunst und (im Sinne transparenter und reproduzierbarer Forschung) eine Tugend! Pipes können dafür sehr hilfreich sein.</li>
 </ul>
 
-</article></slide><slide class=""><hgroup><h2>Anlegen einer <code>partition</code>: Reguläre Ausdrücke</h2></hgroup><article  class="smaller" id="anlegen-einer-partition-regulare-ausdrucke">
+</article></slide><slide class=""><hgroup><h2>Anlegen einer <code>partition</code>: Reguläre Ausdrücke</h2></hgroup><article  id="anlegen-einer-partition-regulare-ausdrucke" class="smaller">
 
 <ul>
-<li>Will man die Reden einzelner Redner im Deutschen Bundestag identifizieren, kann es tückisch sein, dass die Schreibweise von Namen leicht variieren kann. Dann kann es hilfreich sein, bei der Angabe von Werten für ein S-Attribut mit regulären Ausdrücken zu arbeiten. Um reguläre Ausdrücke zu aktivieren, muss für das Argument <code>regex</code> der logische Wert <code>TRUE</code> angegeben werden. Als Beispiel mag Karl-Theodor zu Guttenberg dienen: Ein (ehemaliger) Abgeordneten mit vielen Vornamen und etlichen Varianten, wie der Adelstitel (&ldquo;zu&rdquo;, &ldquo;von und zu&rdquo;) im Namen angegeben wird. Auch bei akademischen Titeln kann es einen tückischen Variantenreichtum geben (&ldquo;Dr.&rdquo;, &ldquo;Dr. rer. pol.&rdquo;, &ldquo;Dipl.-Ing.&rdquo; etc.).</li>
+<li>Will man die Reden einzelner RednerInnen im Deutschen Bundestag identifizieren, kann es tückisch sein, dass die Schreibweise von Namen leicht variieren kann. Dann kann es hilfreich sein, bei der Angabe von Werten für ein S-Attribut mit regulären Ausdrücken zu arbeiten. Um reguläre Ausdrücke zu aktivieren, muss für das Argument <code>regex</code> der logische Wert <code>TRUE</code> angegeben werden. Als Beispiel mag Karl-Theodor zu Guttenberg dienen: Ein (ehemaliger) Abgeordneten mit vielen Vornamen und etlichen Varianten, wie der Adelstitel (&ldquo;zu&rdquo;, &ldquo;von und zu&rdquo;) im Namen angegeben wird. Auch bei akademischen Titeln kann es einen tückischen Variantenreichtum geben (&ldquo;Dr.&rdquo;, &ldquo;Dr. rer. pol.&rdquo;, &ldquo;Dipl.-Ing.&rdquo; etc.).</li>
 </ul>
 
 <pre class = 'prettyprint lang-r'>guttenberg &lt;- partition(bt2008min, speaker = &quot;.*Guttenberg&quot;, regex = TRUE)
@@ -3285,7 +3285,7 @@ s_attributes(guttenberg, &quot;speaker&quot;)
 s_attributes(merkel2008, s_attribute = &quot;speaker&quot;)
 ## [1] &quot;Angela Merkel&quot; &quot;Petra Merkel&quot;</pre>
 
-</article></slide><slide class=""><hgroup><h2>Szenario: Reden von Merkel zur Finanzmarktkrise</h2></hgroup><article  class="smaller" id="szenario-reden-von-merkel-zur-finanzmarktkrise">
+</article></slide><slide class=""><hgroup><h2>Szenario: Reden von Merkel zur Finanzmarktkrise</h2></hgroup><article  id="szenario-reden-von-merkel-zur-finanzmarktkrise" class="smaller">
 
 <ul>
 <li><p>Die Kombination der Methoden <code>s_attributes()</code> und <code>partition()</code> lässt sich nutzen, um Schritt um Schritt relevante Texte zu identifizieren. Das Beispiel auf der letzten Folie zeigt: Eine Sicherheitsprüfung mit <code>s_attributes()</code> sollte regelmäßig im Forschungsprozess erfolgen, damit nicht versehentliche Treffer in die Analyse eingehen.</p></li>
@@ -3305,7 +3305,7 @@ for (day in s_attributes(merkel2008, s_attribute = &quot;date&quot;)){
 ## 2008-11-26 -&gt; N Finanzkrise = 2
 ## 2008-12-4 -&gt; N Finanzkrise = 1</pre>
 
-</article></slide><slide class=""><hgroup><h2>Zurück zum Volltext: Lesen</h2></hgroup><article  class="smaller" id="zuruck-zum-volltext-lesen">
+</article></slide><slide class=""><hgroup><h2>Zurück zum Volltext: Lesen</h2></hgroup><article  id="zuruck-zum-volltext-lesen" class="smaller">
 
 <ul>
 <li>Entsprechend der letzten Auswertung hat die Bundeskanzlerin am 26.11.2008 die Finanzkrise thematisiert. Den Volltext einer Partition kann man mit der <code>read()</code>-Methode anzeigen lassen.</li>
@@ -3322,7 +3322,7 @@ read(merkel_fcrisis)</pre>
 
 <ul>
 <li><p>Diese Datei können Sie mit einem gängigen Browser ansehen. Ein wichtiger Zweck der Erzeugung des Volltextes ist, diesen für Zwecke der Annotation in ein QDA-Programm (QDA für qualitative Datenanalyse) wie MAXQDA zu importieren.</p></li>
-<li><p>Beachte: Es ist ein &ldquo;technisches&rdquo; html, dass von polmineR erzeugt wird. Bei der Anzeige im Browser ist dies nicht sichtbar, aber jedes einzelne Wort ist von Angaben zu Korpuspositionen umklammert. Das Ziel des so angereichterten html-Formats ist, dass Annotationen von einem Programm wie MAXQDA in R/polmineR rückimportiert werden können.</p></li>
+<li><p>Hinweis: Es ist ein &ldquo;technisches&rdquo; html, dass von polmineR erzeugt wird. Bei der Anzeige im Browser ist dies nicht sichtbar, aber jedes einzelne Wort ist von Angaben zu Korpuspositionen umklammert. Das Ziel des so angereichterten html-Formats ist, dass Annotationen von einem Programm wie MAXQDA in R/polmineR rückimportiert werden können.</p></li>
 </ul>
 
 </article></slide><slide class=""><hgroup><h2></h2></hgroup><article >
@@ -3331,7 +3331,7 @@ read(merkel_fcrisis)</pre>
 
 </iframe>
 
-</article></slide><slide class=""><hgroup><h2>Datumsgenaue Zeitscheiben</h2></hgroup><article  class="smaller" id="datumsgenaue-zeitscheiben">
+</article></slide><slide class=""><hgroup><h2>Datumsgenaue Zeitscheiben</h2></hgroup><article  id="datumsgenaue-zeitscheiben" class="smaller">
 
 <ul>
 <li><p>Es kann oft erforderlich sein, datumsgenau <code>partition</code>-Objekte anzulegen, z.B. wenn man dem Effekt von Ereignissen (z.B. 11. September, Aussetzung Dublin, etc.) auf den Diskurs nachgehen möchte.</p></li>
@@ -3339,20 +3339,20 @@ read(merkel_fcrisis)</pre>
 </ul>
 
 <pre class = 'prettyprint lang-r'>pre_nineeleven &lt;- as.Date(&quot;2000-09-11&quot;)
+nineten &lt;- as.Date(&quot;2001-09-10&quot;)
 nineeleven &lt;- as.Date(&quot;2001-09-11&quot;)
 post_nineeleven &lt;- as.Date(&quot;2002-09-11&quot;)
-
-pre &lt;- partition(&quot;GERMAPARL&quot;, date = seq.Date(from = pre_nineeleven, to = nineeleven, by = &quot;day&quot;))
+pre &lt;- partition(&quot;GERMAPARL&quot;, date = seq.Date(from = pre_nineeleven, to = nineten, by = &quot;day&quot;))
 post &lt;- partition(&quot;GERMAPARL&quot;, date = seq.Date(from = nineeleven, to = post_nineeleven, by = &quot;day&quot;))
 
 count(pre, &quot;Terrorismus&quot;)
 ##          query count         freq
-## 1: Terrorismus    39 7.097135e-06
+## 1: Terrorismus    39 7.165373e-06
 count(post, &quot;Terrorismus&quot;)
 ##          query count         freq
 ## 1: Terrorismus   837 0.0001647596</pre>
 
-</article></slide><slide class=""><hgroup><h2>Anlegen eines <code>partition_bundle</code></h2></hgroup><article  class="smaller" id="anlegen-eines-partition_bundle">
+</article></slide><slide class=""><hgroup><h2>Anlegen eines <code>partition_bundle</code></h2></hgroup><article  id="anlegen-eines-partition_bundle" class="smaller">
 
 <ul>
 <li><p>Mehrere <code>partition</code>-Objekte können zu einem <code>partition_bundle</code>-Objekt zusammengefasst werden. Man kann mit der <code>partition_bundle()</code>-Methode durch Variation eines S-Attributes ein <code>partition_bundle</code>-Objekt erzeugen.</p></li>
@@ -3372,7 +3372,7 @@ summary(merkel_speeches)</pre>
 ## 6 2008-11-26 5844
 ## 7  2008-12-4 3087</pre>
 
-</article></slide><slide class=""><hgroup><h2>Zählung über ein <code>partition_bundle</code></h2></hgroup><article  class="smaller" id="zahlung-uber-ein-partition_bundle">
+</article></slide><slide class=""><hgroup><h2>Zählung über ein <code>partition_bundle</code></h2></hgroup><article  id="zahlung-uber-ein-partition_bundle" class="smaller">
 
 <ul>
 <li><p>Viele Methoden des <em>polmineR</em>-Pakets sind auch für <code>partition_bundle</code>-Objekte verfügbar. So auch die <code>count()</code>-Methode, die wir bereits kurz kennen gelernt haben.</p></li>
@@ -3394,14 +3394,14 @@ summary(merkel_speeches)</pre>
 <li>Dies kann sehr nützlich sein, wenn ein Diktionär zum Scoring von Partitionen genutzt wird, z.B. wenn nur Partitionen analysiert werden, die einen Mindest-Score aufweisen.</li>
 </ul>
 
-</article></slide><slide class=""><hgroup><h2>Mit <code>as.speeches</code> zum <code>partition_bundle</code></h2></hgroup><article  class="smaller" id="mit-as.speeches-zum-partition_bundle">
+</article></slide><slide class=""><hgroup><h2>Mit <code>as.speeches</code> zum <code>partition_bundle</code></h2></hgroup><article  id="mit-as.speeches-zum-partition_bundle" class="smaller">
 
 <ul>
-<li><p>Eine Annahme bei den Beispielen zu den Reden von Bundeskanzlerin Angela Merkel zur Finanzmarktkrise war, dass alle Worte in einem Plenarprotokoll zu einer Parlamentssitzung zu einer Rede gehören. Gerade prominente Sprecher im Parlament (wie eine Bundeskanzlerin, oder Fraktionsvorsitzende) halten jedoch, zumindest gelegentlich, zwei Reden zu unterschiedlichen Themen/Tagesordnungspunkten in ein und derselben Sitzung. Ausgeschlossen werden sollte auch, dass Wortbeiträge, die keine eigenständige Rede darstellen (Zwischenfragen, mündliche Fragen, Geschäftsordnungsanträge) einer Rede zugeschlagen werden.</p></li>
-<li><p>Für die so skizzierte Problemstellung gibt es im polmineR-Paket die <code>as.speeches()</code>-Funktion. Die zentrale Heuristik der Funktion ist, dass Passagen ununterbrochener Rede eines Sprechers zu einer Rede zusammengefasst werden können, wenn diese nicht von einer Anzahl von Worten anderer Sprecher unterbrochen werden, die über dem Wert des Arguments <code>gap</code> liegt (Standard-Wert: 500). Damit ist sichergestellt, dass nicht schon eine Zwischenfrage (eine kurze Unterbrechung durch Parlamentspräsidentin etc.) dazu führt, dass aus einer Rede zwei werden. Der Rückgabewert der <code>as.speeches()</code>-Funktion ist ein <code>partition_bundle</code>.</p></li>
+<li><p>Eine Annahme bei den Beispielen zu den Reden von Bundeskanzlerin Angela Merkel zur Finanzmarktkrise war, dass alle Worte in einem Plenarprotokoll zu einer Parlamentssitzung zu einer Rede gehören. Gerade prominente SprecherInnen im Parlament (wie eine Bundeskanzlerin, oder Fraktionsvorsitzende) halten jedoch, zumindest gelegentlich, zwei Reden zu unterschiedlichen Themen/Tagesordnungspunkten in ein und derselben Sitzung. Ausgeschlossen werden sollte auch, dass Wortbeiträge, die keine eigenständige Rede darstellen (Zwischenfragen, mündliche Fragen, Geschäftsordnungsanträge) einer Rede zugeschlagen werden.</p></li>
+<li><p>Für die so skizzierte Problemstellung gibt es im polmineR-Paket die <code>as.speeches()</code>-Funktion. Die zentrale Heuristik der Funktion ist, dass Passagen ununterbrochener Rede einer Sprecherin zu einer Rede zusammengefasst werden können, wenn diese nicht von einer Anzahl von Worten anderer SprecherInnen unterbrochen werden, die über dem Wert des Arguments <code>gap</code> liegt (Standard-Wert: 500). Damit ist sichergestellt, dass nicht schon eine Zwischenfrage (eine kurze Unterbrechung durch Parlamentspräsidentin etc.) dazu führt, dass aus einer Rede zwei werden. Der Rückgabewert der <code>as.speeches()</code>-Funktion ist ein <code>partition_bundle</code>.</p></li>
 </ul>
 
-</article></slide><slide class=""><hgroup><h2>Zusammenfassung und Ausblick</h2></hgroup><article  class="smaller" id="zusammenfassung-und-ausblick">
+</article></slide><slide class=""><hgroup><h2>Zusammenfassung und Ausblick</h2></hgroup><article  id="zusammenfassung-und-ausblick" class="smaller">
 
 <ul>
 <li><p>Die <code>partition</code>- und <code>partition_bundle</code>-Objekte bieten viel Flexibilität für die Analyse. Behalten Sie in Erinnerung, dass alle grundlegenden Methoden des polmineR-Pakets (<code>count()</code>, <code>dispersion()</code>, <code>kwic()</code>, <code>cooccurrences()</code> etc) jeweils für Korpora implementiert sind (die durch einen <code>character</code>-Vektor angegeben werden) sowie für <code>partition</code>- und <code>partition_bundle</code>-Objekte.</p></li>

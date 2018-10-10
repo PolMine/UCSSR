@@ -2,7 +2,7 @@
 title: "KWIC-Analysen mit 'polmineR'"
 subtitle: 'Syntax und Rezepte'
 author: "Andreas Blaette"
-date: "20. September 2018"
+date: "10. Oktober 2018"
 output:
   ioslides_presentation:
     css: css/stylesheet.css
@@ -105,7 +105,7 @@ kwic(bt2005, query = "Migrationshintergrund")
 options("polmineR.pagelength" = 5L)
 ```
 
-Bei der Formulierung von Suchanfragen können Sie wie die CQP-Syntax verwenden. Setzen Sie dafür das Argument `cqp` auf `TRUE`. (Wenn Sie das nicht explizit angeben, prüft polmineR selbstständig, ob die CQP-Syntax verwendet wird.)
+Bei der Formulierung von Suchanfragen können Sie die CQP-Syntax verwenden. Setzen Sie dafür das Argument `cqp` auf `TRUE`. (Wenn Sie das nicht explizit angeben, prüft polmineR selbstständig, ob die CQP-Syntax verwendet wird.)
 
 ```{r, eval = TRUE, render = knit_print, message = FALSE}
 kwic(bt2005, query = '[pos = "NN"] "mit" "Migrationshintergrund"', cqp = TRUE)
@@ -118,7 +118,7 @@ kwic(bt2005, query = '[pos = "NN"] "mit" "Migrationshintergrund"', cqp = TRUE)
 options("polmineR.pagelength" = 4L)
 ```
 
-Es kann erforderlich sein, ein größeres Wortumfeld zu analysieren, als nur (wie voreingestellt) fünf Worte links und rechts. Nutzen Sie für die Bestimmung des Wortumfels die Argumente `left` und `right`.
+Es kann erforderlich sein, ein größeres Wortumfeld zu analysieren, als nur (wie voreingestellt) fünf Worte links und rechts. Nutzen Sie für die Bestimmung des Wortumfelds die Argumente `left` und `right`.
 
 ```{r, eval = TRUE, render = knit_print, message = FALSE}
 kwic("GERMAPARL", query = "Ausländer", left = 15, right = 15)
@@ -150,7 +150,7 @@ options("polmineR.right" = 5L)
 
 ## KWIC: Anzeige von Metadaten {.smaller}
 
-Merkmale eines Sprechers wie Fraktions- bzw. Parteizugehörigkeit (Parteiendifferenzthese!), Geschlecht werden oft einen Unterschied machen: Zeigen Sie die Metadaten zu einer Konkordanz mit dem Argument `s_attributes` an. 
+Merkmale einer Sprecherin wie Fraktions- bzw. Parteizugehörigkeit (Parteiendifferenzthese!), Geschlecht werden oft einen Unterschied machen: Zeigen Sie die Metadaten zu einer Konkordanz mit dem Argument `s_attributes` an. 
 
 ```{r, eval = TRUE, render = knit_print, message = FALSE}
 kwic(bt2005, query = "Ausländer", s_attributes = "party", verbose = FALSE)

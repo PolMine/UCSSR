@@ -2,7 +2,7 @@
 title: "Diktionäre und Sentiment-Analysen"
 subtitle: 'GermaParl - polmineR - SentiWS'
 author: "Andreas Blaette"
-date: "25. Juli 2018"
+date: "10. Oktober 2018"
 output:
   ioslides_presentation:
     css: css/stylesheet.css
@@ -78,9 +78,9 @@ use("GermaParl")
 
 ## Wir holen 'get_sentiws' von GitHub {.smaller}
 
-Als Diktionär nutzen wir in der folgenden exemplarischen Analyse den SentimentWortschatz des Leipziger Wortschatz-Projekts, kurz "SentiWS". Eine Erläuterung finden Sie [hier](http://wortschatz.uni-leipzig.de/de/download). Die Daten stehen unter einer CC-BY-SA-NC Lizenz zur Verfügung und können im wissenschaftlichen Kontext ohne lizenzrechtliche Einschränkungen verwendent werden. Erforderlich ist selbstverständlich, dass die Daten korrekt zitiert werden.
+Als Diktionär nutzen wir in der folgenden exemplarischen Analyse den Sentiment-Wortschatz des Leipziger Wortschatz-Projekts, kurz "SentiWS". Eine Erläuterung finden Sie [hier](http://wortschatz.uni-leipzig.de/de/download). Die Daten stehen unter einer CC-BY-SA-NC Lizenz zur Verfügung und können im wissenschaftlichen Kontext ohne lizenzrechtliche Einschränkungen verwendent werden. Erforderlich ist selbstverständlich, dass die Daten korrekt zitiert werden.
 
-SentWS kann als zip-Datei heruntergeladen werden. Um die Dinge weiter zu vereinfachen ist als Gist bei der GitHub-Präsenz des PolMine-Projekts eine Funktion hinterlegt, die den Download erledigt und automatisch eine tabellarische Datenstruktur generiert, wie wir sie benötigen werden.
+SentiWS kann als zip-Datei heruntergeladen werden. Um die Dinge weiter zu vereinfachen ist als Gist bei der GitHub-Präsenz des PolMine-Projekts eine Funktion hinterlegt, die den Download erledigt und automatisch eine tabellarische Datenstruktur generiert, wie wir sie benötigen werden.
 
 ```{r get_senti_ws, eval = TRUE, message = FALSE}
 gist_url <- "https://gist.githubusercontent.com/PolMine/70eeb095328070c18bd00ee087272adf/raw/c2eee2f48b11e6d893c19089b444f25b452d2adb/sentiws.R"
@@ -93,7 +93,7 @@ Damit ist mit dem Objekt `SentiWS` das Diktionär verfügbar.
 
 ## SentiWS: Ein Blick in die Daten {.smaller}
 
-Das SentiWS-Objeckt ist ein `data.table`. Wir nutzen das anstelle eines klassischen `data.frame`, weil das später das Matching der Daten (Worte im Korpus und Worte im Diktionär) erleichtert und beschleunigt. Damit wir verstehen, womit wir arbeiten, werfen wir einen schnellen Blick in die Daten.
+Das SentiWS-Objekt ist ein `data.table`. Wir nutzen das anstelle eines klassischen `data.frame`, weil das später das Matching der Daten (Worte im Korpus und Worte im Diktionär) erleichtert und beschleunigt. Damit wir verstehen, womit wir arbeiten, werfen wir einen schnellen Blick in die Daten.
 
 ```{r inspect_senti_ws, eval = TRUE}
 head(SentiWS, 10)

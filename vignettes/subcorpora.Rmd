@@ -2,7 +2,7 @@
 title: "Subkorpora"
 subtitle: "Nutzung von 'partitions' mit polmineR"
 author: "Andreas Blaette"
-date: 'Stand: 31. September 2018'
+date: 'Stand: 10. Oktober 2018'
 output:
   ioslides_presentation:
     css: css/stylesheet.css
@@ -18,8 +18,7 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-# Sys.setenv(CORPUS_REGISTRY = "") # to avoid that all system corpora show up
-options("kableExtra.html.bsTable" = TRUE)
+options("kableExtra.html.bsTable" = TRUE) # macht schöne Tabellen-Ausgabe verfügbar
 ```
 
 ```{r include = FALSE}
@@ -33,13 +32,13 @@ library(kableExtra)
 
 ## Subkorpora und Partitionen {.smaller}
 
-- Bei der Analyse von Korpora ist regelmäßig die synchrone Variation von Sprache (als Träger von Bedeutungen, Deutungsmustern etc.) von Interesse oder der (diachrone) Wandel im Zeitverlauf. Dementsprechend ist die Erstellung von Subkorpora zentral für den sinnvollen Einsatz von Korpora im Forschungsprozess.
+- Bei der Analyse von Korpora ist regelmäßig die synchrone Variation von Sprache (als Trägerin von Bedeutungen, Deutungsmustern etc.) von Interesse oder der (diachrone) Wandel im Zeitverlauf. Dementsprechend ist die Erstellung von Subkorpora zentral für den sinnvollen Einsatz von Korpora im Forschungsprozess.
 
-- In der Diktion des polmineR-Pakets wird an Stelle von "Subkorpora" (subcorpus) der Begriff der "Partitionen" (partitions) verwendet. Dies schließt zum einen an die Begrifflichkeit der französischen lexikometrischen Forschung an. Vor allem aber kann 'partition' sowohl als Verb als auch als Nomen verstanden werden. Die `partition()`-Methode wird dementsprechend verwendet, um ein Objekt der Klasse `partition` zu erzeugen, welches die relevanten Informationen zur Beschreibung einer Partition enthält.
+- In der Terminologie des *polmineR*-Pakets wird an Stelle von "Subkorpus" (*subcorpus*) der Begriff der "Partition" (*partition*) verwendet. Dies ist zum einen in der französischen lexikometrischen Forschung üblich. Vor allem aber kann *partition* sowohl als Verb als auch als Nomen auftreten: In der Programmierung gilt es als gute Praxis, wenn für Methoden Verben verwendet werden. Die `partition()`-Methode partitioniert ein Korpus und  erzeugt ein Objekt der Klasse `partition`, welches die relevanten Informationen zur Beschreibung einer Partition enthält.
 
-- Die Erzeugung einer Partition erfolgt anhand von S-Attributen. Diese Attribute können als Metadaten auf der Textebene angesiedelt sein. Weil sie aber sehr flexibel Text-Regionen auszeichnen können, können S-Attribute zum Beispiel auch Annotationen von Textpassagen markieren.
+- Die Erzeugung einer Partition erfolgt anhand von S-Attributen (strukturellen Attributen). Diese Attribute können als Metadaten auf der Textebene angesiedelt sein. Weil sie aber sehr flexibel Text-Regionen auszeichnen können, können S-Attribute etwa auch Annotationen von Textpassagen unterhalb der Textebene sein.
 
-- Welche S-Attribute in einem Korpus vorhanden sind und welche Werte diese Annehmen, lässt sich mit der `s_attributes`-Methode ermitteln. (Siehe hierzu der vorangegangene Foliensatz zu Korpora.)
+- Welche S-Attribute in einem Korpus vorhanden sind und welche Werte diese annehmen, lässt sich mit der `s_attributes`-Methode ermitteln. (Siehe hierzu der vorangegangene Foliensatz zu Korpora.)
 
 
 ## Erforderliche Installationen und Initialisierung
@@ -62,7 +61,7 @@ library(magrittr)
 
 ## Anlegen einer `partition`: Grundlagen {.smaller} 
 
-- Ziel des ersten Beispiels ist es, eine Partition mit all jenen Reden im Bundestag anzulegen, die von Abgeordneten und VertrerInnen der Regierung im Jahr der Finanzmarktkrise, 2008 gehalten wurden.
+- Ziel des ersten Beispiels ist es, eine Partition mit all jenen Reden im Bundestag anzulegen, die von Abgeordneten und RegierungsvertreterInnen im Jahr der Finanzmarktkrise, 2008 gehalten wurden.
 
 - Zunächst ermitteln wir mit der `s_attributes()`-Methode, welche Werte für das S-Attribute `year` verfügbar sind.
 
@@ -70,7 +69,7 @@ library(magrittr)
 s_attributes("GERMAPARL", s_attribute = "year")
 ```
 
-- Eine Partition auf Basis eines Korpus legt man an, in dem als erstes Argument (`.Object`) die großegeschriebene ID des Korpus angibt. Dann können die Namen von S-Attributen als Argumente genutzt werden, denen der erwünschte Wert (oder erwünschte Werte in Form eines Vektors) zugewiesen werden.
+- Eine Partition auf Basis eines Korpus legt man an, in dem als erstes Argument (`.Object`) die (stets großgeschriebene) ID des Korpus angibt. Dann können die Namen von S-Attributen als Argumente genutzt werden, denen der erwünschte Wert (oder erwünschte Werte in Form eines Vektors) zugewiesen werden.
 
 ```{r, message = FALSE}
 bt2008 <- partition("GERMAPARL", year = "2008")
@@ -112,7 +111,7 @@ bt2008 <- partition("GERMAPARL", year = 2008, interjection = FALSE)
 s_attributes(bt2008, s_attribute = "role")
 ```
 
-- Da wir nur Abgeordnete und die Sprecher der Regierung in unserer `partition` haben wollten:
+- Da wir nur Abgeordnete und die SprecherInnen der Regierung in unserer `partition` haben wollten:
 
 ```{r, message = FALSE, collapse = TRUE}
 bt2008min <- partition("GERMAPARL", year = 2008, interjection = FALSE, role = c("government", "mp"))
@@ -137,6 +136,7 @@ c <- partition(b, role = c("mp", "government"))
 size(bt2008min) == size(c)
 ```
 
+
 ## Die `partition()`-Methode in einer Pipe  {.smaller}
 
 - Die Funktionsweise der meisten Methoden des polmineR-Pakets ermöglicht es, diese in einer sogenannten "Pipe" zu verbinden. Mittels des Pipe-Operators des magrittr-Pakets können wir die `partition` von eben auch so erzeugen:
@@ -159,7 +159,7 @@ bt2008min <- "GERMAPARL" %>%
 
 ## Anlegen einer `partition`: Reguläre Ausdrücke {.smaller}
 
-- Will man die Reden einzelner Redner im Deutschen Bundestag identifizieren, kann es tückisch sein, dass die Schreibweise von Namen leicht variieren kann. Dann kann es hilfreich sein, bei der Angabe von Werten für ein S-Attribut mit regulären Ausdrücken zu arbeiten. Um reguläre Ausdrücke zu aktivieren, muss für das Argument `regex` der logische Wert `TRUE` angegeben werden. Als Beispiel mag Karl-Theodor zu Guttenberg dienen: Ein (ehemaliger) Abgeordneten mit vielen Vornamen und etlichen Varianten, wie der Adelstitel ("zu", "von und zu") im Namen angegeben wird. Auch bei akademischen Titeln kann es einen tückischen Variantenreichtum geben ("Dr.", "Dr. rer. pol.", "Dipl.-Ing." etc.).
+- Will man die Reden einzelner RednerInnen im Deutschen Bundestag identifizieren, kann es tückisch sein, dass die Schreibweise von Namen leicht variieren kann. Dann kann es hilfreich sein, bei der Angabe von Werten für ein S-Attribut mit regulären Ausdrücken zu arbeiten. Um reguläre Ausdrücke zu aktivieren, muss für das Argument `regex` der logische Wert `TRUE` angegeben werden. Als Beispiel mag Karl-Theodor zu Guttenberg dienen: Ein (ehemaliger) Abgeordneten mit vielen Vornamen und etlichen Varianten, wie der Adelstitel ("zu", "von und zu") im Namen angegeben wird. Auch bei akademischen Titeln kann es einen tückischen Variantenreichtum geben ("Dr.", "Dr. rer. pol.", "Dipl.-Ing." etc.).
 
 ```{r, message = FALSE, collapse = TRUE}
 guttenberg <- partition(bt2008min, speaker = ".*Guttenberg", regex = TRUE)
@@ -210,7 +210,7 @@ writeLines(text = as.character(read(merkel_fcrisis)), con = "merkel.html")
 
 - Diese Datei können Sie mit einem gängigen Browser ansehen. Ein wichtiger Zweck der Erzeugung des Volltextes ist, diesen für Zwecke der Annotation in ein QDA-Programm (QDA für qualitative Datenanalyse) wie MAXQDA zu importieren. 
 
-- Beachte: Es ist ein "technisches" html, dass von polmineR erzeugt wird. Bei der Anzeige im Browser ist dies nicht sichtbar, aber jedes einzelne Wort ist von Angaben zu Korpuspositionen umklammert. Das Ziel des so angereichterten html-Formats ist, dass Annotationen von einem Programm wie MAXQDA in R/polmineR rückimportiert werden können. 
+- Hinweis: Es ist ein "technisches" html, dass von polmineR erzeugt wird. Bei der Anzeige im Browser ist dies nicht sichtbar, aber jedes einzelne Wort ist von Angaben zu Korpuspositionen umklammert. Das Ziel des so angereichterten html-Formats ist, dass Annotationen von einem Programm wie MAXQDA in R/polmineR rückimportiert werden können. 
 
 
 ----
@@ -227,10 +227,10 @@ writeLines(text = as.character(read(merkel_fcrisis)), con = "merkel.html")
 
 ```{r, collapse = TRUE, message = FALSE}
 pre_nineeleven <- as.Date("2000-09-11")
+nineten <- as.Date("2001-09-10")
 nineeleven <- as.Date("2001-09-11")
 post_nineeleven <- as.Date("2002-09-11")
-
-pre <- partition("GERMAPARL", date = seq.Date(from = pre_nineeleven, to = nineeleven, by = "day"))
+pre <- partition("GERMAPARL", date = seq.Date(from = pre_nineeleven, to = nineten, by = "day"))
 post <- partition("GERMAPARL", date = seq.Date(from = nineeleven, to = post_nineeleven, by = "day"))
 
 count(pre, "Terrorismus")
@@ -265,9 +265,9 @@ count(merkel_speeches, query = c("Finanzmarktkrise", "Finanzmärkte", "Lehman"))
 
 ## Mit `as.speeches` zum `partition_bundle` {.smaller}
 
-- Eine Annahme bei den Beispielen zu den Reden von Bundeskanzlerin Angela Merkel zur Finanzmarktkrise war, dass alle Worte in einem Plenarprotokoll zu einer Parlamentssitzung zu einer Rede gehören. Gerade prominente Sprecher im Parlament (wie eine Bundeskanzlerin, oder Fraktionsvorsitzende) halten jedoch, zumindest gelegentlich, zwei Reden zu unterschiedlichen Themen/Tagesordnungspunkten in ein und derselben Sitzung. Ausgeschlossen werden sollte auch, dass Wortbeiträge, die keine eigenständige Rede darstellen (Zwischenfragen, mündliche Fragen, Geschäftsordnungsanträge) einer Rede zugeschlagen werden.
+- Eine Annahme bei den Beispielen zu den Reden von Bundeskanzlerin Angela Merkel zur Finanzmarktkrise war, dass alle Worte in einem Plenarprotokoll zu einer Parlamentssitzung zu einer Rede gehören. Gerade prominente SprecherInnen im Parlament (wie eine Bundeskanzlerin, oder Fraktionsvorsitzende) halten jedoch, zumindest gelegentlich, zwei Reden zu unterschiedlichen Themen/Tagesordnungspunkten in ein und derselben Sitzung. Ausgeschlossen werden sollte auch, dass Wortbeiträge, die keine eigenständige Rede darstellen (Zwischenfragen, mündliche Fragen, Geschäftsordnungsanträge) einer Rede zugeschlagen werden.
 
-- Für die so skizzierte Problemstellung gibt es im polmineR-Paket die `as.speeches()`-Funktion. Die zentrale Heuristik der Funktion ist, dass Passagen ununterbrochener Rede eines Sprechers zu einer Rede zusammengefasst werden können, wenn diese nicht von einer Anzahl von Worten anderer Sprecher unterbrochen werden, die über dem Wert des Arguments `gap` liegt (Standard-Wert: 500). Damit ist sichergestellt, dass nicht schon eine Zwischenfrage (eine kurze Unterbrechung durch Parlamentspräsidentin etc.) dazu führt, dass aus einer Rede zwei werden. Der Rückgabewert der `as.speeches()`-Funktion ist ein `partition_bundle`.
+- Für die so skizzierte Problemstellung gibt es im polmineR-Paket die `as.speeches()`-Funktion. Die zentrale Heuristik der Funktion ist, dass Passagen ununterbrochener Rede einer Sprecherin zu einer Rede zusammengefasst werden können, wenn diese nicht von einer Anzahl von Worten anderer SprecherInnen unterbrochen werden, die über dem Wert des Arguments `gap` liegt (Standard-Wert: 500). Damit ist sichergestellt, dass nicht schon eine Zwischenfrage (eine kurze Unterbrechung durch Parlamentspräsidentin etc.) dazu führt, dass aus einer Rede zwei werden. Der Rückgabewert der `as.speeches()`-Funktion ist ein `partition_bundle`.
 
 
 ## Zusammenfassung und Ausblick {.smaller}

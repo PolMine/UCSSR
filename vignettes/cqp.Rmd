@@ -52,11 +52,11 @@ library(data.table)
 
 ## CWB, CQP und 'polmineR' {.smaller}
 
-- Das *polmineR*-Paket nutzt für die Speicherung und die Abfrage von Daten die  *Corpus Workbench* (CWB). Die CWB hat die Funktionalität eines "indexing and query engine". Vergleichbare Software, die für industrielle Anwendungen Vorteile bietet, wären [Lucene](https://lucene.apache.org/) oder [Elasticsearch](https:://www.elastic.co) Ein großer Vorteil der CWB ist jedoch, dass sie vollständig quelloffen ist und in Software-Projekten genutzt und weiterentwickelt werden kann.
+- Das *polmineR*-Paket nutzt für die Speicherung und die Abfrage von Daten die  *Corpus Workbench* (CWB). Die CWB hat die Funktionalität eines "indexing and query engine". Vergleichbare Software, die für industrielle Anwendungen Vorteile bietet, wären [Lucene](https://lucene.apache.org/) oder [Elasticsearch](https:://www.elastic.co). Ein großer Vorteil der CWB ist jedoch, dass sie vollständig quelloffen ist und in Software-Projekten genutzt und weiterentwickelt werden kann.
 
-- Die CWB beinhaltet als Bündel von Tools mit dem *Corpus Query Processor* (CQP) ein mächtiges Instrument, für große Korpora komplexe sprachlich Suchanfragen zur formulieren. Queries können reguläre Ausdrücke beinhalten und linguistische Annotationen abfragen.
+- Die CWB beinhaltet als Bündel von Tools mit dem *Corpus Query Processor* (CQP) ein mächtiges Instrument, für große Korpora komplexe sprachliche Suchanfragen zur formulieren. Queries können reguläre Ausdrücke beinhalten und linguistische Annotationen abfragen.
 
-- Die CQP-Syntax kann bei allen Basis-Befehlen des polmineR-Pakets (`kwic()`, `count()`, `dispersion()`, `cooccurrences()`genutzt werden.
+- Die CQP-Syntax kann bei allen Basis-Befehlen des polmineR-Pakets (`kwic()`, `count()`, `dispersion()`, `cooccurrences()`)genutzt werden.
 
 - In den folgenden Beispielen wird anhand der `count()`-Methode gezeigt, wie die CQP-Syntax funktioniert. Denken Sie daran, dass  die anderen Funktionen auch CQP können! Im folgenden Tutorial wird zunächst kurz in die Nutzung regulärer Ausdrücke eingeführt. Dann wird die Nutzung linguistischer Merkmale eines Korpus erläutert.
 
@@ -146,9 +146,9 @@ count("GERMAPARL", query = '"Asyl(suchende|berechtigte|ant|anti)"', cqp = TRUE, 
 
 - CQP erweitert die Syntax der regulären Ausdrücke um Möglichkeiten, über mehrere Worte ("Tokens") Abfragen zu formulieren. CQP kann die verschiedenen Annotationen eines linguistisch annotierten Korpus abfragen. 
 
-- Das Datenformat ist grundsätzlich tabellarisch. Wnn neben der Ursprünglichen Wortform (p-Attribut "word") auch ein Wortarterkennung (sog. "Part-of-Speech"-Annotation, p-Attribut "pos") und eine Lemmatisierung (p-Attribute "lemma") durchgeführt wurde, so ist ein dreispaltiger *tokenstream* verfügbar.
+- Das Datenformat ist grundsätzlich tabellarisch. Wenn neben der ursprünglichen Wortform (P-Attribut "word") auch ein Wortarterkennung (sog. "Part-of-Speech"-Annotation, P-Attribut "pos") und eine Lemmatisierung (P-Attribut "lemma") durchgeführt wurde, so ist ein dreispaltiger *tokenstream* verfügbar.
 
-- Die Tabelle auf der folgenden Seite gibt als Beispiel den Anfang einer Plenardebatte wider. In der erseten ist die *corpus position* ("cpos") angeführt.
+- Die Tabelle auf der folgenden Seite gibt als Beispiel den Anfang einer Plenardebatte wieder. In der ersten ist die *corpus position* ("cpos") angeführt.
 
 
 ## Tokenstream mit positionalen Attributen {.smaller}
@@ -172,7 +172,7 @@ DT::datatable(tokenstream_df)
 
 ## CQP II: Suche im Tokenstream {.smaller}
 
-- Wenn über die CQP-Syntax im p-Attribut "word" gesucht wird, muss der hierauf bezogene Suchbegriff nur in Anführungszeichen gesetzt werden. Um die anderen p-Attribute anzusteuern, wird in eckigen Klammern angegeben, auf welches Attribut man sich beziehen möchte. 
+- Wenn über die CQP-Syntax im P-Attribut "word" gesucht wird, muss der hierauf bezogene Suchbegriff nur in Anführungszeichen gesetzt werden. Um die anderen P-Attribute anzusteuern, wird in eckigen Klammern angegeben, auf welches Attribut man sich beziehen möchte. 
 
 - Mit dem folgenden Suchbegriff "Q" sucht man etwa Abfolgen von einem Nomen, dann "mit" und einem Wort, dass mit "Migrations" beginnt.
 

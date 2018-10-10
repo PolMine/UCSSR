@@ -3161,7 +3161,7 @@ background-size: 125px 41px;
 
 <iframe src="https://www.youtube.com/embed/frpQm2UcZJk" width="420" height="315" frameborder="0" allowfullscreen=""></iframe>
 
-</article></slide><slide class=""><hgroup><h2>Installation von R und RStudio</h2></hgroup><article  class="smaller" id="installation-von-r-und-rstudio">
+</article></slide><slide class=""><hgroup><h2>Installation von R und RStudio</h2></hgroup><article  id="installation-von-r-und-rstudio" class="smaller">
 
 <p>Das MigParl-Korpus der migrations- und integrationsbezogenen Debatten in den deutschen Parlamenten steht als linguistisch annotiertes und indiziertes Korpus zur Verfügung, das in die <a href='http://cwb.sourceforge.net/' title=''>Corpus Workbench (CWB)</a> eingepflegt worden ist. Die Analysen können mit dem R-Paket <a href='https://CRAN.R-project.org/package=polmineR' title=''>polmineR</a> durchgeführt werden.</p>
 
@@ -3171,7 +3171,7 @@ background-size: 125px 41px;
 
 <p>RStudio ergänzt R als <a href='https://de.wikipedia.org/wiki/Integrierte_Entwicklungsumgebung' title=''>Integrierte Entwicklungsumgebung</a> (kurz IDE, für <em>integrated development environment</em>) um eine Einbettung von R in eine graphische Benutzeroberfläche, die eine Vielzahl nützlicher Funktionen bereit hält und die enorm helfen kann, produktiv mit R zu arbeiten. Die Arbeit mit der Open Source-Version von RStudio Desktop wird nachdrücklich empfohlen, zum Download gelangen Sie <a href='https://www.rstudio.com/products/rstudio/download/#download' title=''>hier</a>. Als Einstieg in RStudio können Sie die Webinar-Serie <a href='https://resources.rstudio.com/' title=''>RStudio Essentials</a> nutzen.</p>
 
-</article></slide><slide class=""><hgroup><h2>Installation von polmineR</h2></hgroup><article  class="smaller" id="installation-von-polminer">
+</article></slide><slide class=""><hgroup><h2>Installation von polmineR</h2></hgroup><article  id="installation-von-polminer" class="smaller">
 
 <p>Das offizielle Release des polmineR-Pakets ist <a href='https://CRAN.R-project.org/package=polmineR' title=''>bei CRAN publiziert</a> und kann mit der Funktion <code>install.packages</code> installiert werden:</p>
 
@@ -3184,7 +3184,7 @@ background-size: 125px 41px;
 <pre class = 'prettyprint lang-r'>install.packages(&quot;devtools&quot;)
 devtools::install_github(&quot;PolMine/polmineR&quot;, ref = &quot;dev&quot;)</pre>
 
-</article></slide><slide class=""><hgroup><h2>Installation von Korpora</h2></hgroup><article  class="smaller" id="installation-von-korpora">
+</article></slide><slide class=""><hgroup><h2>Installation von Korpora</h2></hgroup><article  id="installation-von-korpora" class="smaller">
 
 <p>Das polmineR-Paket enthält kleine Beispiel-Korpora, um die Funktionalität des Pakets zu illustrieren und zu testen. Die eigentlichen, weit größeren Korpora sind auf einem Server des PolMine-Projekts hinterlegt und werden über korpus-spezifische R-Pakete nachgeladen.</p>
 
@@ -3198,7 +3198,7 @@ install.packages(pkgs = c(&quot;cwbtools&quot;, &quot;GermaParl&quot;))</pre>
 
 <pre class = 'prettyprint lang-r'>GermaParl::germaparl_download_corpus() # hier kommt mehr als 1 GB, braucht sicher einen Moment!</pre>
 
-</article></slide><slide class=""><hgroup><h2>Ein kurzer Test der Installation</h2></hgroup><article  class="smaller" id="ein-kurzer-test-der-installation">
+</article></slide><slide class=""><hgroup><h2>Ein kurzer Test der Installation</h2></hgroup><article  id="ein-kurzer-test-der-installation" class="smaller">
 
 <p>Wir testen nun zuerst, ob polmineR geladen werden kann. Als Bildschirmausgabe sollten Sie eine Auskunft über die Versionsnummer des Pakets erhalten, sowie einen Hinweis, wo die &ldquo;registry&rdquo;-Dateien (temporär) liegen, welche die verfügbaren Korpora beschreiben.</p>
 
@@ -3215,7 +3215,7 @@ c(&quot;REUTERS&quot;, &quot;GERMAPARLMINI&quot;, &quot;GERMAPARL&quot;) %in% co
 
 <p>Mehr als 100 000 000 Worte? Das sollte für den Start reichen.</p>
 
-</article></slide><slide class=""><hgroup><h2>Erste Gehversuche</h2></hgroup><article  class="smaller" id="erste-gehversuche">
+</article></slide><slide class=""><hgroup><h2>Erste Gehversuche</h2></hgroup><article  id="erste-gehversuche" class="smaller">
 
 <p>Wenn Sie möchten, können Sie nun die folgenden Befehle ausprobieren. Diese werden dann in den folgenden Foliensätzen ausführlicher erläutert.</p>
 
