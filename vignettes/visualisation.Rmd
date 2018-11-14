@@ -1,0 +1,258 @@
+---
+title: "Kleine kritische Visualisierungskunde"
+subtitle: 'Zur Analyse von Ego-Netzwerken mit polmineR'
+author: "Andreas Blaette"
+date: "Stand: 14. November 2018"
+output:
+  ioslides_presentation:
+    css: css/stylesheet.css
+    logo: img/polmine.png
+    widescreen: yes
+  slidy_presentation: default
+editor_options:
+  chunk_output_type: console
+vignette: >
+  %\VignetteIndexEntry{Visualisierung}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+## Visualisierungen: Potentiale und Probleme
+
+- Visualisierungen können ein Instrument der Erkenntnis sein, indem sie Muster und Strukturen sichtbar machen.
+
+- Visualisierungen sind ein starkes Vermittlungsinstrument zur Kommunikation von Ergebnissen.
+
+- Visualisierungen können mit ihrer Suggestivkraft in die irre führen.
+
+- Wir werden Visualisierungen zum Instrument der Erkenntnis?
+
+
+## Installationen
+
+- Wir laden das *polmineR*-Paket und aktivieren das *GermaParl*-Korpus.
+
+```{r, eval = TRUE, message = FALSE, echo = TRUE}
+library(polmineR)
+use("GermaParl")
+```
+ 
+- Und wir laden weitere Bibliotheken.
+
+```{r, echo = TRUE, message = FALSE}
+library(magrittr)
+library(pbapply)
+library(gradgets)
+library(igraph)
+library(svgPanZoom)
+library(DiagrammeR)
+library(networkD3)
+```
+
+
+## Ego-Netzwerke als Beispiel {.smaller}
+
+- Die (kritische) Beschäftigung mit Visualisierungen erfolgt anhand von Ego-Netzwerken. Für die Gewinnung der Daten für ein solches Netzwerk stellen wir ein Rezept vor, das die `cooccurrences()`-Methode in Kombination mit der `cooccurrences_bundle`-Klasse nutzt.
+
+- Als konkretes Beispiel nutzen wir den Suchbegriff "Islam".
+
+```{r, message = FALSE}
+node <- "Islam"
+use_cqp <- FALSE
+```
+
+- Wir nehmen an, dass nach dem 11. September der "Islam" nicht nur häufiger diskutiert wurde, und wir untersuchen die Debatten im Deutschen Bundestag in 2002.
+
+```{r, message = FALSE}
+coi <- partition("GERMAPARL", year = 2002, p_attribute = c("word", "pos"))
+# coi <- Corpus$new("GERMAPARL", p_attribute = c("word", "pos"))
+```
+
+
+## Filterkriterien {.smaller}
+
+- Für die folgende Analyse legen wir noch etliche weitere Parameter fest. Um inhaltliche Konnotationen erfassen zu können, legen wir einen hinreichend großen Wortkontext von 10 Worten links und rechts fest.
+
+```{r, message = FALSE}
+options("polmineR.left" = 10)
+options("polmineR.right" = 10)
+```
+
+- Das Vokabular im Umfeld der Token in unserem Ego-Netzwerk filtern anhand linguistischer Merkmale und mittels einer Stopwort-Liste
+
+```{r, message = FALSE}
+p_attrs <- c("word", "pos")
+pos_to_keep <- c("NN", "ADJA")
+tokens_to_drop <- c("''", '"', "(", ")", "[", "]")
+```
+
+- Schließlich definieren wir Schwellenwerte für einen Filter-Schritt nach statistischen Kriterien.
+
+```{r, message = FALSE}
+min_count <- 3
+min_ll <- 10.83
+max_coocs <- 10
+```
+
+
+## Kookkurrenzen {.smaller}
+
+- Die `cooccurrences()`-Methode des *polmineR*-Pakets filtert die statistischen Ergebnisse bewusst nicht automatisch. Um die zuvor definierten Filterkriterien bequem anwenden zu können, definieren wie eine Funktion, die wir wiederverwenden können.
+
+```{r, message = FALSE}
+cooccurrences_filtered <- function(query){
+  coocs <- cooccurrences(.Object = coi, query = query, cqp = use_cqp, p_attribute = p_attrs, verbose = FALSE) %>%
+    subset(pos %in% pos_to_keep) %>%
+    subset(!word %in% tokens_to_drop) %>%
+    subset(count_window >= min_count) %>% 
+    subset(ll >= min_ll) 
+  if (nrow(coocs) > max_coocs) coocs <- node_coocs[1:max_coocs]
+  coocs
+}
+```
+
+- Den Anfang machen wir, indem wir die Kookkurrenzen zu unserem Suchbegriff berechnen.
+
+```{r, message = FALSE}
+node_coocs <- cooccurrences_filtered(query = node)
+```
+
+
+## Kookkurrenzen ersten Grades {.smaller}
+
+- Die statistische signifikanten token im Wortumfeld unseres Knotenwortes ("Islam") finden sich in der Spalte "word". Im nächsten Schritt berechnen wir die Kookkurrenzen für jedes dieser Worte, wobei wir wiederum die zuvor definierte Filterfunktion heranziehen.
+
+```{r, message = FALSE}
+coocs <- pblapply(node_coocs[["word"]], cooccurrences_filtered)
+```
+
+- Als Zwischenschritt hin zum Ego-Netzwerk überführen wir das Objekt mit den Kookkurrenzen für "Islam" und die Liste mit den Kookkurrenzen ersten Grades in ein `cooccurrences_bundle`-Objekt, das wir fusionieren.
+
+```{r, message = FALSE}
+cooc_bundle <- new("cooccurrences_bundle", objects = coocs)
+cooc_bundle <- cooc_bundle + node_coocs
+```
+
+
+## Rückwärts ... 
+
+```{r}
+queries <- sapply(cooc_bundle@objects, function(x) x@query)
+coocs <- lapply(cooc_bundle@objects, function(x) x[["word"]]) %>% unlist() %>% unique()
+coocs <- coocs[!is.na(coocs)]
+coocs_new <- pblapply(coocs[!coocs %in% queries], cooccurrences_filtered)
+cooc_bundle <- cooc_bundle + new("cooccurrences_bundle", objects = coocs_new)
+```
+
+
+## igraph {.smaller}
+
+- Als Zwischenschritt generieren wir einen data.frame.
+
+```{r, message = FALSE}
+df <- as.data.frame(cooc_bundle)
+df[["b"]] <- gsub("^(.*?)//.*?$", "\\1", df[["b"]])
+```
+
+- Damit haben wir die Datengrundlage, um ein `igraph`-Objekt aus dem `igraph`-Paket zu generieren, die Standard-Klasse für die Arbeit mit Graphen.
+
+- Für die nachfolgenden Visualisierungen nutzen wir noch einen "community detection"-Algorithmus, berechnen wir Koordinaten und normalisieren wir die Koordinaten. 
+
+
+```{r, message = FALSE}
+G <- igraph::graph_from_data_frame(df) %>% 
+  make_ego_graph(order = 2, nodes = node) %>%
+  .[[1]] %>%
+  simplify(remove.multiple = TRUE, remove.loops = TRUE, edge.attr.com = "mean") %>%
+  igraph_add_communities(method = "fastgreedy", weights = FALSE) %>%
+  igraph_add_coordinates(layout = "kamada.kawai", dim = 3) %>%
+  igraph_normalize_coordinates(1000, 1000, 20) -> G2
+```
+
+- Dieses Objekt kann bereits geplottet werden. Um Schönheit kümmern wir uns später ...
+
+```{r, echo = TRUE, message = FALSE, eval = FALSE}
+plot(G)
+```
+
+## igraph {.smaller}
+
+```{r, echo = FALSE, message = FALSE}
+plot(G)
+```
+
+
+## SVG - Code
+
+```{r, eval = FALSE, echo = TRUE, message = FALSE}
+s <- igraph_as_svg(G, radius_min = 5, radius_tf = TRUE, edgeColor = "black",
+  fontSize = 20, textOffset = 3,
+  width = 500, height = 500
+)
+svgPanZoom::svgPanZoom(s)
+```
+
+
+## SVG - Visualisierung {.smaller}
+
+```{r, eval = TRUE, echo = FALSE, message = FALSE}
+s <- igraph_as_svg(G, radius_min = 5, radius_tf = TRUE, edgeColor = "black",
+  fontSize = 20, textOffset = 3,
+  width = 500, height = 500
+)
+svgPanZoom::svgPanZoom(s)
+```
+
+
+## networkD3 - Code {.smaller}
+
+```{r, eval = FALSE, echo = TRUE, message = FALSE}
+as.networkD3(G)
+```
+
+
+
+## networkD3 - Visualisierung {.smaller}
+
+```{r, eval = TRUE, echo = FALSE, message = FALSE}
+as.networkD3(G)
+```
+
+
+## Plotly - Code {.smaller}
+
+```{r, eval = FALSE, echo = TRUE, message = FALSE}
+as.plotly(G)
+```
+
+
+## Plotly - Visualisierung {.smaller}
+
+```{r, echo = FALSE, message = FALSE}
+as.plotly(G)
+```
+
+
+## DiagrammeR - Code {.smaller}
+
+```{r, eval = FALSE, echo = TRUE, message = FALSE}
+as.dgr_graph(G) %>% render_graph()
+```
+
+
+## DiagrammeR - Visualisierung {.smaller}
+
+```{r, echo = FALSE, message = FALSE}
+as.dgr_graph(G) %>% render_graph()
+```
+
+
+## Gephi {.smaller}
+
+You can export the graph to Gephi ...
+
+```{r, eval = FALSE, message = FALSE}
+library(rgexf)
+rgexf::igraph.to.gexf(G) %>% 
+  print(file = "~/Lab/tmp/gephi.gexf")
+```
