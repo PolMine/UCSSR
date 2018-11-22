@@ -129,10 +129,10 @@ f <- features(coi, ref)
 - Für das `features`-Objekt können generische-Methoden wie `as.data.frame()`, `dim()`, `nrow()`, `ncol()`, `colnames()` etc. angewandt werden. Über die `nrow()`-Methode verschaffen wir uns einen Eindruck, wie viele Zeilen eigentlich die Tabelle hat.
 
 ```{r, message = FALSE, eval = FALSE}
-dim(f)
+nrow(f)
 ```
 
-- Über 85000 Zeilen? Das ist sicher mehr als wir ansehen möchten. Also nehmen wir zwei Filterschritte vor, die stets angebracht sein werden: Wir schließen jene Worte aus, die im Untersuchungskorpus mindestens 5mal auftreten und wir filtern (großzügig) nach dem Schwellenwert für eine Irrtumswahrscheinlichkeit von 0,1% (hier: 10,83).
+- Über 85000 Zeilen? Das ist sicher mehr als wir ansehen möchten. Also nehmen wir zwei Filterschritte vor, die stets angebracht sein werden: Wir schließen jene Worte aus, die im Untersuchungskorpus höchstens 5 mal auftreten und wir filtern (großzügig) nach dem Schwellenwert für eine Irrtumswahrscheinlichkeit von 0,1% (hier: 10,83).
 
 ```{r, message = FALSE}
 f <- subset(f, count_coi >= 5) %>% subset(chisquare >= 10.83)
@@ -192,7 +192,7 @@ f
 
 ## Vertiefung {.smaller}
 
-- Wir möchten nun noch auf ein besonderes Szenario hinweisen, das relevant ist, wenn das Untersuchungskorpus Teil des Referenzkorpus ist. Dann ist es erforderlich, das Argument `included` auf `TRUE` zu setzen, so dass von der Zählung der Worte im Referenzkorpus sind die Häufigkeiten im Untersuchungskorpus abgezogen werden.
+- Wir möchten nun noch auf ein besonderes Szenario hinweisen, das relevant ist, wenn das Untersuchungskorpus Teil des Referenzkorpus ist. Dann ist es erforderlich, das Argument `included` auf `TRUE` zu setzen, so dass von der Zählung der Worte im Referenzkorpus die Häufigkeiten im Untersuchungskorpus abgezogen werden.
 
 - Als Beispiel nehmen wir die Reden von Angela Merkel in 2008, dem Jahr der Finanzmarktkrise unter die Lupe. Wir vergleichen diese mit allen anderen Reden im Bundestag, um die Schwerpunktsetzungen der Bundeskanzlerin in Erfahrung zu bringen.
 
@@ -323,7 +323,7 @@ DT::datatable(dt)
 
 - Ein letztes Beispiel, das demonstrieren soll, dass die Analyse umfassenden Entfaltungsspielraum findet: Wir können zu Mehrwort-Formeln aus drei Worten übergehen und Nomen-Artikel-Nomen-Konstruktionen ermitteln. Beim ersten Schritt erhöhen wir lediglich die Zahl der analysierten Worte. 
 
-```{r, eval = TRUE}
+```{r, eval = TRUE, message = FALSE}
 cdu_ngrams <- partition("GERMAPARL", party = "CDU", lp = 17, interjection = FALSE) %>%
   polmineR::ngrams(n = 3, p_attribute = c("word", "pos"))
 
@@ -338,7 +338,7 @@ f <- subset(f, chisquare >= 10.83)
 
 - Wir wandeln das in ein `data.table`-Objekt um und machen uns ans Filtern. 
 
-```{r}
+```{r, echo = TRUE}
 dt <-  data.table::as.data.table(f)
 dt <- subset(dt, dt[["1_pos"]] == "NN") %>% subset(.[["2_pos"]] == "ART") %>% subset(.[["3_pos"]] == "NN") 
 ```
