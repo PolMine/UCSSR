@@ -126,12 +126,11 @@ options("polmineR.right" = 10L)
 
 - Über eine "Pipe" generieren wir nun einen `data.frame` ("df") mit den Zählungen des SentiWS-Vokabulars im Wortumfeld von "Islam". Die Pipe ermöglicht es, die Schritte nacheinander durchzuführen, ohne Zwischenergebnisse zu speichern.
 
-```{r, echo = FALSE}
+```{r, echo = TRUE}
 df <- context("GERMAPARL", query = "Islam", p_attribute = c("word", "pos"), verbose = FALSE) %>%
   partition_bundle(node = FALSE) %>%
   set_names(s_attributes(., s_attribute = "date")) %>%
-  weigh(with = SentiWS) %>%
-  summary()
+  weigh(with = SentiWS) %>% summary()
 ```
 
 
