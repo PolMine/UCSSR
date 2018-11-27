@@ -43,7 +43,7 @@ use("GermaParl")
 - Weitere hier verwendete Pakete werden falls erforderlich installiert und geladen.
 
 ```{r, message = FALSE}
-for (pkg in c("magrittr", "slam", "tm", "quanteda")){
+for (pkg in c("magrittr", "slam", "tm", "quanteda", "Matrix")){
   if (!pkg %in% rownames(installed.packages())) install.packages(pkg)
   library(package = pkg, character.only = TRUE)
 }
@@ -70,13 +70,6 @@ for (pkg in c("magrittr", "slam", "tm", "quanteda")){
 
 ```{r, eval = FALSE}
 dtm <- polmineR::as.DocumentTermMatrix("GERMAPARL", p_attribute = "word", s_attribute = "date")
-```
-
-- Die `as.DocumentTermMatrix()`-Methode kann auch auf `partition`-Objekte angewendet werden.
-
-```{r, eval = FALSE}
-bt16 <- partition("GERMAPARL", lp = 16, interjection = FALSE)
-dtm <- polmineR::as.DocumentTermMatrix(bt16, p_attribute = "word", s_attribute = "speaker")
 ```
 
 
@@ -265,7 +258,8 @@ pb <- partition("GERMAPARL", lp = 16, interjection = FALSE) %>%
   partition_bundle(s_attribute = "parliamentary_group")
 pb <- pb[[names(pb)[!names(pb) %in% c("", "fraktionslos")] ]]
 pb <- enrich(pb, p_attribute = "lemma")
-dtm <- t(polmineR::as.sparseMatrix(pb, col = "count"))
+dtm <- polmineR::as.sparseMatrix(pb, col = "count")
+dtm <- Matrix::t(dtm)
 ```
 
 ---
