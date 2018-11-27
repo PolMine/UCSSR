@@ -1,7 +1,7 @@
 ---
 title: "Säcke voller Wörter"
 subtitle: 'Rezepte zur Term-Dokument-Matrizen'
-author: "Andreas Blaette"
+author: "Andreas Blaette, Christoph Leonhardt"
 date: "Stand: 12. November 2018"
 output:
   ioslides_presentation:
@@ -199,9 +199,7 @@ DT::datatable(y)
 
 ## Filtern anhand von Part-of-Speech-Annotationen {.smaller}
 
-- 
-
-```{r}
+```{r, message = FALSE}
 pb <- partition("GERMAPARL", year = 2015, interjection = FALSE) %>%
   as.speeches(s_attribute_date = "date", s_attribute_name = "speaker") %>% 
   enrich(p_attribute = c("word", "pos"), progress = TRUE) %>%
@@ -215,9 +213,9 @@ pb@objects <- lapply(pb@objects, function(x){x@stat[, "pos" := NULL]; x@p_attrib
 ```
 
 
-## Das nächste Topic-Modell
+## Das nächste Topic-Modell {.smaller}
 
-```{r}
+```{r, eval = doit, message = FALSE}
 dtm <- as.DocumentTermMatrix(pb, col = "count")
 
 short_docs <- which(slam::row_sums(dtm) < 100)
@@ -262,7 +260,7 @@ Es gibt zahlreiche R-Pakete, die computergestütze Textanalysen ermöglichen. W�
 
 Erstellen wir zunächst wie zuvor gezeigt ein `partition-bundle`, das wir an dieser Stelle in eine transponierte, 'sparse' Matrix umwandeln.
 
-```{r, eval = TRUE, echo = TRUE}
+```{r, eval = TRUE, echo = TRUE, message = FALSE}
 pb <- partition("GERMAPARL", lp = 16, interjection = FALSE) %>%
   partition_bundle(s_attribute = "parliamentary_group")
 pb <- pb[[names(pb)[!names(pb) %in% c("", "fraktionslos")] ]]
@@ -286,7 +284,7 @@ pg_dfm <- new(
 )
 ```
 
-## Anwendungsfall Wordfish
+## Anwendungsfall Wordfish I {.smaller}
 
 Unter anderem bieten quanteda eine niedrigschwellige Implementierung von **Wordfish**. Wordfish ist ein bekanntes Modell zur Skalierung politischer Positionen. Hierbei werden Positionen unüberwacht aus Worthäufigkeiten geschlossen. Für einen Überblick über den zugrundeliegenden Algorithmus und eine Auswahl von Veröffentlichungen, die Wordfish nutzen, siehe [hier](http://www.wordfish.org).
 
@@ -295,6 +293,9 @@ Wir wollen im folgenden ein Wordfish-Modell berechnen. Da es hierfür relativ vi
 ```{r, echo = TRUE}
 pg_dfm_red <- dfm_trim(pg_dfm, min_termfreq = 20)
 ```
+
+
+## Anwendungsfall Wordfish II {.smaller}
 
 Nun können wir ein erstes Wordfish-Modell berechnen und mit der summary()-Methode einen ersten Eindruck gewinnen.
 
@@ -305,10 +306,13 @@ summary(wfm_1)
 
 Für die Analyse interessante Parameter sind theta und beta. Theta gibt die Position eines Dokumentes (hier alle Debatten einer Fraktion) auf einer Skala an, während Beta aussagt, in welchem Ausmaß Worte diese Positionierung beeinflussen.
 
+
+## Anwendungsfall Wordfish III {.smaller}
+
 Beide Werte können auf unterschiedliche Art und Weise visualisiert werden. Für Theta kann die implementierte Dotplot-Darstellung genutzt werden.
 
 ```{r, echo = TRUE}
-textplot_scale1d(wfm_1, doclabels = pg_dfm2@Dimnames$docs)
+textplot_scale1d(wfm_1, doclabels = pg_dfm_red@Dimnames$docs)
 ```
 
 Hier zeigt sich, dass die Interpretation eines Wordfish-Modells sorgsam vorgegangen werden muss. Auf welcher Skala macht diese Skalierung Sinn?
@@ -323,6 +327,9 @@ betaterm <- data.frame(terms = wfm_1$features, beta = wfm_1$beta)
 head(betaterm[order(betaterm$beta),], 10)
 head(betaterm[order(betaterm$beta, decreasing = TRUE),], 10)
 ```
+
+
+## Anwendungsfall Wordfish IV {.smaller}
 
 Wird hier primär der Gegensatz Regierung zu Opposition skaliert? Eine thematisch engere Auswahl von Debatten und eine zielgerichtetere Reduktion der Matrix kann hier interessantere Ergebnisse bringen. 
 
