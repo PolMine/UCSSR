@@ -69,14 +69,14 @@ for (pkg in c("magrittr", "slam", "tm", "quanteda")){
   - und eines s-Attributs (die auftretenden s-Attribute sind dann in den Zeilen).
 
 ```{r, eval = FALSE}
-dtm <- as.DocumentTermMatrix("GERMAPARL", p_attribute = "word", s_attribute = "date")
+dtm <- polmineR::as.DocumentTermMatrix("GERMAPARL", p_attribute = "word", s_attribute = "date")
 ```
 
 - Die `as.DocumentTermMatrix()`-Methode kann auch auf `partition`-Objekte angewendet werden.
 
 ```{r, eval = FALSE}
 bt16 <- partition("GERMAPARL", lp = 16, interjection = FALSE)
-dtm <- as.DocumentTermMatrix(bt16, p_attribute = "word", s_attribute = "speaker")
+dtm <- polmineR::as.DocumentTermMatrix(bt16, p_attribute = "word", s_attribute = "speaker")
 ```
 
 
@@ -90,7 +90,7 @@ dtm <- as.DocumentTermMatrix(bt16, p_attribute = "word", s_attribute = "speaker"
 bt16 <- partition("GERMAPARL", lp = 16, interjection = FALSE)
 bt16_speakers <- partition_bundle(bt16, s_attribute = "speaker", progress = TRUE)
 bt16_speakers <- enrich(bt16_speakers, p_attribute = "word", progress = TRUE)
-dtm <- as.DocumentTermMatrix(bt16_speakers, col = "count")
+dtm <- polmineR::as.DocumentTermMatrix(bt16_speakers, col = "count")
 ```
 
 
@@ -110,7 +110,7 @@ doit <- !file.exists("~/Lab/tmp/bt2015speeches_lds.RData")
 bt2015 <- partition("GERMAPARL", year = 2015, interjection = FALSE)
 bt2015_speeches <- as.speeches(bt2015, s_attribute_date = "date", s_attribute_name = "speaker")
 bt2015_speeches <- enrich(bt2015_speeches, p_attribute = "word")
-dtm <- as.DocumentTermMatrix(bt2015_speeches, col = "count")
+dtm <- polmineR::as.DocumentTermMatrix(bt2015_speeches, col = "count")
 ```
 
 
@@ -201,7 +201,7 @@ DT::datatable(y)
 
 - 
 
-```{r, eval = FALSE}
+```{r}
 pb <- partition("GERMAPARL", year = 2015, interjection = FALSE) %>%
   as.speeches(s_attribute_date = "date", s_attribute_name = "speaker") %>% 
   enrich(p_attribute = c("word", "pos"), progress = TRUE) %>%
@@ -258,15 +258,21 @@ DT::datatable(y)
 
 ## Datentransformation: Zur document-feature-matrix {.smaller}
 
-```{r}
+Es gibt zahlreiche R-Pakete, die computergestütze Textanalysen ermöglichen. Während die meisten Pakete eine Art von Term-Dokumenten-Matrix als Ausgangspunkt nutzen, kann der spezifische Matrixtyp variieren. Methoden des beliebten `quanteda`-Paketes nutzen so eine Document-feature-matrix als Input. Mittels Typumwandlung können wir aus `polmineR` ausgegbene Matrizen in eine Document-feature-matrix umwandeln.
+
+Erstellen wir zunächst wie zuvor gezeigt ein `partition-bundle`, das wir an dieser Stelle in eine transponierte, 'sparse' Matrix umwandeln.
+
+```{r, eval = TRUE, echo = TRUE}
 pb <- partition("GERMAPARL", lp = 16, interjection = FALSE) %>%
   partition_bundle(s_attribute = "parliamentary_group")
 pb <- pb[[names(pb)[!names(pb) %in% c("", "fraktionslos")] ]]
 pb <- enrich(pb, p_attribute = "lemma")
-dtm <- t(as.sparseMatrix(pb, col = "count"))
+dtm <- t(polmineR::as.sparseMatrix(pb, col = "count"))
 ```
 
-```{r}
+Eine Document-feature-Matrix ist intern anders geordnet als unsere Matrix. In folgender Typumwandlung wird die Document-Term-Matrix also in eine Document-Feature-Matrix übersetzt.
+
+```{r, echo = TRUE}
 pg_dfm <- new(
   "dfm",
   i = dtm@i,
@@ -279,3 +285,55 @@ pg_dfm <- new(
   )
 )
 ```
+
+## Anwendungsfall Wordfish
+
+Unter anderem bieten quanteda eine niedrigschwellige Implementierung von **Wordfish**. Wordfish ist ein bekanntes Modell zur Skalierung politischer Positionen. Hierbei werden Positionen unüberwacht aus Worthäufigkeiten geschlossen. Für einen Überblick über den zugrundeliegenden Algorithmus und eine Auswahl von Veröffentlichungen, die Wordfish nutzen, siehe [hier](http://www.wordfish.org).
+
+Wir wollen im folgenden ein Wordfish-Modell berechnen. Da es hierfür relativ viel Speicherplatz bedarf und wir vorab keine umfangreiche Reduktion der Matrix durchgeführt haben, werden wir im folgenden die in quanteda implementierte `dfm_trim()`-Methode nutzen, um unsere Matrix zu verkleinern. Wir filtern Worte heraus, die nicht mindestens 10 mal vorkommen und reduzieren damit die Größe der Matrix auf etwa ein Fünftel der ursprünglichen Größe.
+
+```{r, echo = TRUE}
+pg_dfm_red <- dfm_trim(pg_dfm, min_termfreq = 20)
+```
+
+Nun können wir ein erstes Wordfish-Modell berechnen und mit der summary()-Methode einen ersten Eindruck gewinnen.
+
+```{r, echo = TRUE}
+wfm_1 <- textmodel_wordfish(pg_dfm_red, c(4,3))
+summary(wfm_1)
+```
+
+Für die Analyse interessante Parameter sind theta und beta. Theta gibt die Position eines Dokumentes (hier alle Debatten einer Fraktion) auf einer Skala an, während Beta aussagt, in welchem Ausmaß Worte diese Positionierung beeinflussen.
+
+Beide Werte können auf unterschiedliche Art und Weise visualisiert werden. Für Theta kann die implementierte Dotplot-Darstellung genutzt werden.
+
+```{r, echo = TRUE}
+textplot_scale1d(wfm_1, doclabels = pg_dfm2@Dimnames$docs)
+```
+
+Hier zeigt sich, dass die Interpretation eines Wordfish-Modells sorgsam vorgegangen werden muss. Auf welcher Skala macht diese Skalierung Sinn?
+
+Hier kann es helfen, sich die Betawerte je Term anzuschauen. 
+
+```{r, echo = FALSE}
+betaterm <- data.frame(terms = wfm_1$features, beta = wfm_1$beta)
+```
+
+```{r}
+head(betaterm[order(betaterm$beta),], 10)
+head(betaterm[order(betaterm$beta, decreasing = TRUE),], 10)
+```
+
+Wird hier primär der Gegensatz Regierung zu Opposition skaliert? Eine thematisch engere Auswahl von Debatten und eine zielgerichtetere Reduktion der Matrix kann hier interessantere Ergebnisse bringen. 
+
+Bekannt sind die sogenannten Eifelturm-Darstellungen, die sich aus dem Wordfish-Modell ergeben. Hierbei wird auf der x-Achse abgetragen, inwiefern ein Wort auf die Skalierung aufläd. Auf der y-Achse wird die geschätzte Wordhäufigkeit **psi** dargestellt. Für die Skalierung spielen vor allem dokumentspezifische und selten vorkommende Terme eine Rolle, während häufig vorkommende und auf Dokumentebene gleichmäßig verteilte Begriffe eine geringe Rolle spielen. 
+
+```{r, echo = TRUE}
+textplot_scale1d(wfm_1, margin = "features",
+                 highlighted = c("Solidität", "Vermögenssteuer", "Klimakiller",
+                                "Industriestandort", "Freiheit", "Solidarität"))
+```
+
+## Fazit
+
+Ob *Term-Dokument-Matrix*, *Dokument-Term-Matrix* oder *Document-Feature-Matrix*, ob *sparse* oder nicht: Die Darstellung von Texten in Matrizen mit Worten auf der einen und Dokumenten auf der anderen Seite ist für eine Vielzahl von Anwendungsbereichen ind er computergestützen Textanalyse von enormer Bedeutung. polmineR bietet hierbei die Möglichkeit, Korpora in diese Formen zu überführen und für weitere Analysen nutzbar zu machen. Zu beachten ist, dass in dieser Darstellung Wortzusammenhänge aufgelöst werden. Diese *bag-of-words*-Ansätze stehen so im Gegensatz zum hermeneutisch-interpretativen von beispielsweise Keyword-in-Context-Analysen. Ein triangulatives Vorgehen kann im Sinne der Validierung deshalb nur angeraten werden.
