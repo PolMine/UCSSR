@@ -43,7 +43,7 @@ use("GermaParl")
 - Weitere hier verwendete Pakete werden falls erforderlich installiert und geladen.
 
 ```{r, message = FALSE}
-for (pkg in c("magrittr", "slam", "tm", "quanteda")){
+for (pkg in c("magrittr", "slam", "tm", "quanteda", "Matrix")){
   if (!pkg %in% rownames(installed.packages())) install.packages(pkg)
   library(package = pkg, character.only = TRUE)
 }
@@ -70,13 +70,6 @@ for (pkg in c("magrittr", "slam", "tm", "quanteda")){
 
 ```{r, eval = FALSE}
 dtm <- polmineR::as.DocumentTermMatrix("GERMAPARL", p_attribute = "word", s_attribute = "date")
-```
-
-- Die `as.DocumentTermMatrix()`-Methode kann auch auf `partition`-Objekte angewendet werden.
-
-```{r, eval = FALSE}
-bt16 <- partition("GERMAPARL", lp = 16, interjection = FALSE)
-dtm <- polmineR::as.DocumentTermMatrix(bt16, p_attribute = "word", s_attribute = "speaker")
 ```
 
 
@@ -265,8 +258,11 @@ pb <- partition("GERMAPARL", lp = 16, interjection = FALSE) %>%
   partition_bundle(s_attribute = "parliamentary_group")
 pb <- pb[[names(pb)[!names(pb) %in% c("", "fraktionslos")] ]]
 pb <- enrich(pb, p_attribute = "lemma")
-dtm <- t(polmineR::as.sparseMatrix(pb, col = "count"))
+dtm <- polmineR::as.sparseMatrix(pb, col = "count")
+dtm <- Matrix::t(dtm)
 ```
+
+---
 
 Eine Document-feature-Matrix ist intern anders geordnet als unsere Matrix. In folgender Typumwandlung wird die Document-Term-Matrix also in eine Document-Feature-Matrix übersetzt.
 
@@ -331,15 +327,25 @@ head(betaterm[order(betaterm$beta, decreasing = TRUE),], 10)
 
 ## Anwendungsfall Wordfish IV {.smaller}
 
-Wird hier primär der Gegensatz Regierung zu Opposition skaliert? Eine thematisch engere Auswahl von Debatten und eine zielgerichtetere Reduktion der Matrix kann hier interessantere Ergebnisse bringen. 
-
 Bekannt sind die sogenannten Eifelturm-Darstellungen, die sich aus dem Wordfish-Modell ergeben. Hierbei wird auf der x-Achse abgetragen, inwiefern ein Wort auf die Skalierung aufläd. Auf der y-Achse wird die geschätzte Wordhäufigkeit **psi** dargestellt. Für die Skalierung spielen vor allem dokumentspezifische und selten vorkommende Terme eine Rolle, während häufig vorkommende und auf Dokumentebene gleichmäßig verteilte Begriffe eine geringe Rolle spielen. 
 
-```{r, echo = TRUE}
+```{r, echo = TRUE, eval = FALSE}
 textplot_scale1d(wfm_1, margin = "features",
                  highlighted = c("Solidität", "Vermögenssteuer", "Klimakiller",
                                 "Industriestandort", "Freiheit", "Solidarität"))
 ```
+
+Die Abbildung wird auf der nächsten Folie angezeigt.
+
+## Anwendungsfall Wordfish V {.smaller}
+
+
+```{r, echo = FALSE, eval = TRUE}
+textplot_scale1d(wfm_1, margin = "features",
+                 highlighted = c("Solidität", "Vermögenssteuer", "Klimakiller",
+                                "Industriestandort", "Freiheit", "Solidarität"))
+```
+
 
 ## Fazit
 
