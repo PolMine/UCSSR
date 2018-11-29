@@ -2,7 +2,7 @@
 title: "Säcke voller Wörter"
 subtitle: 'Rezepte zur Term-Dokument-Matrizen'
 author: "Andreas Blaette, Christoph Leonhardt"
-date: "Stand: 12. November 2018"
+date: "Stand: 27. November 2018"
 output:
   ioslides_presentation:
     css: css/stylesheet.css
