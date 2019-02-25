@@ -34,13 +34,11 @@ vignette: >
 
 [07. Sentiment-Analysen mit Diktionären](sentiments.html)
 
-[07. Kookkurrenzen](cooccurrences.html)
+[08. Kookkurrenzen](cooccurrences.html)
 
-[08. Features](features.html)
+[09. Features](features.html)
 
-[09. Term-Dokument-Matrizen](tdm.html)
-
-[10. Rmarkdown](img/under_construction.png) (in Vorbereitung)
+[10. Term-Dokument-Matrizen](tdm.html)
 
 
 ## Anhänge
