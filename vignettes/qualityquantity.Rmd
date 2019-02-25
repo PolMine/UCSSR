@@ -1,0 +1,159 @@
+---
+title: "Alle Worte sind gleich?"
+subtitle: 'Term-Extraktion mit polmineR'
+author: "Andreas Blaette"
+date: "Stand: 19. November 2018"
+output:
+  ioslides_presentation:
+    css: css/stylesheet.css
+    logo: img/polmine.png
+    widescreen: yes
+  slidy_presentation: default
+editor_options:
+  chunk_output_type: console
+vignette: >
+  %\VignetteIndexEntry{Sag mir welche Nachbarschaft Du hast}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+## Loading Packages {.smaller}
+
+```{r}
+library(polmineR)
+library(GermaParl)
+library(topicmodels)
+library(DT)
+```
+
+```{r}
+use("GermaParl")
+```
+
+
+## Szenario: Diktionärsbasierte Frame-Analyse
+
+```{r}
+crime_dict <- c(
+  "krimin.*",
+  "[dD]ieb.*",
+  "Vergewa.*",
+  "Übergriff.*",
+  ".*[gG]rapsch.*",
+  "sexuell.*",
+  "[bB]elästig.*",
+  ".*[dD]elikt.*",
+  ".*[vV]ersto.*",
+  "Körperverl.*",
+  ".*[sS]traftat",
+  "[Kk]lauen",
+  "[sS]tehlen",
+  "ausrauben",
+  "[Dd]rogen"
+)
+```
+
+```{r}
+use("MigParl")
+x <- context("MIGPARL", query = '".*[Ff]lüchtling.*"', cqp = TRUE)
+x2 <- context("MIGPARL", query = '".*[Ff]lüchtling.*"', cqp = TRUE, positivelist = crime_dict, regex = TRUE)
+
+x3 <- context(
+  "MIGPARL", query = '".*[Ff]lüchtling.*"', cqp = TRUE,
+  left = 15, right = 15,
+  positivelist = crime_dict, regex = TRUE
+)
+
+kwic(x3, left = 15, right = 15) %>% highlight(yellow = crime_dict, regex = TRUE)
+```
+
+## Create s_attribute 'speech' {.smaller}
+
+```{r}
+if (!"speech" %in% s_attributes("GERMAPARL"))
+  GermaParl::germaparl_add_s_attribute_speech()
+```
+
+
+## Load topicmodel {.smaller}
+
+```{r, eval = TRUE}
+lda_dir <- system.file(package = "GermaParl", "extdata", "topicmodels")
+files_in_lda_dir <- list.files(lda_dir)
+
+if (!"germaparl_lda_speeches_250.rds" %in% files_in_lda_dir)
+  GermaParl::germaparl_download_lda(k = 250)
+
+lda250 <- germaparl_load_topicmodel(k = 250)
+lda_250_terms <- topicmodels::terms(lda250, k = 25)
+colnames(lda_250_terms) <- gsub("^Topic\\s+(\\d+)$", "\\1", colnames(lda_250_terms))
+```
+
+
+## Inspecting the Topicmodel {.smaller}
+
+```{r, render = knit_print, echo = FALSE, message = FALSE}
+DT::datatable(data = t(lda_250_terms)[,1:7])
+```
+
+
+## Encode topicmodel {.smaller}
+
+```{r}
+if (!"topics" %>% s_attributes("GERMAPARL"))
+  GermaParl::germaparl_encode_lda_topics(k = 250, n = 5)
+```
+
+
+## XXX {.smaller}
+
+```{r, eval = FALSE}
+racism <- 65
+citizenship_topic <- 133
+refugees <- 213
+citizenship_speeches <- GermaParl::germaparl_get_speeches_for_topic(n = citizenship_topic)
+```
+
+## XXX
+
+```{r}
+lda_terms_250 <- topicmodels::get_terms(lda250, k = 250)
+citizenship_terms <- lda_terms_250[, citizenship_topic]
+```
+
+
+## Rede Rudolf Körper 
+
+```{r}
+read(citizenship_speeches[[2]]) %>% highlight(yellow = citizenship_terms)
+```
+
+
+## Rede Erwin Marschewski
+
+```{r}
+read(citizenship_speeches[[3]]) %>%
+  highlight(yellow = citizenship_terms)
+```
+
+
+## Rede Cem Özdemir
+
+```{r}
+read(citizenship_speeches[[4]]) %>%
+  highlight(yellow = citizenship_terms)
+```
+
+
+## Erwin Marschewski II
+
+```{r}
+s_attributes(citizenship_speeches[[3]], "topics")
+terms_topic_2 <- lda_terms_250[, 69]
+terms_topic_2
+```
+
+```{r}
+read(citizenship_speeches[[3]]) %>%
+  highlight(yellow = citizenship_terms, lightgreen = terms_topic_2)
+```

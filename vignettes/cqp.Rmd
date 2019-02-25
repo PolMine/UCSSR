@@ -252,7 +252,7 @@ dispersion("GERMAPARL", query = '"[rR]assis.*"', s_attribute = "party")
 
 ```{r, message = FALSE}
 cooccurrences("GERMAPARL", query = '"([mM]uslim.|[iI]slam*)"', cqp = TRUE) %>%
-  as.data.table() %>% subset(rank_ll < 5) %>% DT::datatable() # Einbindung in Folie als htmlwidget
+  polmineR::as.data.table() %>% subset(rank_ll < 5) %>% DT::datatable() # Einbindung in Folie als htmlwidget
 ```
 
 
