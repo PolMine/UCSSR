@@ -2,7 +2,8 @@
 title: "'polmineR' and the CQP Syntax"
 subtitle: 'Use Cases with the UNGA Corpus'
 author: "Andreas Blaette"
-date: "Stand: 8. Oktober 2018"
+english_version: "Christoph Leonhardt"
+date: "8 October 2018"
 output:
   ioslides_presentation:
     css: css/stylesheet.css

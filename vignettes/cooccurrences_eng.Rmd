@@ -2,6 +2,7 @@
 title: "The Neighbourhood Counts"
 subtitle: 'The Analysis of Cooccurrences using polmineR'
 author: "Andreas Blaette"
+english_version: "Christoph Leonhardt"
 date: "12 November 2018"
 output:
   ioslides_presentation:

@@ -2,6 +2,7 @@
 title: "Corpora in polmineR"
 subtitle: "Data Structure and first Applications"
 author: "Andreas Blaette"
+english_version: "Christoph Leonhardt"
 date: '10 October 2018'
 output:
   ioslides_presentation:

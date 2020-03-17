@@ -2,7 +2,8 @@
 title: "Dictionaries and Sentiment Analysis"
 subtitle: 'UNGA - polmineR - Syuzhet'
 author: "Andreas Blaette"
-date: "25. Juli 2018"
+english_version: "Christoph Leonhardt"
+date: "25 July 2018 / 30 September 2019"
 output:
   ioslides_presentation:
     css: css/stylesheet.css
