@@ -2,7 +2,7 @@
 title: "KWIC Analyses using 'polmineR'"
 subtitle: 'Syntax und Rezepte'
 author: "Andreas Blaette"
-english_version: "Christoph Leonhardt"
+english_version: "Christoph Leonhardt (2020-03-17)"
 date: "10 October 2018"
 output:
   ioslides_presentation:

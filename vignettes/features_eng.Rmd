@@ -2,7 +2,7 @@
 title: "Are all Words equal?"
 subtitle: 'Term Extraction with polmineR'
 author: "Andreas Blaette"
-english_version: "Christoph Leonhardt"
+english_version: "Christoph Leonhardt (2020-03-17)"
 date: "19 November 2018"
 output:
   ioslides_presentation:
