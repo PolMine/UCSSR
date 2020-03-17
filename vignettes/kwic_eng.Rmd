@@ -1,0 +1,245 @@
+---
+title: "KWIC Analyses using 'polmineR'"
+subtitle: 'Syntax und Rezepte'
+author: "Andreas Blaette"
+date: "10 October 2018"
+output:
+  ioslides_presentation:
+    css: css/stylesheet.css
+    logo: img/polmine.png
+    widescreen: true
+editor_options: 
+  chunk_output_type: console
+vignette: >
+  %\VignetteIndexEntry{KWIC Analyses using 'polmineR'}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(widgetframe_self_contained = FALSE)
+knitr::opts_chunk$set(widgetframe_isolate_widgets = TRUE)
+knitr::opts_chunk$set(widgetframe_widgets_dir = 'widgets' ) 
+```
+
+
+```{r install_required_packages, eval = TRUE, echo = FALSE, message = FALSE}
+required_packages <- c("vembedr", "htmltools", "devtools", "devtools", "widgetframe")
+for (pkg in required_packages)
+  if (!pkg %in% rownames(installed.packages())) install.packages(pkg)
+if (!"annolite" %in% rownames(installed.packages()))
+  devtools::install_github("PolMine/annolite")
+```
+
+
+
+## Concordances and KWIC: Foundations {.smaller}
+
+* the analysis of the context of words and query terms can serve as an analytical link between quantative counting operations and qualitative-interpretative approaches of content analysis. In the field of linguistics, this analysis of word contexts is called 'concordance analysis'. In the tradition of context analysis in social science this approach often is called Keyword-in-Context-Analysis (or 'KWIC'). Since it nicely conveys the central meaning of the approach, in polmineR the method is called `kwic`. In the following, the term 'concordances' is also used for the quanlitative examination of word contexts of query terms.
+
+* in advance, an important decision is how many words to the left and the right side of the query should be displayed. In linguistical analyses (e.g. in lexicographical approaches) a window of five words to the left and to the right is common. How many context do you need for your application? To satisfy specific disciplinary needs, more than five words might be necessary.
+
+* sometimes, it will not be enough to read and interpret just a small extract in the context window of a word. If necessary, the full text should be used for validation. This can be achieved by using the `read()` method.
+
+
+## Required Installations and Initialization {.smaller}
+
+* These slides use the `polmineR` package and the `UNGA` corpus. The installation is explained in a seperate set of slides.
+
+* Please note: The functionalities explained here are only available in polmineR version `r as.package_version("0.7.10")` or above. Install the correct version of the package accordingly.
+
+
+```{r update_polmineR, eval = TRUE, message = FALSE}
+if (packageVersion("polmineR") < as.package_version("0.7.9.9010"))
+  devtools::install_github("PolMine/polmineR", ref = "dev")
+```
+
+* we now load the `polmineR` package and activate the UNGA corpus.
+
+
+```{r initialize, eval = TRUE, message = FALSE}
+library(polmineR)
+use("UNGA")
+```
+
+
+## `kwic()` method: First steps {.smaller}
+
+```{r, echo = FALSE}
+options("polmineR.pagelength" = 4L)
+```
+
+* the `kwic()` method can be applied to objects of the `character` class (an entire corpus), as well as on `partition` and `context` objects. The query term can be defined by the argument `query`. 
+
+```{r, eval = TRUE, message = FALSE, render = knit_print}
+kwic("UNGA", query = "immigration")
+```
+
+<br/>
+
+* the output of the results can be found in the Viewer panel of RStudio. A short video clip (in German language) should convey the look and feel of this operation.
+
+----
+
+```{r, eval = TRUE, echo = FALSE, message = FALSE}
+vembedr::embed_youtube("F4UkFI0aolI", height = 400, width = 600)
+```
+
+
+## Partitions and Concordances {.smaller}
+
+```{r, echo = FALSE, message = FALSE}
+options("polmineR.pagelength" = 3L)
+```
+
+* like nearly all basic methods of the `polmineR` package the `kwic()` method can be applied not only to corpora but also to `partition` objects. The creation of `partitions` is described in another set of slides. Here, we conduct the search above ('immigration') to a partition of debates from the year 2005. 
+
+
+```{r, eval = TRUE,  render = knit_print, message = FALSE}
+unga_2005 <- partition("UNGA", year = 2005)
+kwic(unga_2005, query = "immigration")
+```  
+
+
+## Using the CQP syntax {.smaller}
+
+```{r, echo = FALSE, message = FALSE}
+options("polmineR.pagelength" = 5L)
+```
+
+* when formulating the query, the usage of CQP syntax is possible. For this, the parameter `cqp` should be set to `TRUE` (if it is not explicitly set to TRUE, polmineR checks internally if CQP syntax is used). 
+
+
+```{r, eval = TRUE, render = knit_print, message = FALSE}
+kwic(unga_2005, query = '[pos = "J.*"] "immigration"', cqp = TRUE)
+```  
+
+
+## KWIC: Adjusting the word context I {.smaller}
+
+```{r, echo = FALSE, message = FALSE}
+options("polmineR.pagelength" = 4L)
+```
+
+* it might be necessary to analyse context window which is larger than the default value of 5 tokens to each side. Use the arguments `left` and `right` for this.
+
+```{r, eval = TRUE, render = knit_print, message = FALSE}
+kwic("UNGA", query = "border", left = 15, right = 15)
+```
+
+
+## KWIC: Adjusting the word context II {.smaller}
+
+* if the arguments `left` and `right` are not explicitly set, the values are used which are defined in the global options of polmineR. Which values are defined there can be determined as follows:
+
+```{r}
+getOption("polmineR.left")
+getOption("polmineR.right")
+```
+
+* these values can be changed for one R session like that:
+
+```{r}
+options(polmineR.left = 10)
+options(polmineR.right = 10)
+```
+
+```{r, echo = FALSE}
+options("polmineR.pagelength" = 5L)
+options("polmineR.left" = 5L)
+options("polmineR.right" = 5L)
+```
+
+## KWIC: Showing Metadata {.smaller}
+
+* characteristics of a speaker such as its party (not applicable for the UNGA corpus) or other associations can be useful for analysis. To display metadata alongside the concordances, the name of the s-attribute has to be passed to the `s_attributes` argument.
+
+```{r, eval = TRUE, render = knit_print, message = FALSE}
+kwic(unga_2005, query = "immigration", s_attributes = "state_organization", verbose = FALSE)
+```
+
+
+## KWIC: Showing Metadata (Continued) {.smaller}
+
+```{r, echo = FALSE, message = FALSE}
+options("polmineR.pagelength" = 3L)
+```
+
+* several attributes can be combined with `c()` which here means 'combine'.
+
+```{r, eval = TRUE, render = knit_print, message = FALSE}
+kwic(unga_2005, query = "immigration", s_attributes = c("state_organization", "date"), verbose = FALSE)
+```
+
+* if you are not sure which metadata (s-attributes) are available in a corpus or partition, use the `s_attributes()` method:
+
+```{r, message = FALSE, eval = FALSE}
+s_attributes(unga_2005)
+```
+
+
+## Highlighting Terms in Word Context {.smaller}
+
+* the argument `positivelist` can be used to limit the results of a `kwic()` analysis to those concordances in which a particular term (or a list of terms) occurs in addition to the query term. Using the `highlight()` method, the terms can be highlighted. 
+
+```{r, eval = TRUE, render = knit_print, message = FALSE}
+K <- kwic(
+  "UNGA", query = "Islam", s_attributes = c("state_organization", "date"),
+  positivelist = "terror"
+)
+K <- highlight(K, yellow = "terror")
+K
+```
+
+
+
+## From concordances to full text view
+
+* the immediate word context only represents a small part of the full text. To see the full text of a concordance, store the `kwic` result in a variable (here: K). Then, apply the `read()` method to this object. The argument `i` indicates the index of the concordance for which the full text is wanted.
+
+```{r, eval = FALSE, message = FALSE}
+K <- kwic(unga_2005, query = "immigration")
+read(K, i = 1)
+```
+
+
+## Full Text View
+
+```{r generate_fulltext_output, message = FALSE, echo = FALSE}
+i <- 1L
+metadata <- c("speaker", "date", "state_organization")
+K <- kwic(unga_2005, query = "immigration", s_attributes = metadata)
+P <- partition(
+  get_corpus(K),
+  def = lapply(setNames(metadata, metadata), function(x) K@stat[[x]][i]),
+  type = "plpr"
+)
+data <- annolite::as.fulltextdata(P, headline = "Cornelie Sonntag-Wolgast (2005-01-21)")
+data$annotations <- data.frame(
+  text = c("", "", ""),
+  code = c("yellow", "lightgreen", "yellow"),
+  annotation = c("", "", ""),
+  id_left = c(
+    min(K@cpos[hit_no == i][direction == -1][["cpos"]]),
+    min(K@cpos[hit_no == i][direction == 0][["cpos"]]),
+    min(K@cpos[hit_no == i][direction == 1][["cpos"]])
+    ),
+  id_right = c(
+    max(K@cpos[hit_no == i][direction == -1][["cpos"]]),
+    min(K@cpos[hit_no == i][direction == 0][["cpos"]]),
+    max(K@cpos[hit_no == i][direction == 1][["cpos"]])
+    )
+)
+W <- annolite::fulltext(data, dialog = NULL, box = TRUE, width = 1000, height = 400)
+Y <- widgetframe::frameWidget(W)
+Y
+```
+
+
+## Prospects: Concordances in the Research Process {.smaller}
+
+* the analysis of concordances can be used in tandem with statistical analyses of cooccurrences: Cooccurrence analysis (`cooccurrences()` function) provides indications of statistical remarkable word usage which can be analysed and interpreted qualitatively by the means of the Keyword-in-Context-Analysis.
+
+* A useful element to systematize the interpretations of concordances is to categorize them or arange them by type. To this end, it can be helpful to export these concordances as Excel files (`mail` method) which can then be used for further categorisation.
+
+* Note that working with concordances can be mainly understood as interpretatitve research which requires hermeneutical intuition. Who says what at which point in time might be relevant, but it is the search of patterns in language use which is most important for the method.

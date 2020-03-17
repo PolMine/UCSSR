@@ -1,0 +1,391 @@
+---
+title: "Bags of Words"
+subtitle: 'Recipes for Term-Document-Matrices'
+author: "Andreas Blaette, Christoph Leonhardt"
+date: "27 November 2018"
+output:
+  ioslides_presentation:
+    css: css/stylesheet.css
+    logo: img/polmine.png
+    widescreen: yes
+  slidy_presentation: default
+editor_options:
+  chunk_output_type: console
+vignette: >
+  %\VignetteIndexEntry{Bag-of-Words}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+## From 'bag-of-words' to algorithmic text analysis {.smaller}
+
+```{r echo = FALSE}
+set.seed(42)
+```
+
+
+* in qualitative text analysis there is a number of algorithms which require a so-called term-document-matrix as input. This is the case for example for topic models but also a lot of other Machine Learning approaches or - of particular importance in political science - for scaling algorithms such as wordscore or wordfish.
+
+* term-document-matrices are based on the so-called 'bag-of-words' representation of text: By representing a text as its mere count of words, its (grammatical) structure is disolved. A term-document-matrix gathers the vector representations of all documents of a corpus, with the terms as rows and documents as columns. The value in each cell then indicates how often term i occurs in document j. 
+
+* from a technical perspective, term-document-matrices have to be realized as sparse matrices because given the vast variety of vocabulary for any given term there are a lot of documents the term does not occur in. The *polmineR* package uses the `TermDocumentMatrix` class of the *tm* package which itself is a slight modification of the `simple_triplet_matrix` of the *slam* package.
+
+
+## Initialization {.smaller}
+
+* Please note that part of the functionality for the following workflow is only available with polmineR version `r as.package_version("0.7.9.9006")`. If required, install the current development version of polmineR.
+
+* in the examples, the UNGA corpus is used. The corpus has to be activated after loading polmineR.
+
+
+```{r initialize, eval = TRUE, message = FALSE}
+if (packageVersion("polmineR") < package_version("0.7.10.9006"))
+  devtools::install_github("PolMine/polmineR", ref = "dev")
+library(polmineR)
+use("UNGA")
+```
+
+* additional packages which we want to use later should be installed as well if necessary.
+
+```{r, message = FALSE}
+for (pkg in c("magrittr", "slam", "tm", "quanteda", "Matrix")){
+  if (!pkg %in% rownames(installed.packages())) install.packages(pkg)
+  library(package = pkg, character.only = TRUE)
+}
+```
+
+
+## Sparse, transformable matrices {.smaller}
+
+* in the `polmineR` package to create objects of the class `TermDocumentMatrix` or `DocumentTermMatrix` the methods `as.TermDocumentMatrix()` and `as.DocumentTermMatrix()` are available.
+
+* depending on which package should be used for further algorithmic analysis, the classes of the *Matrix* package (`sparseMatrix`) or a *document-feature matrix* (`dfm`) of the *quanteda* package could be necessary. This can be easily achieved by type transformation.
+
+* it is important to understand that the `TermDocumentMatrix` class of the *tm* package and the `simple_triplet_matrix` of the *slam* package are mostly identical but for the addition of a weight factor which is the term frequency.
+
+* the `simple_triplet_matrix` is defined by three vectors i, j and v. The first vector i indicates the row of the value, the second vector j indicates the column of the value and vector v indicates the value itself. By restricting the stored values to those which are actually defined, necessary memory capacities can be minimized. Otherwise a matrix with many documents and large vocabulary leads to matrices which are huge and cannot be handled by even capable machines.
+
+
+## Direttissima {.smaller}
+
+* the easiest route to create a `DocumentTermMatrix` is to apply the `as.DocumentTermMatrix()` method to a corpus. The only parameters which have to be stated explicitly are:
+  * a p-attribute (the tokens are written in the columns of the matrix)
+  * a s-attribute (the occuring s-attributes are in the rows of the matrix)
+
+```{r, eval = FALSE}
+dtm <- polmineR::as.DocumentTermMatrix("UNGA", p_attribute = "word", s_attribute = "year")
+```
+
+
+## Flexibility via `partition_bundle`  {.smaller}
+
+* both use cases which were discussed earlier assume that there actually is a s-attribute which describes the inner structure of the corpus or partition. This is fine if you want to analyse a corpus in the lines of given s-attributes such as "year" in the example above. However, it is conceivable that documents can be defined by various combinations of s-attributes. To achieve this, the input of the `as.DocumentTermMatrix()` method can also be a `partition_bundle` object.
+
+* the following scenario illustrates these processing steps. It is important that the `partition` objects in the `partition_bundle` have to be enriched (i.e. a count has to be performed). The argument `col` of the `as.DocumentTermMatrix()` method specifies which column of the enriched `partition` objects in the `partition_bundle` (which then is also a `count_bundle`) contains the count values which are passed to the cells of the Document-Term-Matrix.
+
+```{r, eval = TRUE, message = FALSE}
+unga2016 <- partition("UNGA", year = 2016)
+unga2016_speakers <- partition_bundle(unga2016, s_attribute = "speaker", progress = TRUE)
+unga2016_speakers <- enrich(unga2016_speakers, p_attribute = "word", progress = TRUE)
+dtm <- polmineR::as.DocumentTermMatrix(unga2016_speakers, col = "count")
+```
+
+* a quick glimpse into the matrix can be realized like that. (shown on the next slide)
+
+
+## Flexibility via `partition_bundle` (cont.)  {.smaller}
+
+```{r, echo = FALSE}
+as.matrix(dtm)[sort(sample(1:913, 10)), c(1:5, 300:304)]
+```
+
+
+## Using `as.speeches()` to create a partition_bundle {.smaller}
+
+```{r, echo = FALSE}
+doit <- !file.exists("~/lab/tmp/unga2000s_speeches_lds.RData")
+```
+
+* in plenary protocols a plausible definition of documents a document-term-matrix should be based on could be a single speech of a delegate. The polmineR package provides a method to create a `partition_bundle` of speeches with the `as.speeches()` method. This can be applied to both corpora and `partition` objects.
+
+* the segmentation of plenary protocols follows the heuristical assumption that a speech is an utterance of a single speaker on one day which is not interrupted by another speaker's utterance longer than 500 tokens.
+
+* otherwise shorter interruptions such as interjections or questions would lead to the identification of one actually coherent speech of a speaker as two seperate speakers. At the same time, the possibility that one speaker presents multiple speeches on one day is taken into account.
+
+
+```{r, eval = doit}
+unga_2000s <- partition("UNGA", year = 2000:2010)
+unga_2000s_speeches <- as.speeches(unga_2000s, s_attribute_date = "date", s_attribute_name = "speaker")
+unga_2000s_speeches <- enrich(unga_2000s_speeches, p_attribute = "word")
+dtm <- polmineR::as.DocumentTermMatrix(unga_2000s_speeches, col = "count")
+```
+
+
+## Shrinking the Matrix {.smaller}
+
+* in most use cases (for example topic modelling) a matrix which was not filtered at all will be unnecessarily large, resulting in longer computer times and noisier results. Hence, it is recommended to prune the matrix, removing words that rarely occur as well as noisy words and stopwords. 
+
+* in the following, in a first step we remove documents with a length of less than a certain threshold (here arbitrarily set to 100 words). The length of the document equals the sum of the token counts per row (`row_sums`).  
+
+```{r, eval = doit}
+short_docs <- which(slam::row_sums(dtm) < 100)
+if (length(short_docs) > 0) dtm <- dtm[-short_docs,]
+```
+
+* in a second step we identify words which occur less than 5 times in all documents (`col_sums`). These words are removed from the Document-Term-Matrix (`dtm`).
+
+```{r, eval = doit}
+rare_words <- which(slam::col_sums(dtm) < 5)
+if (length(rare_words) > 0) dtm <- dtm[,-rare_words]
+```
+
+
+## Additional Filtering  {.smaller}
+
+* the `noise()` method of the *polmineR* package supports the identification of noisy words within the vocabulary (tokens with special characters, stopwords). These are removed as well.
+
+
+```{r, eval = doit}
+noisy_tokens <- noise(colnames(dtm), specialChars = NULL, stopwordsLanguage = "en")
+noisy_tokens_where <- which(unique(unlist(noisy_tokens)) %in% colnames(dtm))
+dtm <- dtm[,-noisy_tokens_where]
+```
+
+* the stopword list used does not account for stopwords which are capitalized (for example because they are written at the beginning of a sentence). We add those variations here.
+
+
+```{r, eval = doit}
+stopit <- tm::stopwords("en")
+stopit_upper <- paste(toupper(substr(stopit, 1, 1)), substr(stopit, 2, nchar(stopit)), sep = "")
+stopit_upper_where <- which(stopit_upper %in% colnames(dtm))
+if (length(stopit_upper_where) > 0) dtm <- dtm[, -stopit_upper_where]
+```
+
+
+## Fitting a Topic Model {.smaller}
+
+* the filtering steps shown above can create documents without any acutally occuring tokens. We remove them here because otherwise they might cause problems when fitting models.
+
+
+```{r, eval = doit}
+empty_docs <- which(slam::row_sums(dtm) == 0)
+if (length(empty_docs) > 0) dtm <- dtm[-empty_docs,]
+```
+
+* now that the preparations are complete, we initialize the 'classic' fitting of a *Latent Dirichlet Allocation* Topic Model as implemented in the *lda* package.
+
+```{r, eval = doit}
+lda <- topicmodels::LDA(
+  dtm, k = 150, method = "Gibbs",
+  control = list(burnin = 1000, iter = 3L, keep = 50, verbose = TRUE)
+)
+```
+
+```{r, echo = FALSE, eval = TRUE}
+if (doit == TRUE){
+  saveRDS(lda, file = "~/lab/tmp/unga2000s_speeches_lds.RData")
+} else {
+  lda <- readRDS(file = "~/lab/tmp/unga2000s_speeches_lds.RData")
+}
+```
+
+* to evaluate the results, we retrieve the vocabulary which describes the individual topics. The result can be seen on the next slide.
+
+```{r, echo = TRUE, eval = FALSE}
+lda_terms <- terms(lda, 10)
+```
+
+
+## Topic-Term-Matrix {.smaller}
+
+```{r, echo = FALSE, eval = TRUE, message = FALSE}
+n_terms <- 5L
+lda_terms <- terms(lda, n_terms)
+y <- t(lda_terms)
+colnames(y) <- paste("Term", 1:n_terms, sep = " ")
+DT::datatable(y)
+```
+
+
+## Filtering by Part-of-Speech Annotation {.smaller}
+
+```{r, message = FALSE}
+pb <- partition("UNGA", year = 2000:2010) %>%
+  as.speeches(s_attribute_date = "date", s_attribute_name = "speaker") %>% 
+  enrich(p_attribute = c("word", "pos"), progress = TRUE) %>%
+  subset(pos == "NN")
+```
+
+* at this point, only one intermediate step is required: Removing the column of Part-of-Speech-Annotations by hand.
+
+```{r}
+pb@objects <- lapply(pb@objects, function(x){x@stat[, "pos" := NULL]; x@p_attribute <- "word"; x})
+```
+
+
+## The next Topic Model {.smaller}
+
+```{r, eval = doit, message = FALSE}
+dtm <- polmineR::as.DocumentTermMatrix(pb, col = "count")
+
+short_docs <- which(slam::row_sums(dtm) < 100)
+if (length(short_docs) > 0) dtm <- dtm[-short_docs,]
+
+rare_words <- which(slam::col_sums(dtm) < 5)
+if (length(rare_words) > 0) dtm <- dtm[,-rare_words]
+
+empty_docs <- which(slam::row_sums(dtm) == 0)
+if (length(empty_docs) > 0) dtm <- dtm[-empty_docs,]
+
+lda <- topicmodels::LDA(
+  dtm, k = 150, method = "Gibbs",
+  control = list(burnin = 1000, iter = 3L, keep = 50, verbose = TRUE)
+)
+```
+
+
+```{r, echo = FALSE}
+if (doit == TRUE){
+  saveRDS(lda, file = "~/lab/tmp/lda_unga2000s_speeches_pos.RData")
+} else {
+  lda <- readRDS(file = "~/lab/tmp/lda_unga2000s_speeches_pos.RData")
+}
+```
+
+
+## Topic-Term-Matrix {.smaller}
+
+```{r, echo = FALSE, eval = TRUE, message = FALSE}
+n_terms <- 5L
+lda_terms <- terms(lda, n_terms)
+y <- t(lda_terms)
+colnames(y) <- paste("Term", 1:n_terms, sep = " ")
+DT::datatable(y)
+```
+
+
+## Data transformation: Creating a document-feature-matrix {.smaller}
+
+* there is a number of R packages which can be used for computer assisted text analysis. While a lot of these packages require some version of Term-Document-Matrix as input, the specific type of matrix can vary. Methods of the popular `quanteda` package use a Document-Feature-Matrix. By type transformation we can cast the matrices `polmineR` provides to such a `dfm`.
+
+* first we create a `partition_bundle` as illustrated before. In a second step, we cast this `partition_bundle` to a sparse matrix.
+
+```{r, eval = TRUE, echo = TRUE, message = FALSE}
+pb <- partition("UNGA", speaker = "Clinton|Bush|Obama|Trump", regex = TRUE) %>%
+  partition_bundle(s_attribute = "speaker")
+pb <- enrich(pb, p_attribute = "lemma")
+dtm <- polmineR::as.sparseMatrix(pb, col = "count")
+dtm <- Matrix::t(dtm)
+```
+
+## Data transformation (cont.) {.smaller}
+
+* the internal structure of the Document-Feature-Matrix is different than the sparse matrix created above. Via type conversion we cast it to a Document-Feature-Matrix.
+
+```{r, echo = TRUE}
+pg_dfm <- new(
+  "dfm",
+  i = dtm@i,
+  p = dtm@p,
+  x = dtm@x,
+  Dim = dtm@Dim,
+  Dimnames = list(
+    docs = dtm@Dimnames$Docs,
+    features = dtm@Dimnames$Terms
+  )
+)
+```
+
+## Use Case Wordfish I {.smaller}
+
+* among other things quanteda offers an easily applicable implementation of **wordfish**. Wordfish is a popular model used for scaling ideological positions of political actors. These positions are derived from word frequencies. For an overview about the underlying algorithm and a selection of publications which use wordfish, see [here](http://www.wordfish.org).
+
+* we want to fit a wordfish model. Since this requires relatively much memory and we did not manually reduce the size of the matrix before, we use the `dfm_trim()` method of quanteda to do so now. We remove words which occur less than ten times.
+
+```{r, echo = TRUE}
+pg_dfm_red <- dfm_trim(pg_dfm, min_termfreq = 10)
+```
+
+
+## Use Case Wordfish II {.smaller}
+
+* now we can fit the wordfish model. The calculation will take some time.
+
+```{r, echo = TRUE}
+wfm_1 <- textmodel_wordfish(pg_dfm_red, c(3,4))
+```
+
+* We can use the `summary()` method to get a first glimpse at the results.
+
+```{r}
+wordfish_summary <- summary(wfm_1)
+```
+
+* the interesting parameters are theta and beta. See the next slide.
+
+
+## Use Case Wordfish II (cont.) {.smaller}
+
+* *theta* indicates the estimated position of the document (here all debates of a president).
+
+```{r}
+wordfish_summary$estimated.document.positions
+```
+
+* *beta* describes the effect of individual words on this scaling.
+
+```{r}
+head(wordfish_summary$estimated.feature.scores, 4) # show first 4 terms
+```
+
+
+## Use Case Wordfish III {.smaller}
+
+* both values can visualized in different ways. Theta can be easily visualized via the implemented dotplot visualization.
+
+```{r, echo = TRUE}
+textplot_scale1d(wfm_1, doclabels = pg_dfm_red@Dimnames$docs)
+```
+
+* this shows the results of the Wordfish model must be interpreted carefully. Which scale is represented here?
+
+* it might be helpful to have a look at the beta values per term.
+
+```{r, echo = FALSE}
+betaterm <- data.frame(terms = wfm_1$features, beta = wfm_1$beta)
+```
+
+```{r}
+head(betaterm[order(betaterm$beta),], 10)
+head(betaterm[order(betaterm$beta, decreasing = TRUE),], 10)
+```
+
+
+## Use Case Wordfish IV {.smaller}
+
+* the Eiffel Tower visualizations of Wordfish are well-known. There, the x-axis indicates the extent a word has on the scaling. The y-axis shows the estimated word frequency **psi**. For the scaling those terms matter most which are specific to a small number of documents and occur rarely otherwise. In contrast, terms which are rather evenly distributed on document level are less important. 
+
+
+```{r, echo = TRUE, eval = FALSE}
+textplot_scale1d(wfm_1, margin = "features",
+                 highlighted = c("America", "liberty", "development", "terror", "border", "inequality"))
+```
+
+* the visulization is shown on the next slide.
+
+## Use Case Wordfish V {.smaller}
+
+
+```{r, echo = FALSE, eval = TRUE}
+textplot_scale1d(wfm_1, margin = "features",
+                 highlighted = c("America", "liberty", "development", "terror", "border", "inequality"))
+```
+
+
+## Conclusion {.smaller}
+
+* whether *Term-Document-Matrix*, *Document-Term-Matrix* or *Document-Feature-Matrix*, whether *sparse* or not: The representation of text in matrices with terms on one and documents on the other side is of utmost importance for a lot of applications in the realm of computer assisted text analysis.
+
+* the polmineR package offers the possibility to cast corpora into these different kinds of matrices to facilitate all kinds of analyses.
+
+* note that this representation disolves the actual struture of the underlying texts. This *bag-of-words* approach thus follows an approach which is contrary to hermeneutic-interpretative approaches such as keyword-in-context analyses. A triangulated precedure for validation is recommended.

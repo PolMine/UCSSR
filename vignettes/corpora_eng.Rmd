@@ -1,0 +1,357 @@
+---
+title: "Corpora in polmineR"
+subtitle: "Data Structure and first Applications"
+author: "Andreas Blaette"
+date: '10 October 2018'
+output:
+  ioslides_presentation:
+    css: css/stylesheet.css
+    logo: img/polmine.png
+    widescreen: yes
+  slidy_presentation: default
+editor_options:
+  chunk_output_type: console
+vignette: >
+  %\VignetteIndexEntry{Corpora in polmineR}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r, include = FALSE}
+Sys.setenv(CORPUS_REGISTRY = "") # to avoid that all system corpora show up
+options("kableExtra.html.bsTable" = TRUE)
+```
+
+```{r include = FALSE}
+if (! "icon" %in% rownames(installed.packages()) ) devtools::install_github("ropenscilabs/icon")
+```
+
+```{r, echo = FALSE}
+library(kableExtra)
+```
+
+
+## Technology and Terminology {.smaller}
+
+* corpora which have been prepared in the PolMine project are cast from different data formats into a standardized XML format. This standardization complies with the [Text Encoding Initiative (TEI)](http://www.tei-c.org/).
+
+* the TEI-XML format of the GermaParl corpus can serve as an example. It is freely available in a [GitHub-Repository](https://www.github.com/PolMine/GermaParlTEI).
+
+* The TEI-XML is suitable for sustainable data storage and ensures interoperability. However, it is not appropriate as a data format for efficient analysis. As an "indexing and query engine" the PolMine project uses the Corpus Workbench (CWB).
+
+* CWB-indexed corpora can store linguistic annotations alongside the fundamental text and expose these additional annotation layers for analysis via so-called positional attributes (p-attributes). 
+
+* metadata is available as so-called structural attributes (s-attributes). Note: s-attributes are not limited to the text level but can also encompass passages of text (i.e. annotations, named entities, interjections in plenary protocols) underneath the text level. 
+
+
+## Required Installation and Initialization {.smaller}
+
+This collection of slides uses the `polmineR` package and the `UNGA` corpus. The installation procedure was thoroughly explained in the previous set of slide. 
+
+Please note: The functionalities explained here are only available in polmineR version `r as.package_version("0.7.10")` or above. Install the correct version of the package accordingly.
+
+For the following examples, we load the `polmineR` package. In addition, the `data.table` package is needed.
+
+```{r load_libraries, eval = TRUE, message = FALSE}
+library(polmineR)
+library(data.table)
+```
+
+
+## Show available corpora {.smaller}
+
+The `corpus()` method (without parameters) returns a list of corpora which are available for analysis. The second column of the table indicates the size of the corpus. The column "template" informs you about whether rules are provided about how text should be formatted in full text view.
+
+```{r}
+corpus()
+```
+
+In its most basic use case, the `size()` method can be used to learn about the size in tokens of a corpus.
+
+```{r}
+size("REUTERS")
+```
+
+The corpora you see here are part of the sample data of the polmineR package.
+
+
+## Activating corpora stored in data packages with `use` {.smaller}
+
+To activate corpora which are stored in a data package, the function `use()` is used.
+
+```{r, message = FALSE}
+use("UNGA")
+```
+
+By calling the `corpus()` method again, we can check if the UNGA corpus is actually available now. 
+
+```{r}
+corpus()
+```
+
+Note: According to the conventions of the CWB corpora are always written in upper case.
+
+
+## Using corpora stored in other locations {.smaller}
+
+The CWB requires access to the description of a corpus which is provided in form of a plain text file in the so-called registry directory of the corpus. Indeed, when loading `polmineR` a temporary registry directory is created to which the registry files of all activated corpora are added. The path for this temporary directory can be seen with the `registry()` function.
+
+```{r, eval = FALSE}
+registry()
+```
+
+The way the CWB is usually set up requires the existence of a default registry directory which is defined by the environment variable CORPUS_REGISTRX. When starting polmineR, it is checked whether this environment variable is defined. If so, the registry files in this directory are copied to the temporary directory described above. The CORPUS_REGISTRY environment variable can be defined as shown below. Note: This must be done before the polmineR package is loaded.
+
+```{r, eval = FALSE}
+Sys.setenv(CORPUS_REGISTRY = "/PATH/TO/REGISTRY/DIRECTORY")
+```
+
+Hint: The easiest way to define environment variables for R is to change the .Renviron file which is evaluated before every start of R. `?Startup` provides more information about this. 
+
+
+## Linguistic Annotations: Positional Attributes {.smaller}
+
+* Corpora are imported into the CWB in tokenized form (tokenization = segmentation of initial continuous text in single words / "Tokens").
+
+* During this import, the tokens get indexed: each token of the corpus gets an unique numeric value ("corpus position", abbreviation: "cpos").
+
+* in most corpora, in addition to the original word, a part-of-speech annotation ("pos") as well as a lemmatization of the tokens (reduction of words to their basic form) will be performed (linguistically annotated corpora). For the UNGA corpus, named entities are provided as well.
+
+* using the `p_attributes()` method, available positional attributes are shown.
+
+```{r}
+p_attributes("UNGA")
+```
+
+The table on the following page shows the data structure with positional attributes (p-attributes) and corpus positions (cpos). The text can be read from top to bottom.
+
+
+## CWB data structure: Token stream {.smaller}
+
+```{r, echo = FALSE}
+df <- data.frame(lapply(
+  c("word", "pos", "lemma", "ner"),
+  function(p_attribute){
+    ts <- get_token_stream("UNGA", left = 46, right = 54, p_attribute = p_attribute)
+    Encoding(ts) <- registry_get_encoding("UNGA")
+    ts
+  }
+    
+))
+colnames(df) <- c("word", "pos", "lemma", "ner")
+df <- data.frame(cpos = 46:54, df)
+kableExtra::kable(df) %>% 
+  kableExtra::kable_styling(bootstrap_options = "striped", font_size = 20L, position = "center")
+```
+
+
+`r icon::fa("lightbulb")`  Essentially, this data structure is comparable with the structure you might know from the tidytext package.
+
+
+## Structural attributes ('s-attributes') {.smaller}
+
+Metadata are denoted as structural attributes (s-attributes). The `s_attributes()` method can be used to show which s-attributes are available.
+ 
+```{r}
+s_attributes("UNGA")
+```
+
+The documentation of a corpus should explain the meaning of these s-attributes. To examine which values each s-attribute can have, the `s_attributes()` method can be used with the argument `s_attribute`. 
+
+```{r}
+s_attributes("UNGA", s_attribute = "year")
+```
+
+
+## Corpus Size {.smaller}
+
+Above it was already mentioned that you can check the size of the corpus with the `size()` method. 
+
+```{r}
+size("UNGA")
+```
+
+If you provide an additional parameter `s_attribute`, the corpus size will be displayed according to this metadata.
+
+```{r}
+size("UNGA", s_attribute = "year") %>% head(4)
+```
+
+Note: Here, we limit the output to the first four lines using a pipe operator ("%>%"). You will learn more about this later.
+
+
+## Recipe: Bar plot of corpus size {.smaller}
+
+A small example should illustrate how the number of tokens fluctuates within the corpus. We want to visualize this with a bar plot. First, we determine the size of the corpus by years, using the `size()` method.
+
+```{r, eval = TRUE}
+s <- size("UNGA", s_attribute = "year")
+```
+
+After this, we create a bar plot with the y axis depicting the size in thousand tokens.
+
+```{r, eval = FALSE}
+barplot(
+  height = s$size / 1000,
+  names.arg = s$year,
+  main = "Size of the UNGA corpus in years",
+  ylab = "Tokens (in Thousands)", xlab = "Year",
+  las = 2
+)
+```
+
+The resulting visualization is shown on the next slide.
+
+----
+
+```{r, echo = FALSE}
+barplot(
+  height = s$size / 1000,
+  names.arg = s$year,
+  main = "Size of the UNGA corpus in years",
+  ylab = "Tokens (in Thousands)", xlab = "Year",
+  las = 2
+)
+```
+
+`r icon::fa("question")` In the years 1993 and 2018 we see a drastically smaller corpus size. What might be the reason for this?
+
+
+## Corpus Size: Two s-attributes {.smaller}
+
+For the `size()` method a second s-attribute can be provided as well. Then, a table is returned in which the corpus size is represented according to both characteristics.
+
+Note: The return value here is a `data.table` instead of a `data.frame` which is the default data format of R for tables. Many operations are can be performed faster with data.tables instead of data.frames. For this reason, the polmineR package prominently uses data.tables internally. A conversion of these data.tables can be achieved easily.
+
+```{r}
+dt <- size("UNGA", s_attribute = c("speaker", "year"))
+df <- as.data.frame(dt) # Conversion into data.frame
+head(df)
+```
+
+
+## Proportions of Speaker per Year {.smaller}
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+DT::datatable(dt)
+```
+
+
+## Corpus Size: Two Dimensions {.smaller}
+
+In a second example, we want to examine rates in which different countries speak per year. We use the `s_attribute` "state_organization" which contains either the name of the state or the name of the organization the person is speaking for. To retrieve only states and not organizations in our overview, we use the `countrycode` package which provides a list of the English names of countries, among other information. In an actual analysis, a thorough check of this list would be advised as it might be incomplete and thus remove entities we would like to include otherwise.
+
+
+```{r}
+dt <- size("UNGA", s_attribute = c("state_organization", "year")) %>%
+  subset(state_organization %in% countrycode::codelist$country.name.en) %>%
+  subset(year %in% 2000:2009)
+
+data.table::setnames(dt, old = "state_organization", new = "state")
+```
+
+This table now is in the so-called extensive form and can be transformed into the regular form as follows: 
+
+```{r}
+tab <- data.table::dcast(state ~ year, data = dt, value.var = "size")
+```
+
+To reduce the number of states in our overview, we then subset the resulting table so only those countries remain which speak more than 200.000 tokens in general.
+
+```{r}
+tab_min <- tab[which(rowSums(tab[,2:ncol(tab)], na.rm = TRUE) > 200000),]
+```
+
+
+## Corpus Size: Two Dimensions (cont.) {.smaller}
+
+We examine the results by using a 'widget' which is created by the JavaScript library 'DataTable' (which is not identical with the `data.table` package). We can easily incorporate this output in slides which are created in R Markdown. The output is shown on the next slide.
+
+```{r, eval = FALSE}
+DT::datatable(tab_min)
+```
+
+
+## Number of Tokens by state and year {.smaller}
+
+```{r, echo = FALSE, eval = TRUE}
+DT::datatable(tab_min)
+```
+
+## Preparing the bar plot {.smaller}
+
+For a grouped bar plot we need a matrix which indicates the height of the bars.
+
+```{r}
+state <- tab_min[["state"]] # We save the state names for labelling
+tab_min[["state"]] <- NULL # removing the state column
+m <- as.matrix(tab_min) # Transforming the data.table into a matrix
+m[is.na(m)] <- 0 # NA values in the matrix indicate a corpus size of 0
+```
+
+As a last bonus we create a vector of colours we then assign to each country. This vector is named so that we can access the values by name later. We use a random colour palette by the `RColorBrewer` package here.
+
+```{r}
+colors <- RColorBrewer::brewer.pal(length(state), "Set3")
+names(colors) <- state
+```
+
+
+## Let's go {.smaller}
+
+Creating the bar plot is easy now.
+
+
+```{r, eval = FALSE}
+barplot(
+  m / 1000, # Heigth of Bars - Number of Tokens
+  ylab = "Tokens (in thousands)", # Label of Y axis
+  beside = TRUE, # Grouping, 
+  col = colors[state] # colour of bars
+)
+# To create the legend in a two-column layout we create it seperately
+legend(
+  x = "topright", # Placement of the legend on the top right corner
+  legend = state, # Label, here: State name
+  fill = colors[state], # colour of legend items
+  ncol = 2, # two-colum legend
+  cex = 0.7 # smaller font
+)
+```
+
+
+## Corpus Size by Year and State {.flexbox .vcenter}
+
+
+```{r, echo = FALSE}
+barplot(
+  m / 1000, # Heigth of Bars - Number of Tokens
+  ylab = "Tokens (in thousands)", # Label of Y axis
+  beside = TRUE, # Grouping, 
+  col = colors[state] # colour of bars
+  )
+# To create the legend in a two-column layout we create it seperately
+legend(
+  x = "topright", # Placement of the legend on the top right corner
+  legend = state, # Label, here: State name
+  fill = colors[state], # colour of legend items
+  ncol = 2, # two-colum legend
+  cex = 0.7 # smaller font
+  )
+```
+
+
+## Know your data! {.smaller}
+
+When working with data, a substantial understanding of the inner workings of this data is necessary. So read the documentation of the data and understand the underlying structure. If you do not know enough about the data you work with, the risk of misguided research is big.
+
+
+## Discussion and perspective {.smaller}
+
+First some words of encouragement: The first steps of working with data.tables certainly does require some effort, but its worth it, not only from the perspective of efficiency. As an example the following snippet illustrates its flexibility.
+
+```{r}
+size("UNGA", s_attribute = "speaker")[speaker == "Trump"]
+```
+
+Often, you might want to work only with a small subset of a corpus, i.e. a subcorpus. How thos can be done using polmineR is explained in the next set of slides.

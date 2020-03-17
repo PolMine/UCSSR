@@ -1,0 +1,122 @@
+---
+title: "First Steps"
+subtitle: 'Requirements and Installation'
+author: "Andreas Blaette"
+date: 'September 2018'
+output:
+  ioslides_presentation:
+    css: css/stylesheet.css
+    logo: img/polmine.png
+    widescreen: yes
+  slidy_presentation: default
+editor_options:
+  chunk_output_type: console
+vignette: >
+  %\VignetteIndexEntry{First Steps}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}  
+---
+
+## R, RStudio, polmineR and CWB-indexed Corpora {.smaller}
+
+This collection of introductory slices comprises:
+
+  * installation of R (statistical programming language)
+  * installation of RStudio (integrated development environment)
+  * installation of polmineR (R package for text analysis)
+  * installation of corpora via R packages (here: UNGA)
+  * bacis demonstrations of the usage of the polmineR package
+
+## Installation of R and RStudio {.smaller}
+
+The UNGA corpus is linguistically annotated and [CWB-indexed](http://cwb.sourceforge.net/). It contains all speeches of the United Nations General Assembly from October 1993 to March 2018. To analyze the data using its full potential, the R package [polmineR](https://CRAN.R-project.org/package=polmineR) can be used.
+
+The basic requirement to use the polmineR package is the installation of R and RStudio. While there are no specific additional system requirements, a limiting component often is the memory capacity of the system. Eight Gigabytes of RAM are sufficient in most scenarios, 16 Gigabytes can handle also more demanding tasks (most of the time).
+
+The [R programming language](https://en.wikipedia.org/wiki/R_(programming_language)) is a free software environment of the [R Project for Statistical Computing](https://www.r-project.org/). For most regular operating systems (Windows, macOS, Linux) it can be installed via the servers of the Comprehensive R Archive Network (CRAN).
+
+The [integrated development environment](https://en.wikipedia.org/wiki/Integrated_development_environment) RStudio provides a graphical interface for R which exposes a multitude of useful functionality which greatly enhances productivity when working with R. Thus, it is strongly recommended to work with the Open Source version of RStudio Desktop which can be downloaded [here](https://www.rstudio.com/products/rstudio/download/#download). The webinar series [RStudio Essentials](https://resources.rstudio.com/) provides some first insights.
+
+
+## Installing polmineR {.smaller}
+
+The official release of the `polmineR` package is available via CRAN and can be installed using the `install.packages()` function. 
+
+```{r, eval = FALSE}
+install.packages("polmineR")
+```
+
+Windows users can work with precompiled dependencies, so it should work 'out of the box'. Users of MacOS and Linux have to install the libraries [pcre](https://www.pcre.org/) and [GLib](https://de.wikipedia.org/wiki/GLib) in the terminal *before* installing polmineR. The installation workflow for MacOS is described [here](https://polmine.github.io/polmineR/index.html).
+
+The polmineR package is consistently improved. The most recent development version is available on [GitHub](https://github.com/PolMine/polmineR), a plattform to administrate and share open-source software. The development version fixes known bugs and contains new functionilites as well as improved documentation. The installation is performed using `install_github()` from the `devtools` package.
+
+```{r, eval = FALSE}
+install.packages("devtools")
+devtools::install_github("PolMine/polmineR", ref = "dev")
+```
+
+
+## Installing Corpora {.smaller}
+
+The polmineR package contains small sample corpora to illstrate the functionality of the package. The actual corpora are stored on a server of the PolMine project and can be downloaded via corpus specific R packages.
+
+A new installation mechanism is used for the UNGA package. First a (relatively small) package is installed, which only contains test or demonstration data. The actual data of the UNGA corpus is then downloaded subsequently. This is done through the 'drat' repository of the PolMine project at GitHub. Therefore, the 'drat' package is installed first.
+
+```{r, eval = FALSE}
+install.packages("drat")
+drat::addRepo("polmine") # in this case 'polmine' must be written in lower case!
+
+install.packages("cwbtools")
+install.packages("UNGA")
+```
+
+Now we can load the UNGA package and get the actual corpus
+
+```{r, eval = FALSE}
+library("UNGA")
+unga_download_corpus()
+```
+
+## Testing the Installation {.smaller}
+
+To test if UNGA is available, we first load the polmineR package.
+
+```{r, eval = FALSE}
+library(polmineR)
+```
+
+Then, we activate the UNGA corpus. We check if the UNGA corpus (corpora are written in upper case all the time) is mentioned on the list of available corpora in addition to "REUTERS" and "GERMAPARLMINI" which are sample data of the polmineR package. 
+
+```{r, eval = FALSE}
+use("UNGA")
+c("REUTERS", "GERMAPARLMINI", "UNGA") %in% corpus()[["corpus"]]
+```
+
+Finally, we check if the UNGA corpus has the correct size.
+
+```{r, eval = FALSE}
+size("UNGA")
+```
+
+There are 43 million tokens.
+
+## First Steps {.smaller}
+
+If you want, you can try out the following commands. These will be explained in more detail in the following slides.
+
+```{r, eval = FALSE}
+partition("UNGA", year = "2001") # Creation of a subcorpus ("partition")
+kwic("UNGA", query = "Integration") # easy overview over concordances
+kwic("UNGA", '[pos = "J.*"] "Integration" %c', cqp = TRUE) # Using the CQP syntax
+cooccurrences("UNGA", "Islam") # calculating first cooccurrences 
+count("UNGA", query = c("Islam", "Muslim", "Quran")) # basic counting
+```
+
+Counting is the basis of many more advanced statistical operations. Of particular importance for the design of the polmineR package however is the possibility to return to the full text. 
+
+```{r, eval = FALSE}
+obama <- partition("UNGA", date = "2009-09-23", speaker = "Obama", regex = TRUE)
+read(obama, meta = c("speaker", "date"))
+```
+
+This should be enough for a first impression.

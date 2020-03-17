@@ -1,0 +1,263 @@
+---
+title: "Subcorpora"
+subtitle: "Using 'partitions' in polmineR"
+author: "Andreas Blaette"
+date: '10 October 2018'
+output:
+  ioslides_presentation:
+    css: css/stylesheet.css
+    logo: img/polmine.png
+    widescreen: yes
+  slidy_presentation: default
+editor_options:
+  chunk_output_type: console
+vignette: >
+  %\VignetteIndexEntry{Subcorpora}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}  
+---
+
+```{r, include = FALSE}
+options("kableExtra.html.bsTable" = TRUE) # provides nicer looking tables
+```
+
+```{r include = FALSE}
+if (! "icon" %in% rownames(installed.packages()) ) devtools::install_github("ropenscilabs/icon")
+```
+
+```{r, echo = FALSE}
+library(kableExtra)
+```
+
+
+## Subcorpora and Partitions {.smaller}
+
+* In the analysis of corpora we are often interested in the synchronic or the diachronic variation of language. Hence, the creation of subcorpora is central for the meaningful use of corpora in research.
+
+* in the terminology of the `polmineR` package, instead of *subcorpus* the term *partition* is being used. On the one hand, this follows the conventional use of the French lexicometric tradition. On the other hand and more importantly, *partition* does occur both as a verb as well as a noun. In programming it is good practice to use verbs when naming methods. The `partition()` method partitions a corpus and creates an object of the class `partition` which contains all relevant information to describe a partition.
+
+* the creation of the partition is based on s-attributes (structural attributes). These attributes are not limited to the level of text but can also encompass passages of text (i.e. annotations, named entities, interjections in plenary protocols) underneath the text level.
+
+* which s-attributes are available in a corpus and how they are characterized can be determined with the `s_attributes` method.
+
+## Required installations and initialization {.smaller}
+
+The collection of slides is using the `polmineR` package and the `UNGA` corpus. The installation was explained in more detail in an earlier set of slides.
+
+```{r, message = FALSE}
+library(polmineR)
+use("UNGA")
+```
+
+Please note: The functionalities explained here are only available in polmineR version `r as.package_version("0.7.10")` or above. Install the correct version of the package accordingly.
+
+For the following examples we additionally use the [magrittr](https://magrittr.tidyverse.org/) package.
+
+```{r load_libraries, eval = TRUE, message = FALSE}
+library(magrittr)
+```
+
+
+## Creating a `partition`: Basics {.smaller} 
+
+* the objective of the first example is the creation of a partition which contains all speeches in the United Nations General Assembly during the year of the financial crisis in 2008.
+
+* First we determine which values for the s-attribute `year` are available for the corpus.
+
+```{r}
+s_attributes("UNGA", s_attribute = "year")
+```
+
+* a partition is created by first providing the ID of the corpus which is always written in upper case. After that, the names of s-attributes can be used as arguments.
+
+```{r, message = FALSE}
+unga_2008 <- partition("UNGA", year = "2008")
+```
+
+
+## Creating a `partition`: Next Steps {.smaller} 
+
+* besides characters, the values which were assigned to the s-attribute can be numeric or logical. The necessary conversion into character values is performed internally automatically 
+
+```{r, message = FALSE}
+unga_2008 <- partition("UNGA", year = 2008) # identical
+```
+
+* this can be particularly useful if you want to create a partition which comprises several years
+
+```{r, message = FALSE}
+unga_2009_ff <- partition("UNGA", year = 2009:2013)
+```
+
+
+## Creating a `partition`: Next Steps {.smaller} 
+
+* our objective was to analyse only speeches of regular speakers, not of the chairman or the presidency of the assembly
+* we always spoke about the `partition()` method or the `s_attributes()` *method* instead of *functions* Why? The specific characteristic of a *method* is that they adjust their behaviour based on the kind of object they receive as their input. To see for which classes of objects a method is defined you can access the documentation of the method via the help functionality (i.e. `?partition()` or `?s_attributes()`). 
+* specifically this means that we can use the `s_attributes()` method we used on corpora also on `partition` objects. 
+
+```{r, collapse = TRUE}
+s_attributes(unga_2008, s_attribute = "role")
+```
+
+* lets assume we only want to keep speakers in our selection which are *head of state*.
+
+```{r, message = FALSE, collapse = TRUE}
+unga_2008_min <- partition("UNGA", year = 2008, role = "head of state")
+```
+
+
+## Creating a `partition`: "Zooming" {.smaller} 
+
+* If you have a look at the documentation of the `partition()` method, you see that the method can be used on `partition` objects as well.
+* in consequence, we can create partitions of partitions (i.e. subcorpora of subcorpora), hence zooming into the corpus step by step. Instead of creating the partition at once as shown above, we can achieve the same result by performing the following steps:
+
+```{r, message = FALSE}
+a <- partition("UNGA", year = 2008)
+b <- partition(a, role = "head of state")
+```
+   
+* is it really the same result? The `size()` method we used for corpora, works for `partition` objects as well.
+
+```{r, message = FALSE}
+size(unga_2008_min) == size(b)
+```
+
+
+## The `partition()` method in a Pipe  {.smaller}
+
+* the way most methods of the polmineR package work, allows for the usage of the so-called pipe. Using the pipe operator ("%>%") of the magrittr package, we can create the `partition` above also like this:
+
+
+```{r, message = FALSE}
+unga_2008_min <- "UNGA" %>% 
+  partition(year = 2008) %>%
+  partition(role = "head of state")
+```
+
+* using a pipe the code can be written more like one would describe the process in natural language: "Take the UNGA corpus, partition it for the year 2008 and then count how often the term 'financial crisis' occurs" would be like that:
+
+```{r, message = FALSE, collapse = TRUE}
+"UNGA" %>% partition(year = 2008) %>% count(query = '"financial" "crisis"', cqp = TRUE)
+```
+
+* writing comprehensible and readable code is a merit by itself. Pipes can help with that.
+
+
+## Creating a `partition`: "Regular Expressions" {.smaller} 
+
+* when creating partitions, sometimes the exact manifestation of the s-attribute one might want to subset is unknown. Often, there are different spellings for names. In the UNGA corpus a more applicable example might be different country names. For example it might be unknown how speakers of the United Kingdom can be identified.
+
+
+```{r, message = FALSE, collapse = TRUE}
+uk <- partition("UNGA", state_organization = "United Kingdom", regex = TRUE)
+s_attributes(uk, "state_organization")
+```
+
+* the regular expression is passed to the known `grep()` function
+
+
+## Scenario: Speeches of United Kingdom Representatives after 2008 {.smaller}
+
+* the combination of the methods `s_attributes()` and `partition()` can be used to identify relevant texts step by step. A validity check with `s_attributes()` should be performed regularly during the research process to exclude unwanted hits from the analysis.
+
+* example: on which dates did the representative of the United Kingdom speak during and after the financial crisis 2008 and actually address the topic?
+
+```{r, collapse = TRUE, message = FALSE}
+uk_2008_ff <- partition("UNGA", state_organization = "United Kingdom", year = 2008:2009)
+for (day in s_attributes(uk_2008_ff, s_attribute = "date")){
+  dt <- partition(uk_2008_ff, date = day) %>% count(query = '"financial" "crisis"', cqp = TRUE)
+  cat(sprintf("%s -> N Crisis = %s\n", day, dt[["count"]]))
+}
+```
+
+## Back to the full text: Reading {.smaller}
+
+* according to our last analysis the representative of the United Kingdom did address the financial crisis on September 26th 2008 in the general assembly. The full text of this partition can be seen with the `read()` method.
+
+
+```{r, message = FALSE, eval = TRUE, echo = FALSE}
+uk_fcrisis <- partition(uk_2008_ff, date = "2008-09-26")
+```
+
+```{r, message = FALSE, eval = FALSE}
+uk_fcrisis <- partition(uk_2008_ff, date = "2008-09-26")
+read(uk_fcrisis)
+```
+
+* the output of the `read()` method can be converted to a character vector which can be stored.
+
+```{r, message = FALSE}
+writeLines(text = as.character(read(uk_fcrisis)), con = "uk_fcrisis.html")
+```
+
+* this file can be viewed with any regular browser. An important purpose to create such files could be the eventual import into programmes for qualitative data analysis such as MAXQDA.
+
+* note: the created html is a 'technical html' which consists of the word representation as well as the corpus positions for each individual token. These corpus positions are invisible in the regular browser but can be used to reimport annotations from programmes such as MAXQDA back into polmineR.
+
+
+----
+
+<iframe src="uk_fcrisis.html"></iframe>
+
+
+## Date specific time slice {.smaller}
+
+* often is can be necessary to create a date specific `partition`, for instance if the effect of events on the discourse should be investigated.
+
+* the most efficient way to achieve this is to cast the date information of the corpus into objects of the class `Date`. With these, operations such as greater or smaller than can be performed or sequences can be created. In the following example we count the frequency of the term "terrorism" in the United Nations General Assembly in the year before and after nine-eleven.
+
+
+```{r, collapse = TRUE, message = FALSE}
+pre_nineeleven <- as.Date("2000-09-11")
+nineten <- as.Date("2001-09-10")
+nineeleven <- as.Date("2001-09-11")
+post_nineeleven <- as.Date("2002-09-11")
+pre <- partition("UNGA", date = seq.Date(from = pre_nineeleven, to = nineten, by = "day"))
+post <- partition("UNGA", date = seq.Date(from = nineeleven, to = post_nineeleven, by = "day"))
+
+count(pre, "terrorism")
+count(post, "terrorism")
+```
+
+
+## Creating a `partition_bundle` {.smaller}
+
+* multiple `partition` objects can be consolidated to one `partition_bundle` object. It is possible to create a `partition_bundle` object using the `partition_bundle` method by defining an s-attribute.
+
+* the `partition_bundle()` method can be applied to both a corpus or `partition` objects. For `partition_bundle` objects regular R methods are available, for example `summary()` in the following chunk
+
+```{r, message = FALSE}
+uk_2009 <- partition(uk_2008_ff, year = 2009)
+uk_2009_days <- partition_bundle(uk_2009, s_attribute = "date")
+summary(uk_2009_days)
+```
+
+
+## Counting based on `partition_bundle` {.smaller}
+
+* Many methods of the *polmineR* package are also available on `partition_bundle` objects. This is also true for the `count()` method we learned about earlier.
+
+* a `character` vector can be used as the argument `query` of the `count()` method. This way, a count based on all `partition` objects of a `partition_bundle` can be performed with multiple query terms
+
+```{r, message = FALSE, render = knit_print}
+count(uk_2009_days, query = c("crisis", "bank", "financial")) %>% show()
+```
+
+* this might be useful if a dictionary is used to score partitions, i.e. when only partitions should be analysed which have a certain minimal score.
+
+## With `as.speeches()` to `partition_bundle` {.smaller}
+
+* an assumption of all examples above was, that all words in one protocol on one day are part of one single speech. However, especially prominent speakers in an assembly sometimes give multiple speeches on one day. In addition, text artefacts which are not part of the speech itself such as interjections or insertions of the chair of the chamber, should not be regarded as part of the speech.
+
+* accordingly, there is a `as.speeches()` method in the polmineR package. The central heuristic of the method is that passages of speech by one single speaker can be subsumed into one speech if this speech is not interrupted by the number of tokens by another speaker which is defined by the value of the argument `gap`. Per default this value is 500. This ensures that an interjection does not cause one speech to be counted as two. The return value of `as.speeches()` is a `partition_bundle` object.
+
+## Summary and Perspective {.smaller}
+
+* `partition` and `partition_bundle` objects provide flexibility for the analysis. Keep in mind that all central methods of the polmineR package are implemented for both corpora and `partition` as well as `partition_bundle` objects. 
+
+* `partition` and `partition_bundle` objects are objects of the so-called S4 system of object oriented programming in R. For objects of this class methods are defined which can be looked up in the according class documentation (`?"partition-class"` and `?"partition_bundle-class"` respectively).
+
+* the S4 system which is used by polmineR for this implementation is assumed to be more complex and difficult to manage than the older S3 system. However, it ensures greater control over error messaging and thus, quality control. Further information about object oriented programming in R can be found in the online book ["Advanced R" by Hadley Wickham](http://adv-r.had.co.nz/S4.html).
+
+* after understanding the mechanisms of `partition` and `partition_bundle` objects we now have the basics for all further, substantially interesting approaches of analysis. In the next slides we have a look at the art of counting.

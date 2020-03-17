@@ -1,0 +1,527 @@
+---
+title: "The Art of Counting"
+subtitle: 'Using the count() method of polmineR'
+author: "Andreas Blaette"
+date: "10. Oktober 2018"
+output:
+  ioslides_presentation:
+    css: css/stylesheet.css
+    logo: img/polmine.png
+    widescreen: yes
+  slidy_presentation: default
+editor_options:
+  chunk_output_type: console
+vignette: >
+  %\VignetteIndexEntry{The Art of Counting}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+## The Art of Counting {.smaller}
+
+* the possibility to perform analyses goes far beyond counting. Counting terms (and more complex lexical units) however is the fundamental operation for more complex algorithmic analyses and can also constitute meaningful research results by itself.
+
+* Counting can be understood as a measurement procedure. As with all other steps of analysis, each counting operation should be considered in terms of validity: Is it ensured that I measure what I intend to measure? In particular because of the natural variation of language use, this is not trivial.
+
+* it is necessary to differentiate between absolute frequencies (`count`) and relative frequencies (`frequencies`, which is the normalization of frequencies by the division by corpus or subcorpus size, mostly abbreviated as `freq`). In analyses the choice of using counts or frequencies has to be justified.
+
+* the fundamental methods which are explained here are `count`, `dispersion` and `as.TermDocumentMatrix`. Like all other basic methods of the polmineR package, these methods are available for corpora and `partition` objects.
+
+* among others, the creation of time series and dictionary based classification are examples used in the following.
+ 
+
+## Initialization {.smaller}
+
+* in the examples, the UNGA corpus is used. The corpus has to be activated after loading polmineR.
+
+```{r initialize, eval = TRUE, message=FALSE}
+library(polmineR)
+use("UNGA")
+```
+
+* in addition, the packages `magrittr`, `data.table` and `xts` are used. If needed, these have to be installed and loaded.
+
+```{r, message = FALSE}
+for (pkg in c("magrittr", "data.table", "xts", "lubridate"))
+  if (!pkg %in% rownames(installed.packages())) install.packages(pkg)
+
+library(magrittr)
+library(data.table)
+library(xts)
+```
+
+* the `lubridate` package is also needed and installed, but not loaded yet to avoid namespace conflicts with some functions of the `data.table` package.
+
+
+## Basics of Counting: The `count()` method {.smaller}
+
+* The easiest operation is to measure the frequency of the occurrence of a term (`query`) with the `count()` method.
+
+```{r, collapse = TRUE}
+count("UNGA", query = "refugee")
+```
+
+* The column `count` indicates the absolute frequency of the term, the column `freq` indicates the (relative frequency). The frequency here is the result of the division of absolute frequency and corpus size.
+
+```{r, collapse = TRUE}
+count("UNGA", query = "refugee")[["count"]] / size("UNGA")
+```
+
+* as a `query` a `character` vector containing multiple queries can be passed.
+
+```{r, collapse = TRUE}
+count("UNGA", query = c("refugee", "migrant"))
+```
+
+
+## Using the result of the counting method {.smaller}
+
+* with a small example the usage of different terms should be examined.
+
+```{r}
+queries <- c(
+  "alien", "emigrant", "evacuee", "expatriate", "foreigner", "immigrant", "migrant", "refugee"
+  )
+dt <- count("UNGA", query = queries)
+```
+
+* the return value of the `count()` method is a `data.table`. This can be cast to a `data.frame` without loss. We sort them afterwards.
+
+```{r}
+df <- as.data.frame(dt)
+df <- df[order(df$count, decreasing = TRUE),] # sorting
+```
+
+* now we can create a barplot which is shown on the next slide.
+
+```{r, eval = FALSE}
+par(mar = c(8,4,2,2)) # enlarge plane for more room for labels
+barplot(height = df$count, names.arg = df$query, las = 2)
+```
+
+
+## Frequencies of terms related to Asylum {.flexbox .vcenter}
+
+```{r, eval = TRUE, echo = FALSE}
+par(mar = c(8,4,2,2)) # enlarge plane for more room for labels
+barplot(height = df$count, names.arg = df$query, las = 2)
+```
+
+
+## `count()` method and `partition` objects {.smaller}
+
+* the `count()` method can be applied on both corpora as well as on `partition()` objects.
+
+```{r, collapse = TRUE, message = FALSE}
+unga_2015 <- partition("UNGA", year = 2015)
+count(unga_2015, query = "refugee")
+```
+
+* it is possible to use the `partition()` method and the `count()` method in a pipe. For this, it is required to have the `magrittr` package installed and loaded. Using the pipe means to chain methods and functions via the pipe operator ("%>%") and to use the return value of the left expression as the input value of the right expression.
+
+```{r, collapse = TRUE, message = FALSE}
+partition("UNGA", year = 2015) %>%
+  count(query = "refugee")
+```
+
+
+## Example: Variation of language use {.smaller}
+
+* we illustrate this by analysing the variation of language use of the last four American presidents (potentially) concerning the position of the United States in the global system.
+
+```{r, eval = FALSE, echo = TRUE}
+queries <- c("America", "borders", "crisis", "development", "economy", "freedom", "liberty", "markets", "wealth")
+
+par(mar = c(6,5,2,2), mfrow = c(2,2),  cex = 0.6)
+
+for (us_president in c("Clinton", "Bush", "Obama", "Trump")){
+  dt <- partition("UNGA", speaker = us_president) %>%
+    count(query = queries)
+  barplot(
+    height = dt$freq * 100000, names.arg = dt$query, # labels with query terms
+    las = 2, # rotate labels to improve visuals
+    main = us_president,
+    ylab = "Count of Terms  (per 100.000 Tokens)",
+    ylim = c(0, 350) # shared scale for comparison
+    )
+}
+```
+
+
+## Variation of language use {.flexbox .vcenter}
+
+```{r, eval = TRUE, echo = FALSE, message = FALSE}
+queries <- c("America", "borders", "crisis", "development", "economy", "freedom", "liberty", "markets", "wealth")
+
+par(mar = c(6,5,2,2), mfrow = c(2,2),  cex = 0.6)
+
+for (us_president in c("Clinton", "Bush", "Obama", "Trump")){
+  dt <- partition("UNGA", speaker = us_president) %>%
+    count(query = queries)
+  barplot(
+    height = dt$freq * 100000, names.arg = dt$query, # labels with query terms
+    las = 2, # rotate labels to improve visuals
+    main = us_president,
+    ylab = "Count of Terms  (per 100.000 Tokens)",
+    ylim = c(0, 350) # shared scale for comparison
+    )
+}
+```
+
+
+## Using regular expressions and CQP {.smaller}
+
+* it is also possible to pass the syntax of the Corpus Query Processor to the `query` argument of the `count()` method. This syntax will be explained in another [collection of slides](cqp_eng.html). In its most basic form, CQP can be used to pass regular expressions to the query. The query term is escaped in single quotes and the argument `cqp` is set to TRUE.
+
+
+```{r, collapse = TRUE}
+count("UNGA", query = "'refugee.*'", cqp = TRUE) # using CQP syntax
+```
+
+* a breakdown of the actual terms which are hit by the regular expression can be retrieved as follows:
+
+```{r}
+dt <- count("UNGA", query = "'refugee.*'", cqp = TRUE, breakdown = TRUE)
+```
+
+* the result (you can see the result on the next slide) can serve as a warning: in the earlier examples, we measured language use rather crudely. Here, we also see inflected word forms of the query term.
+
+## Hits for regular expression {.smaller}
+
+```{r, echo = FALSE}
+DT::datatable(dt)
+```
+
+
+## Counting with positional attributes {.smaller}
+
+* there are two solutions addressing the problem that words can occurr in different inflected forms. It is possible to work with lemmatization, which can be activated via the positional attribute 'lemma'. Another possibility is the development of accurate regular expressions.
+
+* a reminder: 'Lemmatization' describes the process to reduce a word to its basic form. CWB indexed corpora - which is the data format used by polmineR - can contain the positional attribute 'lemma'. Using the `count()` method, the lemmatized form is used when assigning the value 'lemma' to the argument p_attribute.
+
+```{r, collapse = TRUE}
+count("UNGA", query = "refugee", p_attribute = "lemma")
+```
+
+* this number corresponds closely with the number of hits found with the regular expression. Aside from 'refugee' inflected forms such as 'refugees' and their upper case counterparts are found (see appendix).
+
+<!-- ## Oder doch reguläre Ausdrücke? {.smaller} -->
+
+<!-- NOT SURE HOW TO USE THIS IN THE UNGA CONTEXT -->
+
+
+## Linguistic Variations: Matching of Inflections {.smaller}
+
+* to illustrate the power of regular expressions we adopt the dictionary introduced earlier and add inflected forms via regular expressions.
+
+```{r, eval = FALSE, echo = TRUE, message = FALSE}
+queries <- c(
+  asylum = "'.*asylum.*'",
+  border = '"border.*"',
+  migrant = '"(|e|im)migrant(|s)"', 
+  migration = "'.*migration.*'",
+  refugee = '"refugee.*"', 
+  visa = "'visa'"
+  )
+par(mar = c(6,5,2,2), mfrow = c(2,2),  cex = 0.6)
+for (us_president in c("Clinton", "Bush", "Obama", "Trump")) {
+  partition("UNGA", speaker = us_president) %>%
+    count(query = unname(queries), cqp = TRUE, p_attribute = "word") -> dt
+  barplot(
+    height = dt$freq * 100000,
+    names.arg = names(queries),
+    las = 2, main = us_president,
+    ylim = c(0, 100)
+  )
+}
+```
+
+
+## Linguistic Variations: Matching of Inflections {.flexbox .vcenter}
+
+```{r, eval = TRUE, echo = FALSE, message = FALSE}
+queries <- c(
+  asylum = "'.*asylum.*'",
+  border = '"border.*"',
+  migrant = '"(|e|im)migrant(|s)"', 
+  migration = "'.*migration.*'",
+  refugee = '"refugee.*"', 
+  visa = "'visa'"
+  )
+par(mar = c(6,5,2,2), mfrow = c(2,2),  cex = 0.6)
+for (us_president in c("Clinton", "Bush", "Obama", "Trump")) {
+  partition("UNGA", speaker = us_president) %>%
+    count(query = unname(queries), cqp = TRUE, p_attribute = "word") -> dt
+  barplot(
+    height = dt$freq * 100000,
+    names.arg = names(queries),
+    las = 2, main = us_president,
+    ylim = c(0, 100)
+  )
+}
+```
+
+
+## Preliminary conclusions and 'Learnings' {.smaller}
+
+* counting words is a fast approach and makes it easy to produce nice looking visualizations. Valid conclusions about seemingly basic relationships (such as the linguistic variation between parties or time) require scientific rigour, as the examples above show.
+
+* using lemmatized forms of words in a corpus can be an efficient way to capture inflected word forms as well. One problem here might be that neologisms cannot necessarily be lemmatized.
+
+* one possible alternative is the diligent development of regular expressions to capture different linguistic variations. The potential of the CQP syntax was only hinted at and is explained in more detail later. Of particular interest is the possibilty to capture multi-word expressions with this approach.
+
+## Frequency Distribution {.smaller}
+
+* diachronic and synchronic analyses of language use are central use cases when working with large corpora. They can be used to analyse language variation over time (diachronic) or between other strucutral characteristics at the same time (synchronic).
+
+* the `dispersion()` method facilitates efficient counts of frequencies by one or two dimensions (here: s-attributes). 
+
+
+```{r get_simple_dispersion}
+dt <- dispersion("UNGA", query = "refugee", s_attribute = "year")
+head(dt) # just looking at the top of the table
+```
+
+* the usage of the CQP syntax and regular expressions is possible for the `dispersion()` method as well.
+
+## Simple Visualization of Frequencies {.smaller}
+
+
+```{r, echo = FALSE}
+par(mfrow = c(1,1))
+```
+
+* In contrast to the `count()` method the argument `freq` is used here to force the normalization of the relativ frequencies.
+
+```{r dispersion, message = FALSE}
+dt <- dispersion("UNGA", query = "refugee", s_attribute = "year", freq = TRUE)
+```
+
+* just as with `count()` the return value of the `dispersion()` method is a `data.table`. The lossless conversion to a data.frame is possible.
+
+* the result of the distribution analysis can be visualized easily as a bar plot.
+
+```{r, eval = FALSE}
+barplot(
+  height = dt[["freq"]] * 100000,
+  names.arg = dt[["year"]],
+  las = 2, ylab = "Hits per 100.000 Terms"
+  )
+```
+
+
+## The term 'refugee' in the United Nations General Assembly, per year {.flexbox .vcenter}
+
+```{r, eval = TRUE, echo = FALSE}
+barplot(
+  height = dt[["freq"]] * 100000,
+  names.arg = dt[["year"]],
+  las = 2, ylab = "Hits per 100.000 Terms"
+  )
+```
+
+## Frequency Distribution - Two Dimensions {.smaller}
+
+* for the analysis we add another dimension: the variation by state or organization. We subset the resulting data.table to only keep those states or organizations in which the query occurs at least 200 times over the entire time and exclude state and organizations with the value of "NA". 
+
+```{r}
+dt <- dispersion("UNGA", query = '"[Rr]efugee(|s)"', cqp = TRUE, s_attribute = c("year", "state_organization"))
+  
+# creating the index for columns with a sum greater than 200
+idx <- which(colSums(dt[,2:ncol(dt)], na.rm = TRUE) > 200) + 1
+
+# subsetting the dt before by this index (as well as the year column)
+dt_min <- dt[,c(1, idx), with = FALSE]
+
+# removing the column NA and the rows for 1993 and 2018 which are only partly in the corpus
+dt_min <- dt_min[2:(nrow(dt_min)-1),-"NA"]
+```
+
+
+## Frequency Distribution - Two Dimensions (cont.) {.smaller}
+
+* for time series analysis we use the `xts` package. We create a `xts` object on the basis of the table created in the previous step.
+
+```{r}
+ts <- xts(x = dt_min[,c(2:ncol(dt_min)), with = FALSE],
+          order.by = as.Date(sprintf("%s-01-01", dt_min[["year"]]))
+          )
+head(ts)
+```
+
+
+## Visualization using `xts` {.smaller}
+
+* a better way to visualize the relationshops is to use a time series plot. The result is shown on the next slide.
+
+```{r, eval = FALSE, echo = TRUE, fig.height = 4, fig.width = 10}
+plot.xts(
+  ts,
+  multi.panel = TRUE,
+  col = RColorBrewer::brewer.pal(12, "Set3"),
+  lwd = 2,
+  yaxs = "r"
+  )
+```
+
+
+## Visualization using `xts` (cont.) {.smaller}
+
+```{r, eval = TRUE, echo = FALSE, fig.height = 4, fig.width = 10}
+plot.xts(
+  ts,
+  multi.panel = TRUE,
+  col = RColorBrewer::brewer.pal(12, "Set3"),
+  lwd = 2,
+  yaxs = "r"
+  )
+```
+
+
+## A date specific time series {.smaller}
+
+```{r, fig.height = 2.5}
+par(mar = c(4,2,2,2))
+dt <- dispersion("UNGA", query = '"[Rr]efugee(s|)"', cqp = TRUE, s_attribute = "date")
+dt <- dt[!is.na(as.Date(dt[["date"]]))]
+ts <- xts(x = dt[["count"]], order.by = as.Date(dt[["date"]]))
+plot(ts)
+```
+
+* is this a meaningful result? We should aggregrate the counts to take into account larger time periods.
+
+
+## Aggregation by week - month - quarter - year {.smaller}
+
+* as time units bigger than a single day we want to use week, month, quarter and year. To calculate 'weeks' we use the `lubridate` package.
+
+* now we create aggregated time series objects. The code below is deliberately condensed and not necessarily easy to understand at first glance. When in doubt, use it via copy & paste to see its effects.
+
+```{r}
+ts_week <- aggregate(ts, {a <- lubridate::ymd(paste(lubridate::year(index(ts)), 1, 1, sep = "-")); lubridate::week(a) <- lubridate::week(index(ts)); a})
+ts_month <- aggregate(ts, as.Date(as.yearmon(index(ts))))
+ts_qtr <- aggregate(ts, as.Date(as.yearqtr(index(ts))))
+ts_year <- aggregate(ts, as.Date(sprintf("%s-01-01", gsub("^(\\d{4})-.*?$", "\\1", index(ts)))))
+```
+
+* which aggregration is the most meaningful? We plot the time series in 2*2 facets.
+
+```{r, eval = FALSE}
+par(mfrow = c(2,2), mar = c(2,2,3,1))
+plot(as.xts(ts_week), main = "Aggregation: Week")
+plot(as.xts(ts_month), main = "Aggregation: Month");
+plot(as.xts(ts_qtr), main = "Aggregation: Quarter")
+plot(as.xts(ts_year), main = "Aggregation: Year")
+```
+
+## Aggregation by week - month - quarter - year {.flexbox .vcenter}
+
+
+```{r, eval = TRUE, echo = FALSE, fig.width = 10}
+par(mfrow = c(2,2), mar = c(2,2,3,1))
+plot(as.xts(ts_week), main = "Aggregation: Week")
+plot(as.xts(ts_month), main = "Aggregation: Month");
+plot(as.xts(ts_qtr), main = "Aggregation: Quarter")
+plot(as.xts(ts_year), main = "Aggregation: Year")
+```
+
+
+## Working with time series: 'learnings' {.smaller}
+
+* the analysis of distributions by different s-attributes constitutes the basis of diachronic and synchronic analyses. Focal point of these examples was timeseries data. Here it is recommended to work with specialized packages such as `xts` or `zoo`. 
+
+* linguistic time series data are observations which occurr irregularily. While measuring temperature can be performed daily, parliaments and assemblies do not meet every day and newspapers are not published on sundays or on holidays. Thus, it is relevant for the analysis (and resulting visualizations) to aggregate data in a way that accounts for that, i.e. aggregating bigger time spans. 
+
+* in diachronic analyses in particular, the possible change of meaning of terms should be considered: Does a political term mean today what it meant 20 years ago? To create valid results when counting, is will often be necessary to additionally perform some random concordance analyses to ensure that a relevant change of word meaning is not overlooked.
+
+
+## Dictionary based classification I | Advanced Applications {.smaller}
+
+* counting is not only applicable on corpora and `partition` objects but also on `partition_bundle` objects. This might be necessary in different use cases. Here, a basic recipe for dicitonary based classifications is provided. The first step is to create a `partition_bundle` object. We do this here based on the state or organization of a speaker in one single day for the year 2016.
+
+
+```{r, message = FALSE, fig.width = 4}
+unga_2016 <- partition("UNGA", year = 2016)
+pb <- partition_bundle(unga_2016, s_attribute = "date")
+nested <- lapply(
+  pb@objects,
+  function(x) partition_bundle(x, s_attribute = "state_organization", verbose = FALSE)
+)
+debates <- flatten(nested)
+names(debates) <- paste(
+  blapply(debates, function(x) s_attributes(x, "date")),
+  blapply(debates, function(x) name(x)), 
+  sep = "_"
+)
+```
+
+
+## Dictionary based classification II {.smaller}
+
+* as a (pseudo) dictionary we use a rather basic list of three key words.
+
+```{r}
+dict <- c("asylum", "escaping", "fleeing", "migration", "refugee")
+```
+
+* we perform a count based on the 'debates' `partition_bundle` and sort the resulting data.table in descending order. This `partition_bundle` with all debates can be indexed by the name of each individual partition which exceeds a certain threshold (here: 10) of the dictionary score. 
+
+
+```{r, message = FALSE}
+dt <- count(debates, query = dict) %>% data.table::setorderv(cols = "TOTAL", order = -1L)
+debates_mig <- debates[[ subset(dt, TOTAL >= 10)[["partition"]] ]]
+```
+
+* to determine the threshold value which differentiated between relevant and irrelevant debates, it can be useful to visualize the counts in a barplot. Alternatively, it is possible to use the full text view to illustrate the fit of the dictionary. This is helped by the possibility to highlight the key words.
+
+```{r, eval = FALSE}
+debates_mig[[1]] %>% read() %>% highlight(yellow = dict)
+```
+
+## Counting all words in the corpus / partition {.smaller}
+
+* if you omit the `query` argument in the `count()` method, the count will be performed on the entire corpus or `partition` object. Via the argument `p_attribute` it is determined which p-attribute is counted. The return value of this operation is a `count` object.
+
+```{r, message = FALSE, collapse = TRUE}
+p <- partition("UNGA", year = 2008)
+cnt <- count(p, p_attribute = "word")
+sum(cnt[["count"]]) == size(p)
+```
+
+* it is possible to pass more than one p-attribute. Most of the time, this will be a combination of 'word' and 'pos' or 'lemma' and 'pos'. Such a count can be filtered with the `subset()` method. 
+
+```{r, eval = FALSE, message = FALSE}
+unga_2008 <- partition("UNGA", year = 2008)
+dt <- count(unga_2008, p_attribute = c("word", "pos")) %>% subset(pos %in% c("NN", "JJ")) %>%
+  data.table::as.data.table(.) %>% data.table::setorderv(., cols = "count", order = -1L) %>% head()
+```
+
+
+## Counting for (more than) algorithms {.smaller}
+
+* the count of all tokens of a partition is the basis for several more advanced approaches, for example term extractions or the creation of term-document-matrices which can serve as the input for a lot of algorithmic text mining approaches such as topic modelling.
+
+* in the polmineR package, the `as.TermDocumentMatrix()` method is the default routine to prepare text-document-matrices. The method can be applied to `count_bundle` or `partition_bundle` objects as well as on a `character` vector which identifies a corpus. For further information see the information in the documentation of these methods.
+
+* Counting does have fundamental importance for the analysis of corpora. These slides should inform you about how this is done internally in polmineR. The most important message is that even this seemingly basic operation can lead to invalid research if it is not done with scientific rigour.
+
+* To validate the results of counting, the usage of concordances (which are explained in the next slides) can be important. The CQP syntax which has been used here, is explained in more depth in a later set of slides.
+
+
+## Appendix {.smaller}
+
+* Which forms of words are covered by one lemma?
+
+```{r, eval = FALSE}
+word <- get_token_stream("UNGA", p_attribute = "word")
+Encoding(word) <- registry_get_encoding("UNGA")
+lemma <- get_token_stream("UNGA", p_attribute = "lemma")
+Encoding(lemma) <- registry_get_encoding("UNGA")
+
+dt <- data.table::data.table(word = word, lemma = lemma)
+
+token <- "refugee"
+q <- iconv(token, from = "UTF-8", to = "latin1")
+dt2 <- dt[lemma == q]
+dt2[, .N, by = .(word)]
+```
