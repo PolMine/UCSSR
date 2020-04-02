@@ -19,7 +19,7 @@ vignette: >
 
 ## Zur Ermittlung der Ungleichheit des Vokabulars {.smaller}
 
-- Alle Worte sind gleich?! Natürlich nicht: Manche Worte sind ungleicher als andere in dem Sinne, dass sie stärker bedeutungstragend sind als andere und den semantischen Gehalt eines Textes ausmachen. Doch wie identifiziert man das inhaltlich interessante und relevante Vokabular eines Subkorpus?
+- Alle Worte sind gleich?! Natürlich nicht: Manche Worte sind ungleicher in dem Sinne, dass sie stärker bedeutungstragend sind als andere und den semantischen Gehalt eines Textes ausmachen. Doch wie identifiziert man das inhaltlich interessante und relevante Vokabular eines Subkorpus?
 
 - Die bloße Häufigkeit von Worten ist bei dieser Frage ein schlechter Ratgeber. Allerweltsworte ("haben", "machen", "ist", "der", "die", "das" etc.) treten weit häufiger auf als jenes Vokabular, das tatsächlich den Inhalt eines Textes ausmacht.
 
@@ -62,14 +62,13 @@ for (pkg in c("magrittr", "data.table", "RColorBrewer", "tm", "wordcloud")){
 
 ## Die Logik des statistischen Tests {.smaller}
 
-- Statistische Verfahren der Feature-Extraktion (vgl. z.B. Manning / Schuetze 2003) beruhen auf dem Vergleich des Auftretens eines Worts (oder einer lexikalischen Einheit) in einem (Sub-)Korpus (*coi*) im Vergleich zu einem Referenzkorpus (*ref*). D.h. die Zählung der Häufigkeiten in Unterschungs- und Referenzkorpus steht am Anfang des Verfahrens.
+- Statistische Verfahren der Feature-Extraktion (vgl. z.B. Manning / Schuetze 2003) beruhen auf dem Vergleich des Auftretens eines Worts (oder einer lexikalischen Einheit) in einem (Sub-)Korpus (*coi*) im Vergleich zu einem Referenzkorpus (*ref*). D. h. die Zählung der Häufigkeiten in Unterschungs- und Referenzkorpus steht am Anfang des Verfahrens.
 
 - Die zentrale Frage des an den Häufigkeiten ansetzenden Unterschiedstests ist, ob bestimmte Worte im Untersuchungskorpus *überzufällig* oft auftreten. Diese Logik eines statistischen Unterschiedstests findet auch bei der Berechnungen von Kookkurrenzen Anwendung. Während aber bei der Kookkurrenzanalyse *Log-Likelihood*-Tests gängig sind, die auch bei seltener auftretenden Worten noch robust bleiben, wird bei der Feature-Extraktion oft auch mit dem etwas einfacheren *Chi-Quadrat*-Test gearbeitet.
 
 - Die `features()`-Methode beinhaltet *keinen* voreingestellten Filter nach der Auftretenshäufigkeit, damit NutzerInnen sich über Selektionsschritte im Klaren bleiben. Es wird in aller Regel immer erforderlich sein, selten auftretendes Vokabular mit der `subset()`-Methode aus der Analyse auszuschließen.
 
 - Die Zahl der statistisch signifikanten Worte ist in hohem Maße abhängig von der Größe des Untersuchungskorpus. Wie bei Kookkurrenz-Analysen wird die Anwendung weiterer Filter- und Reduktionskriterien oftmals relevant sein.
-
 
 
 ## Ein erstes Beispiel {.smaller}
@@ -123,7 +122,7 @@ is(coi)
 - Den Vergleich besorgt die angekündigte `features()`-Methode.
 
 ```{r, render = knit_print}
-f <- features(coi, ref)
+f <- polmineR::features(coi, ref)
 ```
 
 - Für das `features`-Objekt können generische-Methoden wie `as.data.frame()`, `dim()`, `nrow()`, `ncol()`, `colnames()` etc. angewandt werden. Über die `nrow()`-Methode verschaffen wir uns einen Eindruck, wie viele Zeilen eigentlich die Tabelle hat.
@@ -172,7 +171,7 @@ ref <- partition("GERMAPARL", year = 2002:2015, interjection = FALSE) %>% count(
 - Die Berechnung der *features* weicht zunächst nicht von dem bereits bekannten Muster ab. Den Ausschluss niedrigfrequenter Worte die Anwendung des Schwellenwerts für eine 0,1%-Irrtumswahrscheintlichkeit nehmen wir vor.
 
 ```{r, message = FALSE}
-f <- features(coi, ref) %>% subset(count_coi >= 5) %>% subset(chisquare >= 10.83)
+f <- polmineR::features(coi, ref) %>% subset(count_coi >= 5) %>% subset(chisquare >= 10.83)
 ```
 
 - Allerdings können wir nun auch noch nach der POS-Annotation (hier: Nomen, "NN") filtern.
@@ -206,7 +205,7 @@ bt <- partition("GERMAPARL", year = 2008:2009, interjection = FALSE) %>%
 - Beim Aufruf der `features()`-Methode setzen wir das Argument `included` auf `TRUE`. 
 
 ```{r, features = FALSE, message = FALSE}
-am_features <- features(merkel, bt, included = TRUE)
+am_features <- polmineR::features(merkel, bt, included = TRUE)
 ```
 
 
@@ -273,7 +272,7 @@ bt_ngrams <- partition("GERMAPARL", year = 2008:2009, interjection = FALSE) %>%
 ```
 
 ```{r, message = FALSE, eval = FALSE}
-features(merkel_ngrams, bt_ngrams, included = TRUE) %>%
+polmineR::features(merkel_ngrams, bt_ngrams, included = TRUE) %>%
   subset(count_coi >= 5) %>% subset(chisquare >= 10.83)
 ```
 
@@ -284,9 +283,10 @@ features(merkel_ngrams, bt_ngrams, included = TRUE) %>%
 options("polmineR.pagelength" = 10L)
 ```
 
-```{r, message = FALSE, eval = TRUE, echo = FALSE, render = knit_print}
-features(merkel_ngrams, bt_ngrams, included = TRUE) %>%
-  subset(count_coi >= 5) %>% subset(chisquare >= 10.83)
+```{r error_chunk, message = FALSE, eval = TRUE, echo = FALSE, render = knit_print}
+polmineR::features(merkel_ngrams, bt_ngrams, included = TRUE) %>%
+  subset(count_coi >= 5) %>% 
+  subset(chisquare >= 10.83)
 ```
 
 
@@ -305,9 +305,9 @@ bt_ngrams <- partition("GERMAPARL", lp = 17, interjection = FALSE) %>%
 - Wir führen die feature-Extraktion durch und wandeln das Ergebnis in ein `data.table`-Objekt um, das wir noch ein wenig formatieren.
 
 ```{r, message = FALSE}
-dt <- features(merkel_ngrams, bt_ngrams, included = TRUE) %>% data.table::as.data.table()
-dt <- subset(dt, dt[["1_pos"]] == "ADJA") %>% subset(.[["2_pos"]] == "NN") 
-dt[,"1_pos" := NULL][,"2_pos" := NULL][,"exp_coi" := round(exp_coi, 2)][, "chisquare" := round(chisquare, 2)]
+dt <- polmineR::features(merkel_ngrams, bt_ngrams, included = TRUE) %>% data.table::as.data.table()
+dt <- subset(dt, dt[["pos_1"]] == "ADJA") %>% subset(.[["pos_2"]] == "NN") 
+dt[,"pos_1" := NULL][,"pos_2" := NULL][,"exp_coi" := round(exp_coi, 2)][, "chisquare" := round(chisquare, 2)]
 ```
 
 - Die Darstellung erfolgt auf der folgenden Folie.
@@ -332,7 +332,7 @@ non_cdu_ngrams <- partition("GERMAPARL", party = c("SPD", "FDP", "LINKE", "GRUEN
 
 cdu_ngrams <- subset(cdu_ngrams, count >= 5) # vorgezogen
 
-f <- features(cdu_ngrams, non_cdu_ngrams, included = FALSE)
+f <- polmineR::features(cdu_ngrams, non_cdu_ngrams, included = FALSE)
 f <- subset(f, chisquare >= 10.83)
 ```
 
@@ -340,14 +340,14 @@ f <- subset(f, chisquare >= 10.83)
 
 ```{r, echo = TRUE}
 dt <-  data.table::as.data.table(f)
-dt <- subset(dt, dt[["1_pos"]] == "NN") %>% subset(.[["2_pos"]] == "ART") %>% subset(.[["3_pos"]] == "NN") 
+dt <- subset(dt, dt[["pos_1"]] == "NN") %>% subset(.[["pos_2"]] == "ART") %>% subset(.[["pos_3"]] == "NN") 
 ```
 
 
 ## Nomen-Artikel-Nomen-Konstruktionen {.smaller}
 
 ```{r, echo = FALSE}
-dt[, "1_pos" := NULL][, "2_pos" := NULL][, "3_pos" := NULL]
+dt[, "pos_1" := NULL][, "pos_2" := NULL][, "pos_3" := NULL]
 dt[, "exp_coi" := round(exp_coi, 2)][, "chisquare" := round(chisquare, 2)]
 DT::datatable(dt)
 ```

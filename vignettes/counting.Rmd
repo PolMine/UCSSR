@@ -39,13 +39,12 @@ library(polmineR)
 use("GermaParl")
 ```
 
-- Außerdem werden die Pakege magrittr, data.table, xts und lubridate benutzt. Bei Bedarf werden diese installiert und dann geladen.
+- Außerdem werden die Pakete data.table, xts und lubridate benutzt. Bei Bedarf werden diese installiert und dann geladen.
 
 ```{r, message = FALSE}
-for (pkg in c("magrittr", "data.table", "xts", "lubridate"))
+for (pkg in c("data.table", "xts", "lubridate"))
   if (!pkg %in% rownames(installed.packages())) install.packages(pkg)
 
-library(magrittr)
 library(data.table)
 library(xts)
 ```
@@ -61,7 +60,7 @@ library(xts)
 count("GERMAPARL", query = "Fluchtursachen")
 ```
 
-- Die Spalte `count` gibt die (absolute) Häufigkeit an, die Spalte `freq` die (relative) Frequenz. Die Frequenz ergibt sich, indem man  die Häufigkeit durch die Korpusgröße teilt.
+- Die Spalte `count` gibt die (absolute) Häufigkeit an, die Spalte `freq` die (relative) Frequenz. Die Frequenz ergibt sich, indem man die Häufigkeit durch die Korpusgröße teilt.
 
 ```{r, collapse = TRUE}
 count("GERMAPARL", query = "Fluchtursachen")[["count"]] / size("GERMAPARL")
@@ -118,7 +117,7 @@ bt2015 <- partition("GERMAPARL", year = 2015)
 count(bt2015, query = "Flüchtlinge")
 ```
 
-- Es ist möglich, die `partition()`-Methode und die `count()`-Methode in einer "Pipe" zu verbinden (Voraussetzung ist, dass das magrittr-Package geladen ist). Dies bedeutet, Funktionen oder Methoden mit dem Pipe-Operator ("%>%") zu verketten, wobei dann der Rückgabewert einer Methode zum (ersten) Argument der darauffolgenden Methode werden kann.
+- Es ist möglich, die `partition()`-Methode und die `count()`-Methode in einer "Pipe" zu verbinden (Diese wird durch das magrittr Paket bereitgestellt, das mit polmineR installiert wird). Dies bedeutet, Funktionen oder Methoden mit dem Pipe-Operator ("%>%") zu verketten, wobei dann der Rückgabewert einer Methode zum (ersten) Argument der darauffolgenden Methode werden kann.
 
 ```{r, collapse = TRUE, message = FALSE}
 partition("GERMAPARL", year = 2015) %>%
@@ -211,7 +210,7 @@ DT::datatable(dt)
 count("GERMAPARL", query = "Flüchtling", p_attribute = "lemma")
 ```
 
-- Dies entspricht - fast - den Varianten, die wir bei der Aufschlüsselung auf der vorgangegenangen Seit gesehen haben (durch `breakdown = TRUE`): Über das Lemma werden neben "Flüchtling" auch "Flüchtlinge", "Flüchtlingen" auch kleingeschriebene Varianten erfasst ("flüchtling", "flüchtlings", "flüchtlinge"), die über Unsauberkeiten im Korpus auftreten (vgl. Anhang).
+- Dies entspricht - fast - den Varianten, die wir bei der Aufschlüsselung auf der vorangegangenen Seite gesehen haben (durch `breakdown = TRUE`): Über das Lemma werden neben "Flüchtling" auch "Flüchtlinge", "Flüchtlingen" auch kleingeschriebene Varianten erfasst ("flüchtling", "flüchtlings", "flüchtlinge"), die über Unsauberkeiten im Korpus auftreten (vgl. Anhang).
 
 
 ## Oder doch reguläre Ausdrücke? {.smaller}
@@ -219,15 +218,14 @@ count("GERMAPARL", query = "Flüchtling", p_attribute = "lemma")
 - Bei "Geflüchtete" treffen wir jedoch auf folgendes Problem. Bei Wortneuschöpfungen wie dieser ("Geflüchtete" tritt im Bundestag regelmäßig erst ab 2012 auf) ist die Lemmatisierung oftmals nicht erfolgreich. Dies sehen wir, wenn wir mit der klassischen `grep()`-Funktion in den auftretenden Wortformen bzw. den Lemmata suchen.
 
 ```{r, collapse = TRUE}
-terms("GERMAPARL", p_attribute = "word") %>% grep("Geflüchtet", ., value = T)
-terms("GERMAPARL", p_attribute = "lemma") %>% grep("Geflüchtet", ., value = T)
+terms("GERMAPARL", p_attribute = "word") %>% grep("Geflüchtet", ., value = TRUE)
+terms("GERMAPARL", p_attribute = "lemma") %>% grep("Geflüchtet", ., value = TRUE)
 ```
 
 - Die Flektionen von "der/die Geflüchtete" treffen wir am besten mit dem regulären Ausdruck "Geflüchtete(|r|n)". Wir erzielen so 266 Treffer (statt `r count("GERMAPARL", query = "Geflüchtete")[["count"]]` ohne CQP/regulären Ausdruck), was der Sache nach einen deutlichen Unterschied macht.
 
 ```{r, collapse = TRUE}
 count("GERMAPARL", query = '"Geflüchtete(|r|n)"', cqp = TRUE)
-
 ```
 
 
@@ -283,18 +281,18 @@ for (pg in c("CDU/CSU", "GRUENE", "SPD", "LINKE")){
 ```
 
 
-## Zwischenfazit und "Learnings"
+## Zwischenfazit und "Learnings" {.smaller}
 
 - Worte zu zählen geht schnell und man hat schnell eine nette Visualisierung fabriziert. Valide Aussagen selbst über scheinbar einfache Dinge (wie sprachliche Variation zwischen Parteien oder Sprachwandel über Zeit) erfordern gleichwohl Sorgfalt, wie die vorangegangenen Beispiele zeigen.
 
 - Mit der Lemmatisierung im Korpus zu arbeiten, kann eine effiziente Lösung sein, um die Flektionen eines Wortes im Korpus zu erfassen. Ein mögliches Problem ist jedoch, dass Wortneuschöpfungen unter Umständen nicht lemmatisiert werden konnten.
 
-- Eine mögliche Alternative ist die sorgfältige Entwicklung regulärer Ausdrücke, mit denen verschiedene sprachliche Varianten zu erfassen. Die Potentiale der CQP-Syntax wurden hier nur angerissen. Relevant kann insbesondere noch die Möglichkeit sein, Mehrwort-Einheiten zu erfassen (z.B. "Menschen mit Migrationshintergrund").
+- Eine mögliche Alternative ist die sorgfältige Entwicklung regulärer Ausdrücke, mit denen verschiedene sprachliche Varianten zu erfassen. Die Potentiale der CQP-Syntax wurden hier nur angerissen. Relevant kann insbesondere noch die Möglichkeit sein, Mehrworteinheiten zu erfassen (z.B. "Menschen mit Migrationshintergrund").
 
 
 ## Häufigkeitsverteilungen {.smaller}
 
-- Diachrone und synchrone Analysen von Sprache sind bei der Analyse von Korpora von grundlegender Bedeutung. Sie dienen der Untersuchung von Sprachwandel ("diachron", d.h. im Zeitverlauf) und der Varation des Sprachgebrauchs (zur gleichen Zeit, also "synchron") zwischen Akteuren.
+- Diachrone und synchrone Analysen von Sprache sind bei der Analyse von Korpora von grundlegender Bedeutung. Sie dienen der Untersuchung von Sprachwandel ("diachron", d. h. im Zeitverlauf) und der Varation des Sprachgebrauchs (zur gleichen Zeit, also "synchron") zwischen Akteuren.
 
 - Die `dispersion()`-Methode ermöglicht die effiziente Zählungen von Häufigkeiten über ein oder zwei Dimensionen (konkret: S-Attribute).
 
@@ -319,7 +317,7 @@ par(mfrow = c(1,1))
 dt <- dispersion("GERMAPARL", query = "Flüchtlinge", s_attribute = "year", freq = TRUE)
 ```
 
-- Der Rückgabewert die `dispersion`-Methode ist wie bei der `count()`-Methode ein `data.table`. Die verlustfreie Umwandlung mit `as.data.frame()` ist möglich.
+- Der Rückgabewert die `dispersion()`-Methode ist wie bei der `count()`-Methode ein `data.table`. Die verlustfreie Umwandlung mit `as.data.frame()` ist möglich.
 
 - Das Ergebnis der Verteilungsanalyse lassen sich schnell und einfach als Balkendiagramm visualisieren. (Aus der Abbildung auf der folgenden Folie geht die Resonanz des Themas Flucht und Asyl im Bundestag deutlich hervor.)
 
@@ -330,7 +328,6 @@ barplot(
   las = 2, ylab = "Treffer pro 100.000 Worte"
   )
 ```
-
 
 
 ## Flucht und Asyl im Bundestag, nach Jahren {.flexbox .vcenter}
@@ -496,7 +493,7 @@ sum(cnt[["count"]]) == size(p)
 ```{r, eval = FALSE, message = FALSE}
 bt2008 <- partition("GERMAPARL", year = 2008, interjection = FALSE)
 dt <- count(bt2008, p_attribute = c("word", "pos")) %>% subset(pos %in% c("NN", "ADJA")) %>%
-  as.data.table(cnt2008min) %>% setorderv(dt, cols = "count", order = -1L) %>% head()
+  as.data.table() %>% setorderv(cols = "count", order = -1L) %>% head()
 ```
 
 

@@ -29,25 +29,20 @@ if (!"kableExtra" %in% rownames(installed.packages())) install.packages("kableEx
 
 ## Initialisierung {.smaller}
 
-- Die Beispiele basieren auf dem *GermaParl*-Korpus. Der Datensatz in dem Paket muss nach dem Laden von *polmineR* mit dem `use`-Befehl aktiviert werden.
+- Die Beispiele basieren auf dem *GermaParl*-Korpus. Der Datensatz in dem Paket muss nach dem Laden von *polmineR* mit dem `use()`-Befehl aktiviert werden.
 
 ```{r initialize, eval = TRUE, message=FALSE}
 library(polmineR)
 use("GermaParl")
 ```
 
-- Außerdem nutzen wir das `magrittr`-Paket, um Befehle in einer sogenannten "Pipe" zu verketten. In einer Pipe wird das Ergebnis eines Befehls zum ersten Argument des jeweils nachfolgenden Befehls. Dadurch kann Code aussagekräftig und kompakt geschrieben werden.
-
-```{r}
-library(magrittr)
-```
+- Außerdem nutzen wir das `magrittr`-Paket, um Befehle in einer sogenannten "Pipe" zu verketten. In einer Pipe wird das Ergebnis eines Befehls zum ersten Argument des jeweils nachfolgenden Befehls. Dadurch kann Code aussagekräftig und kompakt geschrieben werden. Das Paket wird bereits mit `polmineR` Paket geladen.
 
 - Schließlich laden wir noch das *data.table*-Paket
 
 ```{r}
 library(data.table)
 ```
-
 
 
 ## CWB, CQP und 'polmineR' {.smaller}
@@ -59,7 +54,6 @@ library(data.table)
 - Die CQP-Syntax kann bei allen Basis-Befehlen des polmineR-Pakets (`kwic()`, `count()`, `dispersion()`, `cooccurrences()`)genutzt werden.
 
 - In den folgenden Beispielen wird anhand der `count()`-Methode gezeigt, wie die CQP-Syntax funktioniert. Denken Sie daran, dass  die anderen Funktionen auch CQP können! Im folgenden Tutorial wird zunächst kurz in die Nutzung regulärer Ausdrücke eingeführt. Dann wird die Nutzung linguistischer Merkmale eines Korpus erläutert.
-
 
 
 ## Suche nach Worten {.smaller}
@@ -76,7 +70,7 @@ count("GERMAPARL", query = '"Diskriminierung"', cqp = TRUE)
 
 ```{r, collapse = TRUE}
 count("GERMAPARL", query = c('"Liebe"', '"Liebe" %c'), cqp = TRUE)
-````
+```
 
 
 ## Reguläre Ausdrücke: Zeichenklassen {.smaller}
@@ -159,7 +153,7 @@ cpos_left <- P@cpos[1,1]
 pAttributes <- c("word", "pos", "lemma")
 tokenstream_list <- lapply(
   pAttributes,
-  function(x) getTokenStream("GERMAPARL", pAttribute = x, encoding = "latin1", left = cpos_left, right = cpos_left + 1000)
+  function(x) get_token_stream("GERMAPARL", pAttribute = x, left = cpos_left, right = cpos_left + 1000)
 )
 tokenstream_df <- as.data.frame(tokenstream_list)
 colnames(tokenstream_df) <- pAttributes
@@ -252,7 +246,7 @@ dispersion("GERMAPARL", query = '"[rR]assis.*"', s_attribute = "party")
 
 ```{r, message = FALSE}
 cooccurrences("GERMAPARL", query = '"([mM]uslim.|[iI]slam*)"', cqp = TRUE) %>%
-  as.data.table() %>% subset(rank_ll < 5) %>% DT::datatable() # Einbindung in Folie als htmlwidget
+  data.table::as.data.table() %>% subset(rank_ll < 5) %>% DT::datatable() # Einbindung in Folie als htmlwidget
 ```
 
 
@@ -288,6 +282,3 @@ Viel Erfolg!
 |VVIZU|Infinitiv mit ``zu'', voll| anzukommen, loszulassen|
 |VVPP|Partizip Perfekt, voll| gegangen, angekommen|
 |VAFIN|finites Verb, aux| [du] bist, [wir] werden | 
-
-
-

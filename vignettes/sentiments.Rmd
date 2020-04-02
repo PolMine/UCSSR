@@ -60,7 +60,7 @@ if (packageVersion("polmineR") < as.package_version("0.7.9.9005"))
 
 Die erforderlichen Pakete werden nun geladen.
 
-```{r load_libraries, eval = TRUE}
+```{r load_libraries, eval = TRUE, message = FALSE}
 library(zoo, quietly = TRUE, warn.conflicts = FALSE)
 library(devtools)
 library(magrittr)
@@ -334,7 +334,7 @@ for (aggregation_level in c("week", "month", "quarter", "year")){
 ```
 
 
-## Diskussion
+## Diskussion {.smaller}
 
   * Wir interpretieren Sie die Ergebnisse der Zeitreihen-Analyse?
   * Wie valide sind die Ergebnisse?

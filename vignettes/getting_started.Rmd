@@ -17,7 +17,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}  
 ---
 
-## R, RStudio, polmineR und CWB-indizierte Korpora
+## R, RStudio, polmineR und CWB-indizierte Korpora {.smaller}
 
 Dieser Foliensatz zum Einstieg umfasst Hiweise zu ... 
 
@@ -38,7 +38,7 @@ vembedr::embed_youtube("frpQm2UcZJk")
 
 ## Installation von R und RStudio {.smaller}
 
-Das MigParl-Korpus der migrations- und integrationsbezogenen Debatten in den deutschen Parlamenten steht als linguistisch annotiertes und indiziertes Korpus zur Verfügung, das in die [Corpus Workbench (CWB)](http://cwb.sourceforge.net/) eingepflegt worden ist. Die Analysen können mit dem R-Paket [polmineR](https://CRAN.R-project.org/package=polmineR) durchgeführt werden.
+Die Korpora des PolMine-Projektes, insbesondere GermaParl und UNGA, stehen als linguistisch annotierte und indizierte Korpora zur Verfügung, die in die [Corpus Workbench (CWB)](http://cwb.sourceforge.net/) eingepflegt worden sind. Die Analysen können mit dem R-Paket [polmineR](https://CRAN.R-project.org/package=polmineR) durchgeführt werden.
 
 Voraussetzung zur Nutzung dieser Analyseumgebung ist die Installation von R und RStudio. Besondere Systemanforderungen gibt es für grundlegende Analysen nicht. Der wesentliche limitierende Faktor bei komplexen statistischen Operationen ist meist der verfügbare Hauptspeicher (gut sind 8GB, mit 16GB kommt man schon sehr weit).
 
@@ -57,7 +57,7 @@ install.packages("polmineR")
 
 Windows-Nutzerinnen und Nutzer können dabei mit vorkompilierten Paketen arbeiten, so dass alles 'out of the box' funktionieren sollte. Nutzerinnen und Nutzer von macOS und Linux müssen *vor* der Installation von polmineR im Terminal für das RcppCWB-Paket die Bibliotheken [pcre](https://www.pcre.org/) und [GLib](https://de.wikipedia.org/wiki/GLib) installieren. Bitte beachten Sie die Installationsanleitung zum polmineR-Paket unter MacOS, die Sie [hier](https://polmine.github.io/polmineR/index.html) finden.
 
-Das polmineR-Paket wird aktiv weiterentwickelt. Die aktuelle Entwicklungsversion ist über [GitHub] als Plattform zur Verwaltung quelloffener Software verfügbar. Sie behebt bekannte Fehler ("Bugs"), enthält oftmals neue Funktionen und bietet in der Regel über eine verbesserte Dokumentation. Die Installation erfolgt mit `install_github` aus dem `devtools`-package.
+Das polmineR-Paket wird aktiv weiterentwickelt. Die aktuelle Entwicklungsversion ist über [GitHub](https://github.com/PolMine/polmineR) als Plattform zur Verwaltung quelloffener Software verfügbar. Sie behebt bekannte Fehler ("Bugs"), enthält oftmals neue Funktionen und bietet in der Regel über eine verbesserte Dokumentation. Die Installation erfolgt mit `install_github` aus dem `devtools`-package.
 
 ```{r, eval = FALSE}
 install.packages("devtools")
@@ -69,7 +69,7 @@ devtools::install_github("PolMine/polmineR", ref = "dev")
 
 Das polmineR-Paket enthält kleine Beispiel-Korpora, um die Funktionalität des Pakets zu illustrieren und zu testen. Die eigentlichen, weit größeren Korpora sind auf einem Server des PolMine-Projekts hinterlegt und werden über korpus-spezifische R-Pakete nachgeladen.
 
-Ein entsprechendes MigParl-Paket wird im Vorfeld des MigTex-Workshops bereitstehen. Für unsere ersten Schritte nutzen wir das GermaParl-Korpus der Plenardebatten des Deutschen Bundestags. Dieses ist noch nicht über CRAN verfügbar, sondern steht über das 'drat'-Repositorium des PolMine-Projekts zur Verfügung. Um auf dieses einfach zugreifen zu können, wird zunächst das 'drat'-package installiert. Dann folgt die Installation von 'cwbtools' als Voraussetzung zur Installation von Korpora aus Archivdateien, und dann des GermaParl-Pakets.
+Für unsere ersten Schritte nutzen wir das GermaParl-Korpus der Plenardebatten des Deutschen Bundestags. Dieses ist noch nicht über CRAN verfügbar, sondern steht über das 'drat'-Repositorium des PolMine-Projekts zur Verfügung. Um auf dieses einfach zugreifen zu können, wird zunächst das 'drat'-package installiert. Dann folgt die Installation von `cwbtools` als Voraussetzung zur Installation von Korpora aus Archivdateien, und dann des GermaParl-Pakets.
 
 ```{r, eval = FALSE}
 install.packages("drat")

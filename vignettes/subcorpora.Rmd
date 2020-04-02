@@ -41,7 +41,7 @@ library(kableExtra)
 - Welche S-Attribute in einem Korpus vorhanden sind und welche Werte diese annehmen, lässt sich mit der `s_attributes`-Methode ermitteln. (Siehe hierzu der vorangegangene Foliensatz zu Korpora.)
 
 
-## Erforderliche Installationen und Initialisierung
+## Erforderliche Installationen und Initialisierung {.smaller}
 
 Der Foliensatz nutzt das `polmineR`-Paket und das `GermaParl`-Korpus. Die Installation wurde im vorhergehenden Foliensatz ausführlicher erläutert.
 
@@ -96,7 +96,7 @@ bt2009ff <- partition("GERMAPARL", year = 2009:2013)
 bt2008 <- partition("GERMAPARL", year = 2008, interjection = FALSE)
 ```
 
-- Zwischenrufe nicht aus der Analyse auszuschließen, wo erforderlich, kann zu unerwünschten Verzerrungen führen. Machen Sie sich gut mit ihren Daten vertraut!
+- Zwischenrufe nicht aus der Analyse auszuschließen, wo erforderlich, kann zu unerwünschten Verzerrungen führen. Machen Sie sich gut mit Ihren Daten vertraut!
 
 
 ## Anlegen einer `partition`: Fortsetzung {.smaller}

@@ -145,15 +145,15 @@ kableExtra::kable(df) %>%
 
 `r icon::fa("lightbulb")`  Grundsätzlich ist diese Datenstruktur vergleichbar mit jener, die Sie vielleicht auch vom tidytext-package kennen.
 
-## Strukturelle Attribute ('s-attributes' ) {.smaller}
+## Strukturelle Attribute ('s-attributes') {.smaller}
 
-Metadaten eines Korpus werden als strukturelle Attribute (s-attributes) bezeichnet. Welche s-Attribute bei einem Korpus verfügbar sind, fragen Sie mit der Methode `s_attributes()` ab.
+Metadaten eines Korpus werden als strukturelle Attribute (s-attributes) bezeichnet. Welche S-Attribute bei einem Korpus verfügbar sind, fragen Sie mit der Methode `s_attributes()` ab.
 
 ```{r}
 s_attributes("GERMAPARL")
 ```
 
-Die Dokumentation eines Korpus sollte erklären, was die s-Attribute bedeuten. Um zu ermitteln, welche Ausprägungen es für ein s-Attribute gibt, nutzen Sie das Argument `s_attribute`.
+Die Dokumentation eines Korpus sollte erklären, was die S-Attribute bedeuten. Um zu ermitteln, welche Ausprägungen es für ein S-Attribute gibt, nutzen Sie das Argument `s_attribute`.
 
 ```{r}
 s_attributes("GERMAPARL", s_attribute = "year")
@@ -162,7 +162,7 @@ s_attributes("GERMAPARL", s_attribute = "year")
 
 ## Korpusgröße {.smaller}
 
-Open wurde schon erwähnt, dass Sie mit der `size()`-Methode die Größe eines Korpus abfragen können.
+Oben wurde schon erwähnt, dass Sie mit der `size()`-Methode die Größe eines Korpus abfragen können.
 
 ```{r}
 size("GERMAPARL")
@@ -195,7 +195,7 @@ barplot(
   )
 ```
 
-Die damit erzeugt Graphik kommt auf der folgenden Folie.
+Die damit erzeugt Grafik kommt auf der folgenden Folie.
 
 ----
 
@@ -233,7 +233,6 @@ DT::datatable(df_min)
 ```
 
 
-
 ## Korpusgröße: Zwei Dimensionen {.smaller}
 
 In einem zweiten Beispiel zur Arbeit mit den Ergebnissen einer Untergliederung des Korpus nach zwei Kriterien stellen wir die Frage, wie die Redeanteile der Fraktionen zwischen den Legislaturperioden geschwankt hat.
@@ -250,7 +249,7 @@ tab <- dcast(parliamentary_group ~ lp, data = dt_min, value.var = "size")
 setnames(tab, old = "parliamentary_group", new = "Fraktion")
 ```
 
-Das schauen wir uns an, wobei wir ein 'widget' benutzen, das mit der JavaScript-Bibliothek DataTable (nicht verwechseln mit data.table!) erzeugt wird. (Die Ausgabe lässt sich auch in Folien einbeziehen, die - wie diese - mit Rmarkdown geschrieben wurden.)
+Das schauen wir uns an, wobei wir ein 'widget' benutzen, das mit der JavaScript-Bibliothek DataTable (nicht verwechseln mit data.table!) erzeugt wird. (Die Ausgabe lässt sich auch in Folien einbeziehen, die - wie diese - mit R Markdown geschrieben wurden.)
 
 ```{r, eval = FALSE}
 DT::datatable(tab)
@@ -285,14 +284,14 @@ colors <- c(
 ```
 
 
-## Let's go
+## Let's go {.smaller}
 
 Den barplot auszugeben, ist nun keine Zauberei mehr.
 
 ```{r, eval = FALSE}
 barplot(
   m / 1000, # Höhe der Balken - Zahl Worte, in Tausend
-  xlab = "Worte (in Tausend)", # Beschriftung der X-Achse
+  ylab = "Worte (in Tausend)", # Beschriftung der Y-Achse
   beside = TRUE, # Gruppierung
   col = colors[pg] # Farben der Balken, Indizierung gewährleistet richtige Reihenfolge
   )
@@ -311,12 +310,12 @@ legend(
 ## Korpus nach Legislaturperiode und Fraktion {.flexbox .vcenter}
 
 ```{r, echo = FALSE}
-barplot(m / 1000, xlab = "Worte (in Tausend)", beside = TRUE, col = colors[pg])
+barplot(m / 1000, ylab = "Worte (in Tausend)", beside = TRUE, col = colors[pg])
 legend(x = "top", legend = pg, fill = colors[pg], ncol = 2, cex = 0.7)
 ```
 
 
-## Kenne deine Daten!
+## Kenne deine Daten! {.smaller}
 
 Das Beispiel einer Visualisierung der Korpusgröße nach Fraktionszugehörigkeit und Legislaturperiode ist nicht ganz zufällig gewählt. In der 15. Wahlperiode gibt es einen gar nicht so kleinen Redeanteil von Sprechern, die "fraktionslos" sind. Wenn Sie die gleiche Analyse auf Ebene von Parteizugehörigkeit durchführen: Was sehen Sie da? Die fraktionslosen Abgeordneten der 15. Wahlperiode sind Angehörige der PDS. 
 
@@ -325,7 +324,7 @@ Dies ist keine Einführung in das GermaParl-Korpus, aber der richtige Ort für d
 Lesen Sie die Dokumentation der Daten und sehen Sie sich die Daten an, in diesem Fall das TEI-XML. Was für jede andere Datenart eine Selbstverständlichkeit ist, gilt auf für Korpora: Wenn man zu wenig über die Daten weiß, ist die Wahrscheinlichkeit schlechter Forschung groß.
 
 
-## Diskussion und Ausblick
+## Diskussion und Ausblick {.smaller}
 
 Zunächst eine Ermutigung: Der Einstieg in die Arbeit mit data.tables erfordert Umdenken, lohnt sich aber, nicht nur wegen der Effizienz dieser Datenstruktur. Als Beispiel dient das folgende "snippet".
 
@@ -334,4 +333,3 @@ size("GERMAPARL", s_attribute = "speaker")[speaker == "Angela Merkel"]
 ```
 
 Nochmal das Stichwort "know your data": Wenn Sie eine Blick in das TEI-XML des GermaParl-Korpus geworfen haben: Zwischenrufe sind - bewusst! - Teil der "XMLifizierung" der Protokolle, in der sie ausgezeichnet sind. Für saubere Analysen muss man also mit Subkorpora arbeiten, die Zwischenrufe aus der Analyse ausschließen. Wie das geht, ist Gegenstand des nächsten Foliensatzes.
-
