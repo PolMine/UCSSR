@@ -33,7 +33,7 @@ if (!"annolite" %in% rownames(installed.packages()))
 
 
 
-## Konkordanen und KWIC: Grundlagen {.smaller}
+## Konkordanzen und KWIC: Grundlagen {.smaller}
 
   * Die Analyse von Wortumfeldern von Worten und Suchbegriffen übernimmt als analytischer Schritt eine Scharnierfunktion zwischen quantitativen Zählverfahren und einem qualitativ-interpretativen Zugang zu Textdaten. In der Linguistik wird dabei von "Konkordanzen" gesprochen, in der sozialwissenschaftlichen Tradition der Inhaltsanalyse von "Keyword-In-Context"-Analysen (kurz "KWIC"). Der Kürze und Prägnanz wegen heißt die Methode im polmineR-Paket kurz `kwic()`. Im Folgenden wird aber auch von "Konkordanzen" als Ansicht von Wortkontexten zu Treffern von Suchanfragen gesprochen.
   
@@ -52,7 +52,7 @@ Bitte beachten Sie, dass die Funktionalität für den folgenden Workflow erst mi
 if (packageVersion("polmineR") < as.package_version("0.7.9.9008"))
   devtools::install_github("PolMine/polmineR", ref = "dev")
 ```
-(
+
 Wir laden nun `polmineR` und aktivieren das GermaParl-Korpus: Der Datensatz in dem Paket muss nach dem Laden von `polmineR` mit dem `use()`-Befehl aktiviert werden.
 
 ```{r initialize, eval = TRUE, message = FALSE}
@@ -234,7 +234,7 @@ Y
 
 ## Ausblick: Konkordanzen im Forschungsprozess {.smaller}
 
-* Die Analyse von Konkordanzen lässt sich sinnvoll auch mit der statistischen Analysen von Kookkurrenzen verbinden: Die Kookkurrenz-Analyse (`cooccurrences()`-Funktion) liefert Hinweise auf statische Auffälligkeite(n des Sprachgebrauchs, die dann per KWIC näher analysiert und interpretiert werden. 
+* Die Analyse von Konkordanzen lässt sich sinnvoll auch mit der statistischen Analysen von Kookkurrenzen verbinden: Die Kookkurrenz-Analyse (`cooccurrences()`-Funktion) liefert Hinweise auf statische Auffälligkeiten des Sprachgebrauchs, die dann per KWIC näher analysiert und interpretiert werden. 
   
 * Ein sinnvoller Schritt zur Systematisierung von Interpretationen von Konkordanzen ist, diese zu kategorisieren bzw. typisieren. Dafür kann es hilfreich sein, diese nach Excel zu exportieren (Methode `mail()`), um dort in einer Zusatzspalte Kategorisierungen einzutragen bzw. Interpretationen zu notieren.
   
