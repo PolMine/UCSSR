@@ -1,0 +1,308 @@
+---
+title: "'polmineR' and the CQP Syntax"
+subtitle: 'Use Cases with the UNGA Corpus'
+author: "Andreas Blaette"
+english_version: "Christoph Leonhardt (2020-03-17)"
+date: "8 October 2018"
+output:
+  ioslides_presentation:
+    css: css/stylesheet.css
+    logo: img/polmine.png
+    widescreen: yes
+  slidy_presentation: default
+editor_options: 
+  chunk_output_type: console
+vignette: >
+  %\VignetteIndexEntry{polmineR' and the CQP Syntax}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}  
+---
+
+
+```{r, message = FALSE, results = "hide", echo = FALSE}
+# This code is not visible in the slides and just necessary to install packages if needed.
+# kable and kableExtra are necessary, to generate table output.
+if (!"knitr" %in% rownames(installed.packages())) install.packages("knitr")
+if (!"kableExtra" %in% rownames(installed.packages())) install.packages("kableExtra")
+```
+
+
+## Initialization {.smaller}
+
+* These slides use the `polmineR` package and the `UNGA` corpus. The installation is explained in a seperate set of slides. The corpus has to be loaded with the `use()` function.
+
+```{r initialize, eval = TRUE, message=FALSE}
+library(polmineR)
+use("UNGA")
+```
+
+* in addition, the `magrittr` package is used to chain operations via the so-called 'Pipe'. Using the pipe means to chain methods and functions via the pipe operator ("%>%") and to use the return value of the left expression as the input value of the right expression.
+
+
+```{r}
+library(magrittr)
+```
+
+* Finally, we also load the `data.table` package
+
+```{r}
+library(data.table)
+```
+
+
+## CWB, CQP and 'polmineR' {.smaller}
+
+* the `polmineR` package uses the *Corpus Workbench* (CWB) as an 'indexing and query engine'. Comparable software such as [Lucene](https://lucene.apache.org/) or [Elasticsearch](https:://www.elastic.co) might offer advantages in industrial use cases. Being open source and available for customization is a plus of the CWB though.
+
+* the CWB comprises the *Corpus Query Processor (CQP)* which is a powerful tool for querying large corpora using complex and linguistical queries. Queries can contain regular expressions and linguistic annotations.
+
+* the CQP syntax can be used in all basic operations of the polmineR package (`kwic()`, `count()`, `dispersion()`, `cooccurrences()`)
+
+* in the following examples, the `count()` method is used to illustrate the usage of the CQP syntax. Note that all the other functions are capable to handle CQP queries as well. The following tutorial starts with a swift introduction of regular expressions. Later, the usage of linguistical attributes of a corpus will be shown.
+
+
+## Looking for Words {.smaller}
+
+* The CQP syntax is passed with the `query` argument of a method. By default, the method will check whether the CQP syntax is used. It is recommended that this information is passed to the method by setting its `cqp` parameter to TRUE or FALSE.
+
+* it is important that individual terms in the query are enclosed in double quotes and the entire query is enclosed in single quotes. 
+
+```{r, collapse = TRUE}
+count("UNGA", query = '"Discrimination"', cqp = TRUE)
+```
+
+
+## Looking for Words (cont.) {.smaller}
+
+* the *flag* %c can be used to ignore case sensitivity, i.e. to ignore the difference between the use of capital and lower case letters. This can be useful to account for the capitalization of words at the beginning of sentences which would make a potentially significant difference when counting terms. In languages other than English the differentiation between upper and lower case is often also semantically important.
+
+* In the example below, the first instance of "Hunger" only matches the occurrences of the word with an initial upper case. The second instance with the %c *flag* also matches lower case versions of the same word.
+
+```{r, collapse = TRUE}
+count("UNGA", query = c('"Hunger"', '"Hunger" %c'), cqp = TRUE)
+```
+
+
+## Regular Expressions: Character Classes {.smaller}
+
+* the CQP syntax includes the usage of regular expressions. Regular expressions are a standardized instrument used in many programming languages to identify patterns in a sequence of characters. See [Wikipedia](https://en.wikipedia.org/wiki/Regular_expression). 
+
+* in regular expressions symbols or wildcards can be used instead of specific characters.
+
+| Expression | Description |
+|:-------:| --------------|
+| .       |A period character matches any character |
+| \\d | 'digit', i.e. 0 to 9 |
+
+</b>
+</b>
+
+```{r, collapse = TRUE}
+count("UNGA", '".iece"', cqp = TRUE, breakdown = TRUE) %>% head()
+```
+
+
+## Regular Expressions: Quantifiers {.smaller}
+
+* the frequency of occurrence of a character class can be determined by quantifiers which are added to the respective character.
+
+| Expression | Description |
+|:-------:| --------------|
+|?|The previous expression occurs between zero and one times.|
+|+|The previous expression occurs between one and multiple times.|
+|*|The previous expression occurs in any frequency between zero and multiple times.|
+|{n}|The previous expression occurs exactly n times.|
+|{min,}|The previous expression occurs at least min times.|
+|{min,max}|The previous expression occurs between min and max times.|
+|{0,max}|The previous expression occurs at most max times.|
+
+
+## Regular Expressions: Examples I {.smaller}
+
+* with that in mind, some basic but powerful queries can be created:
+
+```{r, collapse = TRUE}
+count("UNGA", query = '"multicult.*"', cqp = TRUE, breakdown = TRUE) %>% head(n = 3)
+```
+
+* alternative characters can be indicated in squared brackets. If we do not want to use the *flag* %c we can achieve the same result as follows:
+
+```{r, collapse = TRUE}
+count("UNGA", query = '"[Mm]ulticult.*"', cqp = TRUE, breakdown = TRUE) %>% head(n = 3)
+```
+
+
+## Regular Expressions: Examples II {.smaller}
+
+* while squared brackets provide the possibility to specify alternative characters, round brackets can be used to specify different sequences of characters which are separated by a vertical bar ("|")
+
+```{r, collapse = TRUE}
+count("UNGA", query = '"(im|e)migration.*"', cqp = TRUE, breakdown = TRUE) %>% head()
+```
+
+
+## CQP I: Basics {.smaller}
+
+* CQP extends the syntax of regular expressions by providing possibilities to create queries which span multiple tokens. With CQP different annotation layers of a linguistically annotated corpus can be queries.
+
+* the data format is tabular in principle. If in addition to the initial word form (p-attribute "word") a part-of-speech annotation, a lemmatization and named entity recognition was performed, a *token stream* with four columns is provided.
+
+* the table on the following slide illustrates this annotation using the beginning of a debate as an example. In the first column, the *corpus position* ("cpos") of the token is specified.
+
+## Token Stream with Positional Attributes {.smaller}
+
+```{r, echo = FALSE, message = FALSE}
+P <- partition("UNGA", date = "2017-09-19", speaker = "The Secretary-General")
+cpos_left <- P@cpos[1,1]
+p_attributes <- c("word", "pos", "lemma", "ner")
+tokenstream_list <- lapply(
+  p_attributes,
+  function(x) get_token_stream("UNGA", p_attribute = x, left = cpos_left, right = cpos_left + 1000)
+)
+tokenstream_df <- as.data.frame(tokenstream_list)
+colnames(tokenstream_df) <- p_attributes
+tokenstream_df[["pos"]] <- gsub("^\\$", "\\\\$", tokenstream_df[["pos"]])
+tokenstream_df[["cpos"]] <- 0L:1000L
+tokenstream_df <- tokenstream_df[, c("cpos", p_attributes)]
+DT::datatable(tokenstream_df)
+```
+
+
+## CQP II: Searching in the Token Stream {.smaller}
+
+* if the positional attribute "word" should be used, it is sufficient to enclose the query in quotes. To address other p-attributes, it is necessary to indicate the relevant p-attirbute in squared brackets.
+
+* the following query "Q" is used to search for a pattern which starts with a noun ("NN") followed by "of" and ending with "migration" 
+
+```{r, eval = TRUE, message = FALSE}
+Q <- '[pos = "NN"] "of" "migration"'
+C <- count("UNGA", query = Q, breakdown = TRUE)
+head(C[,c("match", "count", "share")])
+```
+
+
+## CQP III: Quantifiers {.smaller}
+
+* to indicate arbitrary words, squared brackets are used:
+
+```{r}
+count("UNGA", query = '"World" [] [pos = "NN"]', cqp = T, breakdown = T) %>% 
+  head(n = 3) %>% subset(select = c("match", "count", "share"))
+```
+
+* according to the notation shown earlier, curly brackets can be used to specify how many arbitrary words should occur.
+
+```{r}
+count("UNGA", query = '"(un|)just" []{0,3} "sanction.*"', cqp = TRUE, breakdown = TRUE) %>%
+  head(n = 3) %>% subset(select = c("match", "count", "share"))
+```
+
+
+## CQP IV: Neighbours {.smaller}
+
+* Hits for two words which occur within a specific distance to each other can be specified as follows. Note: The inversion of this query indicated by the "|" and the enclosing parantheses enables us to search both ways.
+
+```{r, message = FALSE}
+Q <- '("[tT]error.*" []{0,9} "[iI]slam.*" | "[iI]slam.*" []{0,9} "[tT]error.*")'
+Y <- count("UNGA", query = Q, cqp = TRUE)
+Y[, "count"]
+```
+
+
+## CQP: Useful for all polmineR methods {.smaller}
+
+```{r, echo = FALSE}
+options("polmineR.pagelength" = 6L)
+```
+
+* as stated at the beginning, the CQP syntax is available for all basic methods of the polmineR package.
+
+```{r, render = knit_print}
+kwic("UNGA", query = '"conflict" []{0,5} ".*development.*"', cqp = TRUE)
+```
+
+
+## CQP and the `kwic()` method {.smaller}
+
+```{r, echo = FALSE}
+options("polmineR.pagelength" = 5L)
+```
+
+* earlier, we had a look at matches which were hit by the query terms "terror", "terrorism", etc. in the context of "Islam", "islamist", etc. We could achieve the same by using the `positivelist` argument of the `kwic()` method. 
+
+```{r, render = knit_print, message = FALSE}
+kwic("UNGA", query = '"[iI]slam.*"', positivelist = "[tT]error.*", regex = TRUE, cqp = TRUE) %>%
+  highlight (yellow = "[tT]error.*", regex = TRUE)
+```
+
+
+## CQP and the `kwic()` method (cont.) {.smaller}
+
+* the [CQP Query Language Tutorial](http://cwb.sourceforge.net/files/CQP_Tutorial.pdf) provided by Evert et al. is helpful for mastering the CQP query language. The following final example is inspired by an example provided there (p. 13):
+
+```{r, render = knit_print, message = FALSE}
+kwic("UNGA", query = '[ner = "ORGANIZATION"] []{0,5} [(lemma = "sanction") & (pos = "V.+")]', regex = TRUE, cqp = TRUE)
+```
+
+
+## CQP: Useful for `dispersion()` as well {.smaller}
+
+* the CQP syntax can be used for the `dispersion()` method too.
+
+```{r, message = FALSE}
+dispersion("UNGA", query = '"[Dd]iscrimination.*"', s_attribute = "year")
+```
+
+
+## CQP: Useful for `cooccurrences()` as well {.smaller}
+
+```{r, message = FALSE}
+cooccurrences("UNGA", query = '[(lemma = "love") & (pos = "N.+")]', cqp = TRUE) %>%
+  data.table::as.data.table() %>% subset(rank_ll < 5) %>% 
+  subset(select = c("word", "count_partition", "count_coi", "count_ref", "ll", "rank_ll")) %>%
+  DT::datatable() # Embedding in slides as htmlwidget
+```
+
+
+## Conclusion {.smaller}
+
+* the CQP syntax can be used for both corpora ('character' vectors) or `partition` objects
+
+
+```{r, message = FALSE, eval = FALSE}
+partition("UNGA", year = 2002:2009) %>% 
+  cooccurrences(query = '"([mM]uslim.|[iI]slam*)"', cqp = TRUE)
+```
+
+* CQP is a powerful tool of analysis. Creating meaningful queries takes some practice. Note the following here:
+  * do not forget to enclose the entire query in single quotes
+  * if R throws an error, double check if quotes or brackets are always closed again
+
+Good Luck!
+
+
+## Appendix: Part-of-speech Tagsets I - Stuttgart-Tübingen-Tagset (Excerpt) {.smaller}
+
+* for German we use the Stuttgart-Tübingen-Tagset: 
+
+|Notation|Description|Example|
+|:------:|------------|--------|
+|ADJA| attributive adjektive | [das] große [Haus]|
+|ART| determiner | der, die, das, ein, eine, ... |
+|NN| common noun | Tisch, Herr, [das] Reisen|
+|NE| proper noun | Hans, Hamburg, HSV|
+|VV.*| full verb, all forms | [du] gehst, [wir] kommen [an] |
+|VAFIN| finite verb, aux | [du] bist, [wir] werden | 
+
+## Appendix: Part-of-speech Tagsets II - PENN Tagset (Excerpt) {.smaller}
+
+* for English we use the PENN Tagset
+
+|Notation|Description|Example|
+|:------:|------------|--------|
+|DT| determiner | a, the
+|JJ.*| adjective, all forms | global [partnership], least [fortunate], sustainable [development]
+|NN.*| common noun, all forms | document, vote
+|PR.*| pronoun, personal or posessive | I [would like], its [48th meeting], their [financial contributions]
+|RB| adverb | [I] therefore [take it], properly [discussed]
+|VB.*| verb, any form | be, consider, remind, [has been] postponed

@@ -1,0 +1,47 @@
+---
+title: "UCSSR"
+subtitle: 'Using Corpora in Social Science Research'
+author: "Andreas Blaette"
+english_version: "Christoph Leonhardt (2020-03-17)"
+date: "15 September 2018"
+output:
+  ioslides_presentation:
+    widescreen: true
+    smaller: true
+    css: css/stylesheet.css
+    logo: img/polmine.png
+editor_options: 
+  chunk_output_type: console
+vignette: >
+  %\VignetteIndexEntry{Themenübersicht}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+
+## Overview
+
+[01. First Steps - Installations](getting_started_eng.html)
+
+[02. Corpora](corpora_eng.html)
+
+[03. Subcorpora](subcorpora_eng.html)
+
+[04. The Art of Counting](counting_eng.html)
+
+[05. Keywords-in-Context (KWIC)](kwic_eng.html)
+
+[06. Regular Expressions and CQP](cqp_eng.html)
+
+[07. Sentiment Analysis based on Dictionaries](sentiments_eng.html)
+
+[08. Cooccurrences](cooccurrences_eng.html)
+
+[09. Features](features_eng.html)
+
+[10. Term-Dokument-Matrices](tdm_eng.html)
+
+
+## Anhänge
+
+[A01. Export of Result Tables to Excel](excel_eng.html)

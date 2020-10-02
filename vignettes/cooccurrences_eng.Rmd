@@ -1,0 +1,395 @@
+---
+title: "The Neighbourhood Counts"
+subtitle: 'The Analysis of Cooccurrences using polmineR'
+author: "Andreas Blaette"
+english_version: "Christoph Leonhardt (2020-03-17)"
+date: "12 November 2018"
+output:
+  ioslides_presentation:
+    css: css/stylesheet.css
+    logo: img/polmine.png
+    widescreen: yes
+editor_options:
+  chunk_output_type: console
+vignette: >
+  %\VignetteIndexEntry{The Neighbourhood Counts}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+## "You shall know a word by the company it keeps" {.smaller}
+
+* the often-cited sentence above by Firth (1957: 11) conveys one important idea: The semantic meaning of a word is characterized by the words in its vicinity.
+
+* this idea is the basis of quantative approaches of `collocation analysis` or `cooccurrence analysis`. Based on the frequency and statistical significant occurrence of words in the context of a query term, collocations or cooccurrences can be identified.
+
+* the `polmineR` package uses the term of cooccurrences and provides a `cooccurrences()` method because in contrast to the term collocations the more technical term cooccurrences describes the statistical qualities of the approach more fittingly. The term of collocation suggests a relationship between a query term and its context which is a more substantial characterization than can be provided by mere statistical means.
+
+* statistically derived cooccurrences indicate linguistic patterns which should be further analysed. The transition between scientific states which are open to intersubjective validation and interpretative patterns require an qualitative analysis of concordances (also called keyword-in-context-analysis, see `kwic()` method) subsequent to the quantative analysis via cooccurrences.
+
+
+## Initialization {.smaller}
+
+* Please note that part of the functionality for the following workflow is only available with polmineR version `r as.package_version("0.7.9.9006")`. If required, install the current development version of polmineR.
+
+* in the examples, the UNGA corpus is used. The corpus has to be activated after loading polmineR.
+
+
+```{r initialize, eval = TRUE, message = FALSE}
+if (packageVersion("polmineR") < package_version("0.7.10.9006"))
+  devtools::install_github("PolMine/polmineR", ref = "dev")
+library(polmineR)
+use("UNGA")
+```
+
+* additional packages which we want to use later should be installed as well if necessary.
+
+```{r, message = FALSE}
+for (pkg in c("magrittr", "data.table", "networkD3", "igraph", "DT", "RColorBrewer", "tm")){
+  if (!pkg %in% rownames(installed.packages())) install.packages(pkg)
+  library(package = pkg, character.only = TRUE)
+}
+```
+
+
+## The Analysis of Cooccurrences - Basics {.smaller}
+
+* the basis of the statistical calculation of cooccurrences is a count of frequencies of words in the context window of a query term (often, the hit of the query is called "node"). Of central interest is whether the occurrence of certain words within the context window is significant, i.e. if the occurrence is not to be expected by chance alone. Here, the occurrence of these words within the context window is compared to the occurrence of these words in the corpus or partition in general.
+
+* in particular, a log-likehood test is used to determine cooccurrences. One alternative is the Chi-squared test which however is less robust when confronted with very small number of hits. Threshold values are defined for deployed statistical tests which indicate significance.
+
+* for the count, the size of the context window matters. Lexicographical analyses resort to rather small context windows of three to five words to each side of the node. In social science applications, this window can often be larger (ten words or more left and right). 
+
+* the number of statistical significant cooccurrences is dependent on the size of the corpus or subcorpus. This might limit the possibility to analyse all significant cooccurrences which makes justified filtering and reduction very imporant. 
+
+## Calculation of cooccurrences with polmineR {.smaller}
+
+* the `cooccurrences()` method which provides the calculation of cooccurrences can be useds on entire corpora or on `partition` objects.
+
+* the following function calculates the cooccurrences of the query "Islam". In addition, a window size of ten words to each side is defined. 
+
+
+```{r}
+cooccurrences("UNGA", query = 'Islam', left = 10, right = 10)
+```
+
+* the `cooccurrences()` method generates an object of class `cooccurrences()`. The documentation of this class can be viewed with `?"cooccurrences-class"`. There, methods are explained which use this class as input.
+
+* if an object of class `cooccurrences` is called in an RStudio session, the statistics table of the object will be shown (implicitly, a `show()` method for the cooccurrences class is called). These tables are incorporated in these slides as well.
+
+```{r, eval = FALSE}
+cooccurrences("UNGA", query = "Islam")
+```
+
+
+## Cooccurrences of "Islam" {.smaller}
+
+```{r, echo = FALSE, eval = TRUE, render = knit_print}
+cooccurrences("UNGA", query = "Islam")
+```
+
+
+## Filtering Results {.smaller}
+
+* the common `subset()` method can be applied to a `cooccurrences` object to filter results. In the following examples, a cooccurrence analysis for the context of "Islam" is filtered:
+  * by statistical significance value (`ll` value of at least 11.83)
+  * by minimum frequency of the occurrences in the context window (`count_coi` of at least 5)
+  * stop words are excluded using a stop word list
+
+```{r, eval = FALSE}
+cooccurrences("UNGA", query = "Islam") %>% 
+  subset(ll >= 11.83) %>%
+  subset(count_coi >= 5) %>% 
+  subset(!tolower(word) %in% tm::stopwords("en")) %>%
+  subset(!word %in% c("''", ",", "``"))
+```
+
+* note: when filtering the word column the preceding exclamation mark indicates the inversion of the logical tests performed here. This means, those words remain which are *not* part of the stopword list.
+
+## Filtered word context of "Islam" {.smaller}
+
+
+```{r, echo = FALSE, eval = TRUE, render = knit_print, message = FALSE}
+cooccurrences("UNGA", query = "Islam") %>% 
+  subset(ll >= 11.83) %>%
+  subset(count_coi >= 5) %>% 
+  subset(!tolower(word) %in% tm::stopwords("en")) %>%
+  subset(!word %in% c("''", ",", "``"))
+```
+
+
+## Pitfalls of Filtering {.smaller}
+
+* seemingly, the filtered list is cleaned from noise. However, the chosen example illustrates that even rather unsuspicious filtering steps can lead to a relevant loss of information.
+
+* the quotation marks which are still part of the unfiltered analysis may well be interpreted as noise. However, their statistical occurrence is not random: speakers often refer to other speakers by quoting them or try to distance themselves from their statements using a proverbial style. In protocols this might be transcriped using quotation marks.
+
+* The same is true for pronouns which might suggest a unified understanding of a certain concept ("the Islam") which would be made invisible when applying the usual stop word lists
+
+## Cooccurrence to Concordance Analysis {.smaller}
+
+```{r, echo = FALSE}
+options("polmineR.pagelength" = 3L)
+```
+
+* if this is the case can only be determined by qualitatively checking relevant parts of the text which suggest a meaningful use of - for example - pronouns. This can be realized in form of a concordance analysis.
+
+* the argument `positivelist` is useful in the `kwic()` method to limit the results to those instances in which certain words occur in the context window. In the following example, we highlight this term.
+
+```{r, render = knit_print, message = FALSE}
+kwic("UNGA", query = "Islam", positivelist = "The") %>% highlight(yellow = "The")
+```
+
+
+## Specification of the word context {.smaller}
+
+* if the arguments `left` and `right` aren't set explicitly, the method uses the global options which can be checked via `getOption("polmineR.left")` or `getOption("polmineR.right")` respectively. The following chunk shows how these settings can be made for every window for one session.
+
+```{r}
+options("polmineR.left" = 10L)
+options("polmineR.right" = 10L)
+```
+
+* the larger the size of the context window, the higher the probability that the context window exceeds the actual border of the text or segment we want to analyse. The argument `s_attribute` can be used to specify a structural attribute which the window cannot exceed.
+
+* this is especially useful if corpora of plenary protocols contain interjections as they often would be included in the calculation of cooccurrences otherwise. Since the United Nations General Assembly protocols do not annotate interjections, the corpus does not have interjections as well. However, the same challenge applies to neighboring speeches which might be included inadvertently.
+
+```{r, eval = FALSE}
+cooccurrences("UNGA", query = '"Islam"', s_attribute = "speaker")
+```
+
+
+## Using the CQP Syntax {.smaller}
+
+```{r, echo = FALSE}
+options("polmineR.pagelength" = 5L)
+```
+
+* often, the context of not only a single word but a more complex lexical expression should be analysed. Since the syntax of the *Corpus Query Processor* (CQP) is available for the `cooccurrences()` method as well, this can be realized easily. Although this is also checked internally, it is advised to set the argument `cqp` to TRUE explicitly when using the CQP syntax.
+
+```{r, render = knit_print}
+cooccurrences("UNGA", '"unjust" [] "sanctions"', cqp = TRUE)
+```
+
+
+## Cooccurrences based on Partitions {.smaller}
+
+* interesting research questions are often concerned with diachronic change or the synchronic variation of cooccurrences. To facilitate this the `cooccurrences()` method can be applied to partitions as well.
+
+* in the following example we want to know how the associations of the word "Islam" change between the time before and after 2001. We are omitting the year 2001 itself here and create two partitions which cover the same amount of time (eigth years each). 
+
+```{r, message = FALSE, eval = TRUE}
+before_2001 <- partition("UNGA", year = 1993:2000)
+after_2001 <- partition("UNGA", year = 2002:2009)
+```
+
+* we then calculate the cooccurrences for each time span (results are shown on the next slide)
+
+```{r, eval = FALSE}
+islam_before <- before_2001 %>%
+  cooccurrences(query = '"Islam(s|)"', cqp = TRUE, s_attribute = "speaker") %>%
+  subset(count_coi >= 3) %>% subset(ll >= 11.83)
+islam_after <- after_2001 %>%
+  cooccurrences(query = '"Islam(s|)"', cqp = TRUE, s_attribute = "speaker") %>%
+  subset(count_coi >= 3) %>% subset(ll >= 11.83)
+```
+
+
+## Cooccurrences of "Islam" (before 2001) {.smaller}
+
+```{r, echo = FALSE}
+options("polmineR.pagelength" = 10L)
+```
+
+```{r, eval = TRUE, message = FALSE, echo = FALSE, render = knit_print}
+before_2001 %>%
+  cooccurrences(query = '"Islam(s|)"', cqp = TRUE, s_attribute = "speaker") %>%
+  subset(count_coi >= 3) %>% subset(ll >= 11.83)
+```
+
+
+## Cooccurrences of "Islam" (after 2001) {.smaller}
+
+```{r, eval = TRUE, message = FALSE, echo = FALSE, render = knit_print}
+after_2001 %>%
+  cooccurrences(query = '"Islam(s|)"', cqp = TRUE, s_attribute = "speaker") %>%
+  subset(count_coi >= 3) %>% subset(ll >= 11.83)
+```
+
+
+## Filtering using Part-of-Speech annotation {.smaller}
+
+* the argument `p_attribute` determines the positional attribute which the calculation of the cooccurrences should be based on. Instead of using the default "word", other available positional attributes can be used such as lemmas (p-attribute = "lemma") or word stems. Linguistical variation is reduced which can facilitate the identification of statistical significant cooccurrences.
+
+* it is possible to specify two p-attributes based on which the token frequencies should be determined. For example the part-of-speech annotation can be included when counting and also when filtering results.
+
+* the time needed for computing might increase drastically. The necessity to calculate the frequency of *all* occurring combinations of p-attributes is crucial here.
+
+```{r, eval = FALSE}
+Q <- '[pos = "JJ.*"] []{0,5} "sanctions"'
+cooccurrences("UNGA", query = Q, p_attribute = c("word", "pos")) %>%
+  subset(count_coi >= 3) %>% 
+  subset(ll >= 11.83) %>%
+  subset(pos %in% c("NN", "JJ"))
+```
+
+
+## POS-filtered Cooccurrences {.smaller}
+
+```{r, eval = TRUE, message = FALSE, echo = FALSE, render = knit_print}
+Q <- '[pos = "JJ.*"] []{0,5} "sanctions"'
+sanction_cooc <- cooccurrences("UNGA", query = Q, p_attribute = c("word", "pos")) %>%
+  subset(count_coi >= 3) %>% 
+  subset(ll >= 11.83) %>%
+  subset(pos %in% c("NN", "JJ"))
+sanction_cooc
+```
+
+
+## Word Cloud Visualization of Cooccurrences {.smaller}
+
+* a common visualization of the vocabulary of the collection of text are word clouds. These are applicable for cooccurrences as well.
+
+* one advantage of using cooccurrences as the foundation of word clouds is their statistical quality. Instead of just using the frequency of words to determine the depicted vocabulary, word clouds can refer to the statistical significance of cooccurrence measures.
+
+* the following code benefits from the fast that the `cooccurrences` object contains a `data.table` with columns which can be easily accessed by their name
+
+* Note: the colour palette is taken from the `RColorBrewer` package. The selection of colours is random here, but could be adapted to fit every theoretically derived need.
+
+
+```{r, echo = TRUE, warning = FALSE, eval = FALSE}
+x <- wordcloud::wordcloud(
+  words = sanction_cooc[["word"]],
+  freq = sanction_cooc[["count_coi"]],
+  colors = rep(RColorBrewer::brewer.pal(8, "Dark2"), times = 7),
+  random.color = TRUE
+  )
+```
+
+
+## Word Cloud Visualization of Cooccurrences {.flexbox .vcenter}
+
+
+```{r, echo = FALSE, warning = FALSE, eval = TRUE}
+x <- wordcloud::wordcloud(
+  words = sanction_cooc[["word"]],
+  freq = sanction_cooc[["count_coi"]],
+  colors = rep(RColorBrewer::brewer.pal(8, "Dark2"), times = 7),
+  random.color = TRUE
+  )
+```
+
+
+## Dot Plot Visualization of Cooccurrences {.smaller}
+
+* although common and nice to look at, in academic contexts word clouds are often critizised: The layout of words often is random and not replicable. Where and in which colour a word appears in the cloud is not meaningful most of the time.
+
+* word clouds can be an effective means in presentations to give a first impression of a semantic field or a dictionary
+
+* the systematic meaningfulness however is limited and so is their usefulness in publications which should be restricted to a minimum
+
+* one possible alternative are 'dot plots' which focus on statistical measures
+
+* in the polmineR package, a `dotplot()` method for `cooccurrences()` objects is defined. An application of this can be seen on the next slide. 
+
+```{r, eval = FALSE}
+dotplot(mmh, cex = 0.8)
+```
+
+
+## Dot Plot Visualization of Cooccurrences {.flexbox .vcenter}
+
+```{r, echo = FALSE}
+dotplot(sanction_cooc, cex = 0.8, main = "Cooccurrences of 'Sanctions' \n preceded by an adjective (in prev. 5 words)")
+```
+
+## Calculating all Cooccurrences {.smaller}
+
+* the approach so far was to determine cooccurrences of one single word or query. As part of a data-driven and explorative approach, the analysis of all cooccurrences of a corpus yields heuristic potential.
+
+* as an example we examine the language use of the Secretary-General in 2001, the year of the terrorist attacks on the World Trade Center. The workflow to create a (filtered) object of all cooccurrences should be already familiar. The substantial difference is that to save memory, numerical Token-IDs are decoded (instead of working on token level itself) and the calculation of statistical measurements is done explicitly and seperately. Calculating all cooccurrences in a corpus can be a memory-consuming task!
+
+
+```{r, message = FALSE}
+secgen2008 <- partition("UNGA", year = 2001, speaker = "The Secretary-General")
+terms_to_drop <- terms(secgen2008, p_attribute = "word") %>% noise() %>% unlist()
+coocs <- Cooccurrences(secgen2008, p_attribute = "word", left = 5L, right = 5L, stoplist = terms_to_drop) %>% 
+  decode() %>% # 
+  ll() %>%
+  subset(ll >= 11.83) %>%
+  subset(ab_count >= 5)
+```
+
+
+## Visualization of Cooccurrence Graphs {.smaller}
+
+* the visualization of a complete cooccurrence analysis as a network is a true eyecatcher. The fastest way to create such a graph is the transformation of a `Cooccurrences` object (note the capital "C") to an `igraph` object which can be plotted.
+
+* this basic formula does not necessarily have the most striking optical appeal. However, this line of code illustrates how a rather straightforward workflow leads from polmineR to the world of network analysis and 'graph visualization'.
+
+```{r, eval = FALSE, message = FALSE, fig.width = 7, fig.height = 7}
+as_igraph(coocs) %>% plot()
+```
+
+
+## Visualization of Cooccurrence Graphs (cont.) {.smaller}
+
+
+```{r, echo = FALSE, message = FALSE, fig.width = 7, fig.height = 7}
+as_igraph(coocs) %>% plot()
+```
+
+
+## Visualization with 'networkD3' {.smaller}
+
+* there is a multitude of possibilities to visualize cooccurrence graph objects. In a final example we create a graph which is suited for interactive visualization with the `networkD3` package. As the point of depature we again create an
+`igraph` object. The graph is shown on the next slide.
+
+```{r, echo = TRUE, eval = FALSE}
+G <- as_igraph(coocs)
+
+links <- as.data.frame(cbind(as_edgelist(G, names = FALSE), rep(1, length(E(G)))))
+links[,1] <- links[,1] - 1L # "zero-based" Index für Kanten 
+links[,2] <- links[,2] - 1L # dito
+colnames(links) <- c("source", "target", "value")
+
+nodes <- data.frame(name = V(G)$name, group = rep(1, length(V(G)$name)), size = 3)
+
+forceNetwork(
+  Links = links, Nodes = nodes, Source = "source",
+  Target = "target", Value = "value", NodeID = "name",
+  Group = "group",
+  opacity = 0.75, fontSize = 20, zoom = TRUE
+)
+```
+
+
+## An interactive Cooccurrence Graph {.smaller}
+
+```{r, echo = FALSE, eval = TRUE, message = FALSE}
+library(networkD3)
+G <- as_igraph(coocs)
+
+links <- as.data.frame(cbind(as_edgelist(G, names = FALSE), rep(1, length(E(G)))))
+links[,1] <- links[,1] - 1L
+links[,2] <- links[,2] - 1L 
+colnames(links) <- c("source", "target", "value")
+
+nodes <- data.frame(name = V(G)$name, group = rep(1, length(V(G)$name)), size = 3)
+
+forceNetwork(
+  Links = links, Nodes = nodes, Source = "source",
+  Target = "target", Value = "value", NodeID = "name",
+  Group = "group",
+  opacity = 0.75, fontSize = 20, zoom = TRUE
+)
+```
+
+
+## Visualization, Hermeneutics and 'close reading' {.smaller}
+
+* when working with all cooccurrences of an entire (sub)corpus the question of how to apply filtering steps is at least as important as it is when working with 'ordinary' cooccurrences. The documentation of the `Cooccurrences()` method offers some hints about the functionality of the polmineR package to use a `feature` selection to filter cooccurrences systematically. 
+
+* Beware of the temptation of visualization. Cooccurrence graphs can be tricky as they can suggest discoursive patterns which are not really there and may show only an effect of confirmation bias. As with other quantitative measures, cooccurrence graphs are only signposts for potentially interesting patterns which should be validated via 'close reading' (Moretti).
+
+* this is also true for the 'ordinary' cooccurence analyses which were the focal point of these slides: Statistics of text provides hits for linguistic patterns which are standing out from a statistical point of view. This quantitative result should not be confused with a substantial result which can only be achieved by careful interpretative research conducted on the initial text, for example by concordance/KWIC analyes and the recourse to the full text.

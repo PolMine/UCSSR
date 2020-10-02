@@ -1,0 +1,110 @@
+---
+title: "Using Corpora in Social Science Research (UCSSR)"
+subtitle: 'Exporting Data to Excel'
+author: "Andreas Blaette"
+note: "Translation by Florian Gilberg"
+date: "23 July 2018"
+output:
+  ioslides_presentation:
+    css: css/stylesheet.css
+    logo: img/polmine.png
+    widescreen: yes
+editor_options:
+  chunk_output_type: console
+vignette: >
+  %\VignetteIndexEntry{Exporting Data to Excel}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+
+## Table export {.smaller}
+
+R does not necessarily set technical limits when working with text data. But some steps of the analysis can be done faster and/or more fluently with another program like Excel. Excel may not offer the same level of reproducibility as R for the preparation of tables for research reports and publications, but it can offer more convenience. Accordingly, the polmineR package provides functions for exporting to Excel. 
+
+These methods are
+
+  * `store()` - for saving tabular results in Excel format and
+  * `mail()`- for sending these tables conveniently by e-mail.
+ 
+While the `mail()` method was part of the polmineR package early on, `store()` was added later. In the process, `mail()` was fundamentally revised. You need at least version `r as.package_version("0.7.9.9004")` for the following steps to work. Check which version of the package you have installed by calling `packageVersion("polmineR")`. If you have an older version installed, please install the current version of polmineR, which is available via GitHub.
+
+```{r install_recent_polmineR_version, eval = FALSE}
+devtools::install_github("PolMine/polmineR", ref = "dev")
+```
+
+
+## Save tabular results locally I {.smaller}
+
+The polmineR package assumes two standard scenarios: Either a text-statistical evaluation like a frequency count, a cooccurrency analysis or the result of a term extraction is to be saved as an Excel document. Or you want to continue working with the output of a keyword-in-context analysis in Excel. In the following examples, we specify a file name on the desktop (feel free to change the file location).
+
+In the examples we use the UNGA corpus. After loading the polmineR package, we activate the corpus.
+
+```{r, eval = FALSE}
+library(polmineR)
+use("UNGA")
+```
+
+As a first example we save the result of a cooccurrency analysis as an Excel file. 
+
+```{r, eval = FALSE}
+result <- cooccurrences("UNGA", query = "Islam")
+store(result, filename = "~/Desktop/cooccurrences.xlsx")
+```
+
+In the second example we save a dispersion analysis.
+
+```{r, eval = FALSE}
+result <- dispersion("UNGA", query = "Islam", s_attribute = "year")
+store(result, filename = "~/Desktop/dispersion.xlsx")
+```
+
+
+## Save tabular results locally II {.smaller}
+
+In a third example we now work with the results of a term extraction.
+
+```{r, eval = FALSE}
+unga_2007 <- partition("UNGA", year = "2007", p_attribute = "word")
+merkel_2007 <- partition("UNGA", year = "2007", speaker = "Merkel", p_attribute = "word")
+merkel_terms <- features(unga_2007, merkel_2007, included = TRUE)
+store(merkel_terms, filename = "~/Desktop/merkel_terms_2007.xlsx")
+```
+
+An important note: The tables of text statistical evaluations often have many lines. To avoid unnecessary memory consumption, the number of saved or exported lines is limited to 250. You can explicitly specify the lines to be saved using the `rows` argument. 
+
+```{r, eval = FALSE}
+store(merkel_terms, filename = "~/Desktop/merkel_terms_2007.xlsx", rows = 1:50)
+```
+
+Saving keyword-in-context tables works similar to the previously introduced procedure.
+
+```{r, eval = FALSE}
+K <- kwic("UNGA", "refugees")
+store(K, filename = "~/Desktop/kwic.xlsx")
+```
+
+All hits are exported by default in the KWIC results. If required, you can select the number of exported rows as in the previous example.
+
+
+## Export of KWIC results via e-mail {.smaller}
+
+You can also have the Excel files prepared by polmineR for export sent to you by e-mail. It is important that you configure the server for sending mails.
+
+Here you can see an example configuration for members of the University of Duisburg-Essen. Please note that sending e-mails in this case only works if you are dialed into the university network via VPN.
+
+```{r}
+options("polmineR.mail" = "max.mustermann@uni-due.de") # Fill in a real email address here!
+options("polmineR.smtp_server" = "mail.uni-due.de")
+options("polmineR.smtp_port" = "587")
+```
+
+If you have configured the mail, you can use the `mail()` method exactly like the `store()` method.
+
+```{r, eval = FALSE}
+mail(merkel_terms)
+mail(K)
+mail(K, rows = 1:50)
+```
+
+With a little skill it is possible to save the mail configuration permanently, so that it is automatically available when starting R. For this purpose, the above-mentioned adaptations of the R and polmineR options must be made in the Renviron or .Renviron.site file - compare the manual which can be accessed via `?Startup`. Presumably this step is only for advanced R users.

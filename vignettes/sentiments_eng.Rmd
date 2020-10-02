@@ -1,0 +1,246 @@
+---
+title: "Dictionaries and Sentiment Analysis"
+subtitle: 'UNGA - polmineR - Syuzhet'
+author: "Andreas Blaette"
+english_version: "Christoph Leonhardt  (2020-03-17)"
+date: "25 July 2018 / 30 September 2019"
+output:
+  ioslides_presentation:
+    css: css/stylesheet.css
+    logo: img/polmine.png
+    widescreen: true
+editor_options: 
+  chunk_output_type: console
+vignette: >
+  %\VignetteIndexEntry{Dictionaries and Sentiment Analysis}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r klippy, echo=FALSE, include=TRUE}
+klippy::klippy()
+```
+
+## Fundamentals of sentiment analysis {.smaller}
+
+Sentiment analyses are very popular. Text Mining blogs are showing the many possibilities to capture the variation of text evaluations with a numerical indicator and how to analyse and display changes over time.
+
+Which movies are rated particularly good or particularly bad? This can be examined by using film reviews. What is the response of customers to a new product launched on the market? Comments in social media can be examined for this purpose. There is certainly a range of useful application scenarios for sentiment analyses, especially beyond science.
+
+What are the benefits of sentiment analyses in scientific work? The central questions here are what one actually measures when one measures "sentiments". Is the validity of the measurement given, does one measure what one believes to measure? From the answers it can be derived when and how sentiment analyses can be used as a well-founded research instrument. The essential difference is as follows:
+
+  * _Dictionary-based_ methods measure using lists with positive / negative vocabulary.
+  * _Machine Learning_ based methods are developed from training data with known evaluations and make derivations for texts to be reassessed using an algorithm. +
+  
+## Fundamentals of sentiment analysis (cont.) {.smaller}
+  
+In this manual we work with a, much simpler, dictionary-based method. For the English language, we use the [Syuzhet dictionary](https://cran.r-project.org/web/packages/syuzhet/vignettes/syuzhet-vignette.html) by Matthew Jockers.
+
+NB: These slides were used in a [workshop](https://github.com/PolMine/ValidationWorkflows/blob/master/Rmd/sentiment_analysis.Rmd) for the Social Science and Humanities Open Cloud (SSHOC) in September 2019. 
+
+
+## Required installations / packages {.smaller}
+
+The following explanations use the `polmineR` package and the `GermaParl` corpus. The installation is explained in a separate set of slides. In addition, we use the following packages:
+
+  * `zoo`: A package for working with time series data;
+  * `magrittr`: Tools for chaining R commands in a "pipe" one after the other (see below);
+  * `devtools`: developer tools, we use a command to download a single function;
+
+The following code checks whether these packages are installed and installs them if necessary.
+
+```{r install_required_packages, eval = TRUE}
+required_packages <- c("zoo", "magrittr", "devtools")
+for (pkg in required_packages){
+  if (pkg %in% rownames(installed.packages()) == FALSE) install.packages(pkg)
+}
+```
+
+Please note that the functionality for the following workflow is only available with polmineR version `r as.package_version("0.7.9.9005")`. If required, install the current development version of polmineR.
+
+```{r update_polmineR, eval = TRUE}
+if (packageVersion("polmineR") < as.package_version("0.7.9.9005"))
+  devtools::install_github("PolMine/polmineR", ref = "dev")
+```
+
+
+## Let's go {.smaller}
+
+The required packages are now loaded.
+
+```{r load_libraries, eval = TRUE}
+library(zoo, quietly = TRUE, warn.conflicts = FALSE)
+library(devtools)
+library(magrittr)
+library(data.table)
+```
+
+We also load polmineR and activate the UNGA corpus, which is available through the UNGA package.
+
+```{r load_polmineR, eval = TRUE, message = FALSE}
+library(polmineR)
+use("UNGA")
+```
+
+
+## Which dictionary to use? {.smaller}
+
+* while in German, we use the classic and more or less unrivalled "SentiWS" dictionary, in English there are several dictionaries which could be used for sentiment analysis. 
+
+* the dictionaries should use a numeric weight, not only a binary estimation and they should be provided with some kind of Open Source License. 
+
+* preferably, the dictionary would have some linguistic information such as Part-of-Speech tags which can improve the analysis. Ultimately, the more words the dictionary contains, the more informative the analysis should become. 
+
+* After some initial testing, three dictionaries, **AFINN**, **SentiWordNet** and **Syuzhet** were considered. In general, SentiWordNet does contain the most comprehensive features. However, the weights sometimes prove to be confusing which might be because of the inclusion of compound words in the labelling process. For example, the word "international" is labelled as negative, while compound words like "international affairs" can convey positive meaning as well. 
+
+* For its comprehensive length and resolution (i.e. the different levels the weight can have), we will work with the Syuzhet dictionary for now.
+
+
+## Syuzhet {.smaller}
+
+The **Syuzhet** dictionary was created in the Nebraska Literary Lab by Matthew Jockers et al. It provides about 11.000 terms with a scale of -1 to + 1. The package itself is licensed under GPL-3.
+
+```{r load_syuzhet, message = FALSE}
+syuzhet_df <- syuzhet::get_sentiment_dictionary()
+names(syuzhet_df) <- c("word", "weight")
+syuzhet_df <- as.data.table(syuzhet_df)
+tail(syuzhet_df, 5)
+```
+
+
+## Syuzhet: First look at the data {.smaller}
+
+The syuzhet_df object is a `data.table`. We use this instead of a classic `data.frame`, because it will later facilitate and accelerate the matching of the data (words in the corpus and words in the dictionary). To understand what we are working with, we take a quick look at the data.
+
+```{r inspect_syuzhet, eval = TRUE, message = FALSE}
+head(syuzhet_df, 5)
+```
+
+In the last column ("weight") you can see that words are assigned a weighting in the dictionary. This can be positive (for "positive" vocabulary) or negative (for "negative" vocabulary). We can check how many positive or negative words are in the table.
+
+```{r inspect_syuzhet_vocab, eval = TRUE, message = FALSE}
+vocab <- c(positive = nrow(syuzhet_df[weight > 0]), negative = nrow(syuzhet_df[weight < 0]))
+vocab
+```
+
+
+## Positive / negative vocabulary {.smaller}
+
+We now examine the word environment of an interesting term. Because it is relevant in the context of debates in the United Nations we ask how the positive/negative connotations of 'sanctions' have developed over time.
+
+A preliminary question is how large the left and right word contexts we want to examine should be. In linguistic studies, a context window of five words left and right is common. More words may be needed for the estimation of meaning in political contexts. We choose 10 words here.
+
+```{r set_polmineR_options, message = FALSE}
+options("polmineR.left" = 10L)
+options("polmineR.right" = 10L)
+```
+
+Via a "pipe" we now generate a `data.frame` ("df") with the counts of the Syuzhet vocabulary in the word environment of "sanctions". The pipe makes it possible to carry out the steps one after the other without saving intermediate results.
+
+```{r count_syuzhet_vocab_next_to_sanctions, message = FALSE}
+df <- context("UNGA", query = "sanctions", p_attribute = "word", verbose = FALSE) %>%
+  partition_bundle(node = FALSE) %>%
+  set_names(s_attributes(., s_attribute = "date")) %>%
+  weigh(with = syuzhet_df) %>%
+  summary()
+```
+
+
+## The tabular data of the sentiment analysis {.smaller}
+
+The df-data.frame lists the statistics of the word surroundings of each occurrence of "sanctions" in the corpus. To keep things simple, we do not initially work with the weightings, but only with the positive or negative words. We simplify the table accordingly and look at it.
+
+```{r table_sentiment, message = FALSE}
+df <- df[, c("name", "size", "positive_n", "negative_n")] 
+head(df, n = 10)
+```
+
+
+## Aggregation {.smaller}
+
+As the name of a word context we used the date of the occurrence of our search term above. This makes it possible to aggregate upwards on the basis of the date for the year.
+
+```{r sentinemt_prep_year_aggregation, message = FALSE}
+df[["year"]] <- as.Date(df[["name"]]) %>% format("%Y-01-01")
+df_year <- aggregate(df[,c("size", "positive_n", "negative_n")], list(df[["year"]]), sum)
+colnames(df_year)[1] <- "year"
+```
+
+However, it does not make sense to work with the absolute frequencies. Therefore, we insert columns that indicate the proportion of negative or positive vocabulary.
+
+```{r sentiment_share_calc, message = FALSE}
+df_year$negative_share <- df_year$negative_n / df_year$size
+df_year$positive_share <- df_year$positive_n / df_year$size
+```
+
+We convert this into a time series object in the actual sense.
+
+```{r sentiment_zoo, message = FALSE}
+Z <- zoo(
+  x = df_year[, c("positive_share", "negative_share")],
+  order.by = as.Date(df_year[,"year"])
+)
+```
+
+
+## Visualisation I {.smaller}
+
+```{r sentiment_plot_1, message = FALSE}
+plot(
+  Z, ylab = "polarity", xlab = "year", main = "Word context of 'sanctions': Share of positive/negative vocabulary",
+  cex = 0.8, cex.main = 0.8
+)
+```
+
+
+## Visualisation II {.smaller}
+
+```{r sentiment_plot_2, message = FALSE, echo = FALSE}
+library(ggplot2)
+df_year_2 <- df_year
+df_year_2$net_share <- df_year_2$positive_share - df_year_2$negative_share
+df_year_2$year <- substr(df_year_2$year, 1, 4)
+p <- ggplot(data = df_year_2, aes(x = year, y = net_share)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  xlab("year") +
+  ylab("") + 
+  labs(title = 'Context of the term "sanctions"', subtitle = "Debates in the United Nations General Assembly, Net-Sentiment") +
+  theme_minimal() +
+  theme(axis.text.x=element_text(angle = 90, vjust = 0.5))
+  
+p
+```
+
+
+## How good are the results? {.smaller}
+
+But what is actually behind the numerical values of the determined sentiment scores? To investigate this, we use the possibility of polmineR to reduce a KWIC output according to a positive-list (vector with required words), to colour-code words and to show further information via tool tips (here: word weights). So: Move your mouse over the highlighted words!
+
+
+```{r sentiment_prep_kwic, eval = TRUE, message = FALSE}
+words_positive <- syuzhet_df[weight > 0][["word"]]
+words_negative <- syuzhet_df[weight < 0][["word"]]
+```
+
+```{r sentiment_kwic_with_tooltips, eval = TRUE, message = FALSE}
+Y <- kwic("UNGA", query = "sanctions", positivelist = c(words_positive, words_negative)) %>%
+  highlight(lightgreen = words_positive, orange = words_negative) %>%
+  tooltips(setNames(syuzhet_df[["word"]], syuzhet_df[["weight"]])) %>%
+  as("htmlwidget")
+```
+
+The result stored in object Y (a 'htmlwidget') is shown on a separate slide.
+
+
+## Results {.smaller}
+
+```{r, eval = TRUE, echo = FALSE, message = FALSE, warning = FALSE}
+Y
+```
+
+
+## Discussion {.smaller}
+
+* How do you interpret the results of the time series analysis?
+* How valid are the results?
+* Is the transition to working with word weightings useful or necessary?

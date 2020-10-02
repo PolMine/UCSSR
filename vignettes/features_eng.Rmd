@@ -1,0 +1,371 @@
+---
+title: "Are all Words equal?"
+subtitle: 'Term Extraction with polmineR'
+author: "Andreas Blaette"
+english_version: "Christoph Leonhardt (2020-03-17)"
+date: "19 November 2018"
+output:
+  ioslides_presentation:
+    css: css/stylesheet.css
+    logo: img/polmine.png
+    widescreen: yes
+  slidy_presentation: default
+editor_options:
+  chunk_output_type: console
+vignette: >
+  %\VignetteIndexEntry{Are all Words equal?}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+## Detecting distinct vocabulary {.smaller}
+
+* all words are equal? Of course not. Some words are less equal than others in the sense that they hold more meaning than others and determine the semantic substance of a text. But how can we identify the part of the vocabulary which is actually relevant and interesting?
+
+* the mere frequency of words does not help us. Words with very little semantic meaning ("have", "make", "is", "the") are far more common than those words which actually tell us something about the substantial content of a text.
+
+* it is because of this that one of the first steps in most text mining applications is the removal of words which occur very often but have mostly syntactical use, commonly called "stopwords". There is a multitude of word cloud visualizations which illustrate the mere count of word frequencies after stopword removal.
+
+* the undifferentiated application of stopword lists following the notion of "one-size-fits-all" can lead to an unexpected loss of information. One example illustrates this: the pronoun "we" and the form of address "you" which are part of every stopword list (e.g. `tm::stopwords("en")`) can play a role in the interaction between different political actors in a plenary setting. In a scenario like this, it might not be wise to remove these terms.
+
+
+## Statistically significant vocabulary {.smaller}
+
+* in the realms of corpus linguistics, substantiated statistical methods were developed to determine the part of the vocabulary of a (sub)corpus which is statistically significant. The fundamental question here is: Which words do occur more often in a corpus of interest (coi) than would be expected by random chance, given a reference corpus (ref) it is compared to.
+
+* these considerations are important in different domains:
+  * statistical approaches are important in socio-linguistical research when determining *keywords*. Thus, keyword extraction is performed.
+  * in text mining applications this method is often called *term extraction*.
+  * in the context of machine learning the term *feature extraction* is used as well: the *features* of texts are those elements which allows to distinguish between them and other texts.
+
+* since *features* seems to be the most general designation of particularly salient characteristics, the polmineR package adopts this terminology for its method for keyword/term/feature extraction, i.e. `features()`.
+
+## Initialization {.smaller}
+
+* in the examples, the UNGA corpus is used. The corpus has to be activated after loading polmineR.
+
+
+```{r initialize, eval = TRUE, message = FALSE}
+library(polmineR)
+use("UNGA")
+```
+
+* additional packages which we want to use later should be installed as well if necessary.
+
+```{r, message = FALSE}
+for (pkg in c("magrittr", "data.table", "RColorBrewer", "tm", "wordcloud")){
+  if (!pkg %in% rownames(installed.packages())) install.packages(pkg)
+  library(package = pkg, character.only = TRUE)
+}
+```
+
+
+## The Logic of the statistical test {.smaller}
+
+* the foundation of the statistical method of the feature extraction (vgl. z.B. Manning / Schuetze 2003) is the comparison between the occurrence of a word (or a lexical unit) in a (sub) corpus (corpus of interest, *coi*) and its occurrence in a reference corpus (*ref*). This means that the measurement starts by counting the frequencies of the occurrence of the word in both the corpus of interest and the reference corpus.
+
+* most importantly the question is if certain terms in the corpus of interest occur more often than we would expect if the word distribution would occur by chance. This assumption of the statistical test of difference is also used for the calculation of cooccurrences. While *Log-Likelihood* tests are common there (because they are more robust when words are evaluated which otherwise occur very rarely), in feature extraction often the more basic *Chi-Squared* test can be used. 
+
+* the `features()` method does *not* filter results by default because users should remain aware about the filtering steps. In most cases, it will be necessary to remove parts of the vocabulary which occurs rarely from the analysis.
+
+* the number of statistically signifcant terms depends on the size of the corpus of interest. Filtering remains a relevant step as seen with the cooccurrence analysis.
+
+
+## A first Example {.smaller}
+
+* in a first example, we want to extract significant topics of the United Nations General Debate of 2017 compared to its counterpart of the year 2009.
+
+* as a corpus of interest (coi) we create a `partition` for 2017. The debate lasted six days between 19 September and 25 September.
+
+```{r, message = FALSE}
+coi <- partition("UNGA", date = "2017-09-(19|20|21|22|23|25)", regex = TRUE)
+```
+
+* as a reference corpus we create a partition of the general debate of 2009. This debate lasted six days between 23 September and 29 September 2009.
+
+```{r, message = FALSE}
+ref <- partition("UNGA", date = "2009-09-2.", regex = TRUE)
+```
+
+* now we have to determine word frequencies. This is done by the `enrich()` method.
+
+```{r, message = FALSE}
+coi <- enrich(coi, p_attribute = "word")
+ref <- enrich(ref, p_attribute = "word")
+```
+
+
+## Many Ways of Counting {.smaller}
+
+* the previous sequence of creating a partition using `partition()` and enriching it using the `enrich()` method can be replaced by a more compact "pipe"
+
+
+```{r, message = FALSE}
+coi <- partition("UNGA", date = "2017-09-(19|20|21|22|23|25)", regex = TRUE) %>% enrich(p_attribute = "word")
+```
+
+* however, an even more streamlined possibility is the addition of the argument `p_attribute` to the initial call of `partition()`. 
+
+```{r, message = FALSE}
+coi <- partition("UNGA", date = "2017-09-(19|20|21|22|23|25)", regex = TRUE, p_attribute = "word")
+ref <- partition("UNGA", date = "2009-09-2.", regex = TRUE, p_attribute = "word")
+```
+
+* essential for feature extraction is the comparison of word counts. Hence, it is important that the `partition` objects are `count` objects as well. This can be checked as follows: 
+
+```{r}
+is(coi)
+```
+
+
+## Finally, Features {.smaller}
+
+* the comparison is performed by the promised `features()` method.
+
+```{r, render = knit_print}
+f <- polmineR::features(coi, ref)
+```
+
+* on the `features` object, generic methods such as `as.data.frame()`, `dim()`, `nrow()`, `ncol()`, `colnames()` etc. can be applied. Using the `nrow()` method, we find out how many rows the resulting table comprises.
+
+```{r, message = FALSE, eval = FALSE}
+nrow(f)
+```
+
+* while about `r nrow(f)` rows probably aren't overwhelmingly many, it can still make sense to filter the table according to two criteria: we exclude those terms which occur less than five times in the corpus of interest and we filter according to a Chi-squared value of 10.83.
+
+```{r, message = FALSE}
+f <- subset(f, count_coi >= 5) %>% subset(chisquare >= 10.83)
+```
+
+
+## The significant vocabulary 2017 {.smaller}
+
+
+```{r, render = knit_print, echo = FALSE}
+f
+```
+
+
+## Filtering and Reduction {.smaller}
+
+```{r, echo = FALSE}
+options("polmineR.pagelength" = 5L)
+```
+
+* notorious noise can be seen in the data here as well. Stopwords in particulary might unnecessarily disturb further analyses. At the same time, other artefacts such as explicitly stated years might be meaningful. We use a commonly used stopword list (from the `tm` package) and additionally remove denominations of years as well.
+
+```{r, message = FALSE, render = knit_print}
+terms_to_drop <- c(tm::stopwords("en"), "17", "70", "2014", "2015", "\\'", "\\'s")
+subset(f, !word %in% terms_to_drop)
+```
+
+
+## Filtering using Part-of-Speech annotation {.smaller}
+
+* determining *features* is based on a comparison of word frequencies. If a Part-of-Speech annotation is available, we can use it as a complimentary attribute in the counts we perform. After creating the `partition` we add the `count()` method to perform a count of two positional attributes ("word" and "pos"). 
+
+```{r, message = FALSE}
+
+coi <- partition("UNGA", date = "2017-09-(19|20|21|22|23|25)", regex = TRUE) %>% 
+  count(p_attribute = c("word", "pos"))
+
+ref <- partition("UNGA", date = "2009-09-2.", regex = TRUE) %>% count(p_attribute = c("word", "pos"))
+```
+
+* the calculation of *features* does not depart from known patterns yet. We remove terms which occur rarely and exclude those in which the Chi-Squared value is less than 10.83 (which describes the significance level)
+
+```{r, message = FALSE}
+f <- polmineR::features(coi, ref) %>% subset(count_coi >= 5) %>% subset(chisquare >= 10.83)
+```
+
+* now, we can filter the results by POS annotation (here: nouns, "NN")
+
+```{r, message = FALSE}
+f <- subset(f, pos == "NN")
+```
+
+
+## Table of Results 2017 - using POS Filtering {.smaller}
+
+```{r, render = knit_print, message = FALSE, echo = FALSE}
+options("polmineR.pagelength" = 10L)
+f
+```
+
+
+## Advanced Scenarios {.smaller}
+
+* additional caution is in order when the corpus of interest is part of the reference corpus. In this scenario it is necessary to explicitly set the argument `included` to `TRUE`. Then the counts of words in the corpus of interest will be substracted from the reference corpus counts. 
+
+* as an example we use the speech of Angela Merkel in the United Nations General Assembly and compare them to all other speeches in the assembly during her tenure as Chancelor.
+
+```{r, message = FALSE}
+merkel <- partition("UNGA", speaker = "Merkel") %>%
+  count(p_attribute = c("word", "pos"))
+unga <- partition("UNGA", year = 2005:2017) %>%
+  count(p_attribute = c("word", "pos"))
+```
+
+* when calling the `features()` method we set the argument `included` to `TRUE`.
+
+```{r, features = FALSE, message = FALSE}
+am_features <- polmineR::features(merkel, unga, included = TRUE)
+```
+
+
+## Merkel in the UNGA {.smaller}
+
+* we filter the table of results using the steps shown above. Filtering based on the Part-of-Speech-Annotation is less restrictive than before, including both nouns ("NN"), adjectives ("JJ") and verbs (in base form "VB" or singular present "VBP").
+
+```{r, message = FALSE}
+am_features_min <- am_features %>%
+  subset(count_coi >= 5) %>%
+  subset(chisquare >= 10.83) %>%
+  subset(pos %in% c("NN", "JJ", "VB", "VBP"))
+```
+
+* while word clouds are limited in their scientific usefulness, the extracted vocabulary can easily be visualized as such. The word cloud is shown on the next slide. Afterwards, the table of results is shown.
+
+```{r, echo = TRUE, warning = FALSE, eval = FALSE}
+wordcloud::wordcloud(
+  words = am_features_min[["word"]][1:30],
+  freq = am_features_min[["count_coi"]][1:30],
+  colors = rep(RColorBrewer::brewer.pal(8, "Dark2"), times = 7),
+  random.color = TRUE
+  )
+```
+
+
+## Merkel in the UNGA - a word cloud {.flexbox .vcenter}
+
+```{r, echo = FALSE, warning = FALSE, eval = TRUE}
+wordcloud::wordcloud(
+  words = am_features_min[["word"]][1:30],
+  freq = am_features_min[["count_coi"]][1:30],
+  colors = rep(RColorBrewer::brewer.pal(8, "Dark2"), times = 7),
+  random.color = TRUE
+  )
+```
+
+
+## Merkel in the UNGA - Table of results {.smaller}
+
+```{r, echo = FALSE, message = FALSE, render = knit_print}
+am_features_min
+```
+
+
+## Multiword Expressions {.smaller}
+
+```{r, echo = FALSE}
+options("polmineR.pagelength" = 5L)
+```
+
+* the extraction of features is based on a comparsion of frequencies. But not only the frequencies of individual words can be compared. Multiword expressions can too! 
+
+* the result of counting ngrams with the `ngrams()` method is a `count` object for which we can calculate features.
+
+```{r, message = FALSE}
+merkel_ngrams <- partition("UNGA", speaker = "Merkel") %>%
+  polmineR::ngrams(n = 2, p_attribute = "word")
+```
+
+```{r, message = FALSE}
+unga_ngrams <- partition("UNGA", year = 2005:2017) %>%
+  polmineR::ngrams(n = 2, p_attribute = "word")
+```
+
+```{r, message = FALSE, eval = FALSE}
+polmineR::features(merkel_ngrams, unga_ngrams, included = TRUE) %>%
+  subset(count_coi >= 5) %>% subset(chisquare >= 10.83)
+```
+
+
+## Statistically significant multiword expressions {.smaller}
+
+```{r, echo = FALSE}
+options("polmineR.pagelength" = 10L)
+```
+
+```{r, message = FALSE, eval = TRUE, echo = FALSE, render = knit_print}
+polmineR::features(merkel_ngrams, unga_ngrams, included = TRUE) %>%
+  subset(count_coi >= 5) %>% subset(chisquare >= 10.83)
+```
+
+
+## Formula and Patterns {.smaller}
+
+* language adheres to standartized patterns: Adjective-Noun-Sequences often occur. We can identify these statistically significant patterns by including the part-of-speech annotation in the ngram count. 
+
+```{r, message = FALSE}
+merkel_ngrams <- partition("UNGA", speaker = "Merkel") %>%
+  polmineR::ngrams(n = 2, p_attribute = c("word", "pos"))
+
+unga_ngrams <- partition("UNGA", year = 2005:2017) %>%
+  polmineR::ngrams(n = 2, p_attribute = c("word", "pos"))
+```
+
+* we perform the feature extraction and create a `data.table` object of the results which we reformat slightly.
+
+```{r, message = FALSE}
+dt <- polmineR::features(merkel_ngrams, unga_ngrams, included = TRUE) %>% data.table::as.data.table()
+dt <- subset(dt, dt[["pos_1"]] == "JJ") %>% subset(.[["pos_2"]] == "NN") 
+dt[,"pos_1" := NULL][,"pos_2" := NULL][,"exp_coi" := round(exp_coi, 2)][, "chisquare" := round(chisquare, 2)]
+```
+
+* the result is shown on the next slide.
+
+## Adjektiv-Nomen-Konstruktionen {.smaller}
+
+```{r, eval = knit_print, eval = TRUE, echo = FALSE}
+DT::datatable(dt)
+```
+
+
+## Noun-Adjective-Noun Sequences {.smaller}
+
+* a last example should illstrate that these analyses can applied to a vast variety of linguistic sequences. We could use multiword expressions with three terms to identify relevant noun-adjective-noun sequences. At first, we just increase the number of analyzed words.
+
+
+```{r, eval = TRUE, message = FALSE}
+post2015_ngrams <- partition("UNGA", year = 2015:2017) %>%
+  polmineR::ngrams(n = 3, p_attribute = c("word", "pos"))
+
+pre2015_ngrams <- partition("UNGA", year = 1993:2014) %>%
+  polmineR::ngrams(n = 3, p_attribute = c("word", "pos"))
+
+
+f <- polmineR::features(post2015_ngrams, pre2015_ngrams, included = FALSE) %>%
+  subset(count_coi >= 5) %>% subset(chisquare >= 10.83)
+```
+
+* we convert the result in a `data.table` object and start filtering.
+* NB: the results on the next slide also illustrate that the automatic part-of-speech annotation isn't flawless.
+
+```{r, echo = TRUE}
+dt <-  data.table::as.data.table(f)
+dt <- subset(dt, dt[["pos_1"]] == "NN") %>% subset(.[["pos_2"]] == "JJ") %>% subset(.[["pos_3"]] == "NN") 
+```
+
+
+## Noun-Adjective-Noun Sequences {.smaller}
+
+```{r, echo = FALSE}
+dt[, "pos_1" := NULL][, "pos_2" := NULL][, "pos_3" := NULL]
+dt[, "exp_coi" := round(exp_coi, 2)][, "chisquare" := round(chisquare, 2)]
+DT::datatable(dt)
+```
+
+
+## Conclusion and Perspectives {.smaller}
+
+* methods of feature extraction which are implemented in form of the `features()` method in the polmineR package, can be used for a variety of purposes:
+
+  * as a method to calculate keywords, the semantically meaningful vocabulary of a corpus can be extracted efficiently which facilitates the identification of keyterms of a discourse.
+  
+  * if used with a thematically coherent subcorpus, the comparison allows for the identification of topical semantic fields which could, for example, be useful in the creation of a dictionary.
+
+  * the identification of statistically significant vocabulary can be used to determine central features which can be used as the baseline of counting or other text statistical measures which saves memory space and might improve the quality of calculations.
+
+  * in sum, the shown procedures provide a flexible and efficient tool to differentiate between important and unimportant parts of the vocabulary.
