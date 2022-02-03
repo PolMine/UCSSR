@@ -21,7 +21,7 @@ vignette: >
 
 * the often-cited sentence above by Firth (1957: 11) conveys one important idea: The semantic meaning of a word is characterized by the words in its vicinity.
 
-* this idea is the basis of quantative approaches of `collocation analysis` or `cooccurrence analysis`. Based on the frequency and statistical significant occurrence of words in the context of a query term, collocations or cooccurrences can be identified.
+* this crucial idea is the basis of quantative approaches of `collocation analysis` or `cooccurrence analysis`. Based on the frequency and statistical significant occurrence of words in the context of a query term, collocations or cooccurrences can be identified.
 
 * the `polmineR` package uses the term of cooccurrences and provides a `cooccurrences()` method because in contrast to the term collocations the more technical term cooccurrences describes the statistical qualities of the approach more fittingly. The term of collocation suggests a relationship between a query term and its context which is a more substantial characterization than can be provided by mere statistical means.
 
