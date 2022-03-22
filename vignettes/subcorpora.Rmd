@@ -2,7 +2,7 @@
 title: "Subkorpora"
 subtitle: "Nutzung von 'partitions' mit polmineR"
 author: "Andreas Blaette"
-date: 'Stand: 10. Oktober 2018'
+date: 'Stand:  4. April 2022'
 output:
   ioslides_presentation:
     css: css/stylesheet.css
@@ -15,6 +15,8 @@ vignette: >
   %\VignetteIndexEntry{Subkorpora}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}  
+bibliography: Literatur_subcorpora.bib
+nocite: '@*'
 ---
 
 ```{r, include = FALSE}
@@ -61,7 +63,7 @@ library(magrittr)
 
 ## Anlegen einer `partition`: Grundlagen {.smaller} 
 
-- Ziel des ersten Beispiels ist es, eine Partition mit all jenen Reden im Bundestag anzulegen, die von Abgeordneten und RegierungsvertreterInnen im Jahr der Finanzmarktkrise, 2008 gehalten wurden.
+- Ziel des ersten Beispiels ist es, eine Partition mit all jenen Reden im Bundestag anzulegen, die von Abgeordneten und RegierungsvertreterInnen im Jahr der Finanzmarktkrise, 2008, gehalten wurden.
 
 - Zunächst ermitteln wir mit der `s_attributes()`-Methode, welche Werte für das S-Attribute `year` verfügbar sind.
 
@@ -78,7 +80,7 @@ bt2008 <- partition("GERMAPARL", year = "2008")
 
 ## Anlegen einer `partition`: Fortsetzung {.smaller}
 
-- Für die für S-Attribute angegebenen Werte können auch numerische oder logische Werte sein. Die für die interne Verarbeitung erforderliche Umwandlung in einen `character`-Vektor erfolgt automatisch.
+- Die für die S-Attribute angegebenen Werte können auch numerische oder logische Werte sein. Die für die interne Verarbeitung erforderliche Umwandlung in einen `character`-Vektor erfolgt automatisch.
 
 ```{r, message = FALSE}
 bt2008 <- partition("GERMAPARL", year = 2008) # identisch mit vorhergehenden Beispiel
@@ -166,7 +168,7 @@ guttenberg <- partition(bt2008min, speaker = ".*Guttenberg", regex = TRUE)
 s_attributes(guttenberg, "speaker")
 ```
 
-- Der reguläre Ausdrück wird an die bekannte R-Funktion `grep()` übergeben, so dass auch Teile eins S-Attributes "gematcht" werden.
+- Der reguläre Ausdruck wird an die bekannte R-Funktion `grep()` übergeben, so dass auch Teile eins S-Attributes "gematcht" werden.
 
 ```{r, message = FALSE, collapse = TRUE}
 merkel2008 <- partition(bt2008min, speaker = "Merkel", regex = TRUE)
@@ -210,7 +212,7 @@ writeLines(text = as.character(read(merkel_fcrisis)), con = "merkel.html")
 
 - Diese Datei können Sie mit einem gängigen Browser ansehen. Ein wichtiger Zweck der Erzeugung des Volltextes ist, diesen für Zwecke der Annotation in ein QDA-Programm (QDA für qualitative Datenanalyse) wie MAXQDA zu importieren. 
 
-- Hinweis: Es ist ein "technisches" html, dass von polmineR erzeugt wird. Bei der Anzeige im Browser ist dies nicht sichtbar, aber jedes einzelne Wort ist von Angaben zu Korpuspositionen umklammert. Das Ziel des so angereichterten html-Formats ist, dass Annotationen von einem Programm wie MAXQDA in R/polmineR rückimportiert werden können. 
+- Hinweis: Es ist ein "technisches" html, das von polmineR erzeugt wird. Bei der Anzeige im Browser ist dies nicht sichtbar, aber jedes einzelne Wort ist von Angaben zu Korpuspositionen umklammert. Das Ziel des so angereichterten html-Formats ist, dass Annotationen von einem Programm wie MAXQDA in R/polmineR rückimportiert werden können. 
 
 
 ----
@@ -279,3 +281,5 @@ count(merkel_speeches, query = c("Finanzmarktkrise", "Finanzmärkte", "Lehman"))
 - Das S4-System, das von polmineR für die Implementierung verwendet wird, gilt als aufwändiger und schwerer handhabbar als das ältere S3-System. Es gewährleistet jedoch, dass mögliche Fehler schneller zu expliziten Fehlermeldungen führen und damit erkannt werden. Mehr über die Objektorientierung in R können Sie im Online-Buch ["Advanced R" von Hadley Wickham](http://adv-r.had.co.nz/S4.html) nachlesen.
 
 - Mit dem Verständnis von `partition`- und `partition_bundle`-Objekten haben wir die entscheidende Grundlage für alle weiteren, substantiell interessanten Analyse-Verfahren. Im nächsten Foliensatz geht es ums ... Zählen!
+
+## Literatur

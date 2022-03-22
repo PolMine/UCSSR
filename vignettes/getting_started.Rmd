@@ -1,7 +1,7 @@
 ---
 title: "Erste Schritte"
 author: "Andreas Blaette"
-date: 'Stand: 31. September 2018'
+date: 'Stand: 4. April 2022'
 output:
   ioslides_presentation:
     css: css/stylesheet.css
@@ -83,6 +83,8 @@ Jetzt können wir das GermaParl-Paket laden und das Korpus vom PolMine-Webserver
 GermaParl::germaparl_download_corpus() # hier kommt mehr als 1 GB, braucht sicher einen Moment!
 ```
 
+Hiernach kann auch der UCSSR Foliensatz heruntergeladen werden. Die Installationsanweisungen finden Sie hier [UCSSR Download](https://github.com/PolMine/UCSSR). Die lokale Verfügbarkeit ist von Vorteil, wenn Sie offline mit den Folien arbeiten und einen praktischen Zugang zu den Rmarkdown Dateien haben möchten, auf denen die Folien basieren.
+
 
 ## Ein kurzer Test der Installation {.smaller}
 
@@ -120,7 +122,7 @@ cooccurrences("GERMAPARL", "Islam") # eine erste Kookkurrenz-Berechnung
 count("GERMAPARL", query = c("Islam", "Muslime", "Koran")) # simples Zählen
 ```
 
-Das Zählen ist ja dann auch die Grundlage für vieler weitergehender statistischer Operationen. Zentral für das Design des PolMine-Pakets ist es jedoch, dass es auch immer möglich bleiben muss, den Volltext zu lesen. Probieren Sie auch das aus.
+Das Zählen ist ja dann auch die Grundlage für viele weitergehende statistischer Operationen. Zentral für das Design des PolMine-Pakets ist es jedoch, dass es auch immer möglich bleiben muss, den Volltext zu lesen. Probieren Sie auch das aus.
 
 ```{r, eval = FALSE}
 merkel <- partition("GERMAPARLMINI", date = "2009-11-10", speaker = "Merkel", regex = TRUE)
@@ -128,3 +130,8 @@ read(merkel, meta = c("speaker", "date"))
 ```
 
 So viel zunächst als Einstieg!
+
+## Tutorials zur Installation von R und RStudio
+
+[Youtube Tutorial](https://www.youtube.com/watch?v=X_Mxya2Fis0&ab_channel=StatistikamPC)  
+[R Studio Education](https://rstudio-education.github.io/hopr/starting.html)

@@ -2,7 +2,7 @@
 title: "'polmineR' und CQP-Syntax"
 subtitle: 'Beispielanalysen mit dem GermaParl-Korpus'
 author: "Andreas Blaette"
-date: "Stand: 8. Oktober 2018"
+date: "Stand: 4. April 2022"
 output:
   ioslides_presentation:
     css: css/stylesheet.css
@@ -14,7 +14,9 @@ editor_options:
 vignette: >
   %\VignetteIndexEntry{Nutzung der CQP-Syntax mit 'polmineR'}
   %\VignetteEncoding{UTF-8}
-  %\VignetteEngine{knitr::rmarkdown}  
+  %\VignetteEngine{knitr::rmarkdown}
+bibliography: Literatur_cqp.bib
+nocite: '@*'
 ---
 
 
@@ -36,7 +38,7 @@ library(polmineR)
 use("GermaParl")
 ```
 
-- Außerdem nutzen wir das `magrittr`-Paket, um Befehle in einer sogenannten "Pipe" zu verketten. In einer Pipe wird das Ergebnis eines Befehls zum ersten Argument des jeweils nachfolgenden Befehls. Dadurch kann Code aussagekräftig und kompakt geschrieben werden. Das Paket wird bereits mit `polmineR` Paket geladen.
+- Außerdem nutzen wir das `magrittr`-Paket, um Befehle in einer sogenannten "Pipe" zu verketten. In einer Pipe wird das Ergebnis eines Befehls zum ersten Argument des jeweils nachfolgenden Befehls. Dadurch kann Code aussagekräftig und kompakt geschrieben werden. Das Paket wird bereits mit dem `polmineR` Paket geladen.
 
 - Schließlich laden wir noch das *data.table*-Paket
 
@@ -60,7 +62,7 @@ library(data.table)
 
 - Die CQP-Suchsyntax wird mit dem Parameter `query` an die Methoden übergegeben. Voreingestellt ist eine automatische Erkennung, ob die CQP-Syntax verwendet wird. Empfohlen ist jedoch, ausdrücklich über den logischen Parameter `cqp` anzugeben, dass CQP verwendet wird.
 
-- Wichtig ist, dass einzelne Suchbegriffe ein Anführungszeichen gesetzt werden müssen und einfache Anführungszeichen den gesammten Suchbegriff umschließen.
+- Wichtig ist, dass einzelne Suchbegriffe in Anführungszeichen gesetzt werden müssen und einfache Anführungszeichen den gesammten Suchbegriff umschließen.
 
 ```{r, collapse = TRUE}
 count("GERMAPARL", query = '"Diskriminierung"', cqp = TRUE)
@@ -124,7 +126,7 @@ count("GERMAPARL", query = '"[Mm]ultikult.*"', cqp = TRUE, breakdown = TRUE) %>%
 
 ## Reguläre Ausdrücke: Beispiele II {.smaller}
 
-- Während in eckigen Klammern alternative einzelne Buchstaben angegeben werden könne, können in runden Klammern alternative Zeichenfolgen angegeben werden, die jeweils mit einem senkrechten Querstrich ("|") getrennt werden. 
+- Während in eckigen Klammern alternative einzelne Buchstaben angegeben werden können, können in runden Klammern alternative Zeichenfolgen angegeben werden, die jeweils mit einem senkrechten Querstrich ("|") getrennt werden. 
 
 
 ```{r, collapse = TRUE}
@@ -282,3 +284,5 @@ Viel Erfolg!
 |VVIZU|Infinitiv mit ``zu'', voll| anzukommen, loszulassen|
 |VVPP|Partizip Perfekt, voll| gegangen, angekommen|
 |VAFIN|finites Verb, aux| [du] bist, [wir] werden | 
+
+## Literatur

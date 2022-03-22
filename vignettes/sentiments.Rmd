@@ -2,7 +2,7 @@
 title: "Diktionäre und Sentiment-Analysen"
 subtitle: 'GermaParl - polmineR - SentiWS'
 author: "Andreas Blaette"
-date: "10. Oktober 2018"
+date: 'Stand:  4. April 2022'
 output:
   ioslides_presentation:
     css: css/stylesheet.css
@@ -11,10 +11,12 @@ output:
   slidy_presentation: default
 editor_options:
   chunk_output_type: console
-vignette: >
-  %\VignetteIndexEntry{Diktionäre und Sentiment-Analysen}
+vignette: |
+  %\VignetteIndexEntry{Diktionäre und Sentiment-Analysen} 
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
+bibliography: Literatur_sentiments.bib
+nocite: '@*'
 ---
 
 ```{r klippy, echo=FALSE, include=TRUE}
@@ -100,7 +102,7 @@ head(SentiWS, 10)
 ```
 
 
-## SentiWS: Ein Blick in die Daten, Teil 2 {.smaller}
+## SentiWS: Ein Blick in die Daten, Teil 2 | Gewichtung von Worten im Diktionär {.smaller}
 
 In der letzten Spalte ("weight") sehen Sie, dass Worten im Diktionär eine Gewichtung zugewiesen ist. Diese kann positiv sein (bei "positivem" Vokabular) oder negativ (bei "negativen" Worten). Außerdem sehen Sie, dass neben der Wortform ("word"-Spalte) auch Lemmata aufgeführt sind sowie eine Part-of-Speech-Klassifikation. Letzteres macht eine eindeutige Zuordnung möglich. Die Spalte "base" mit einem logischen Wert (TRUE/FALSE) ergibt sich technischer aus der Umwandlung der vom Leipziger Wortschatzprojekt heruntergeladenen Tabelle in die extensive Form: In der Roh-Tabelle findet sich in jeder Zeile ein Lemma. Dementsprechend können wir prüfen, wie viele positive bzw. negative Worte als Grundform in der Tabelle sind.
 
@@ -113,7 +115,7 @@ vocab
 ```
 
 
-## Positives/negatives Vokabular in Wortkontext {.smaller}
+## Untersuchung des Wortumfeldes | Positives/negatives Vokabular {.smaller}
 
 - Wir untersuchen nun das Wortumfeld eines interessanten Begriffs. Weil es so einfach, relevant und plakativ ist, stellen wir die Frage, wie sich die positiven/negativen Konnotationen des "Islams" im Zeitverlauf entwickelt haben.
 
@@ -134,7 +136,7 @@ df <- context("GERMAPARL", query = "Islam", p_attribute = c("word", "pos"), verb
 ```
 
 
-## Die tabellarischen Daten der Sentiment-Analyse {.smaller}
+## Die tabellarischen Daten der Sentiment-Analyse | Positive und negative Begriffe {.smaller}
 
 Der df-data.frame führt die Statistik des Wortumfelds eines jeden Auftretens von "Islam" im Korpus auf. Um die Dinge einfach zu halten, arbeiten wir zunächst nicht mit den Gewichtungen, sondern nur mit dem positiven bzw. negativen Worten. Wir vereinfachen die Tabelle entsprechend und sehen sie an.
 
@@ -154,7 +156,7 @@ df_year <- aggregate(df[,c("size", "positive_n", "negative_n")], list(df[["year"
 colnames(df_year)[1] <- "year"
 ```
 
-- Es ist allerdings nicht sinnvoll, mit den absoluten Häufigkeiten zu arbeiten. Daher fügen wir Spalten ein, die den Anteil des negativen bzw. positiven Vokabulars angeben.
+- Es ist allerdings nicht sinnvoll, mit den absoluten Häufigkeiten zu arbeiten. Daher fügen wir Spalten ein, die den **Anteil** des negativen bzw. positiven Vokabulars angeben.
 
 ```{r}
 df_year$negative_share <- df_year$negative_n / df_year$size
@@ -171,7 +173,7 @@ Z <- zoo(
 ```
 
 
-## Visualisierung {.smaller}
+## Visualisierung von Aggregationen {.smaller}
 
 ```{r}
 plot(
@@ -181,7 +183,8 @@ plot(
 ```
 
 
-## Wie gut sind eigentlich die Ergebnisse? {.smaller}
+## Wie gut sind eigentlich die Ergebnisse? | Kwic-Ausgabe der positiven und negativen Worte {.smaller}
+
 
 Aber was verbirgt sich eigentlich hinter den numerischen Werten der ermittelten Sentiment-Scores? Um dem nachzugehen, nutzen wir die Möglichkeit von polmineR, eine KWIC-Ausgabe entsprechend einer Positiv-Liste (Vektor mit erforderlichen Worten) zu reduzieren, Worte farblich zu codieren und über Tooltips (hier: Wortgewichte) weitergehende Informationen einzublenden. Also: Fahren Sie auch mit der Maus auf die angemarkerten Worte!
 
@@ -199,7 +202,7 @@ kwic("GERMAPARL", query = "Islam", positivelist = c(words_positive, words_negati
 Das Ergebnis (ein 'htmlwidget') folgt auf der nächsten Folie.
 
 
-## Sentiment-Analyse: Qualitative Evaluation {.smaller}
+## Sentiment-Analyse: Qualitative Evaluation | Das positive und negative Wortumfeld {.smaller}
 
 ```{r, eval = TRUE, echo = FALSE, message = FALSE, render = knit_print}
 options("polmineR.pagelength" = 7L)
@@ -209,7 +212,7 @@ kwic("GERMAPARL", query = "Islam", positivelist = c(words_positive, words_negati
 ```
 
 
-## Rezept: Sentiment-Analyse über Partition {.smaller}
+## Vorgehen Sentiment-Analyse über Partition {.smaller}
 
 - Die strukturelle Annotation CWB-indizierter Korpora macht es in Kombination mit der `partition()`-Methode leicht, das skizziert Verfahren für die Sentiment-Analyse auf Subkorpora anzuwenden, so dass Bewertungsunterschiede (z.B. zwischen Fraktionen und Parteien) analysiert werden können. Im folgenden Beispiel schränken wir das GermaParl-Korpus auf die Redner von CDU und CSU ein.
 
@@ -229,7 +232,7 @@ df <- context(p, query = "Islam", p_attribute = c("word", "pos"), verbose = FALS
 ```
 
 
-## Aggregation {.smaller}
+## Funktion für Aggregationen {.smaller}
 
 - Daraus wird nun ein Zeitreihen-Objekt.
 
@@ -239,7 +242,7 @@ df[["name"]] <- NULL # Spalte 'name' nicht mehr benötig, wird gelöscht
 tseries <- as.xts(df, order.by = time_index) # Umwandlung in Zeitreihen-Objekt
 ```
 
-- Wir führen jetzt eine wiederverwendbare Funktion zur Aggregation der Zeitreihen ein. Mit dieser kann man nach "week", "month", "quarter" oder "year" aggregieren.
+- Wir führen jetzt eine **wiederverwendbare Funktion** zur Aggregation der Zeitreihen ein. Mit dieser kann man nach "week", "month", "quarter" oder "year" aggregieren.
 
 ```{r}
 aggregate_time_series <- function(x, aggregation){
@@ -284,9 +287,9 @@ plot(
 
 </div>
 
-## Verschiedene Aggregationen {.smaller}
+## Vergleich verschiedener Aggregationen {.smaller}
 
-- Um den Vergleich verschiedener Aggregationen zu haben zeigt die folgende Folie die Aggregation nach Woche, Monat, Quartal und Jahr.
+- Um den Vergleich verschiedener Aggregationen zu haben, zeigt die folgende Folie die Aggregation nach Woche, Monat, Quartal und Jahr.
 
 ```{r, eval = FALSE}
 par(mfrow = c(2,2))
@@ -336,6 +339,9 @@ for (aggregation_level in c("week", "month", "quarter", "year")){
 
 ## Diskussion {.smaller}
 
-  * Wir interpretieren Sie die Ergebnisse der Zeitreihen-Analyse?
+  * Wie interpretieren Sie die Ergebnisse der Zeitreihen-Analyse?
   * Wie valide sind die Ergebnisse?
   * Ist der Übergang zur Arbeit mit Wort-Gewichten sinnvoll oder erforderlich?
+  
+## Literatur
+

@@ -2,7 +2,7 @@
 title: "KWIC-Analysen mit 'polmineR'"
 subtitle: 'Syntax und Rezepte'
 author: "Andreas Blaette"
-date: "10. Oktober 2018"
+date: 'Stand:  4. April 2022'
 output:
   ioslides_presentation:
     css: css/stylesheet.css
@@ -14,6 +14,8 @@ vignette: >
   %\VignetteIndexEntry{KWIC-Analysen mit 'polmineR'}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
+bibliography: Literatur_kwic.bib
+nocite: '@*'
 ---
 
 ```{r, include = FALSE}
@@ -46,7 +48,7 @@ if (!"annolite" %in% rownames(installed.packages()))
 
 Der Foliensatz nutzt das `polmineR`-Paket und das `GermaParl`-Korpus. Die Installation wird in einem eigenen Foliensatz ausführlicher erläutert.
 
-Bitte beachten Sie, dass die Funktionalität für den folgenden Workflow erst mit polmineR-Version `r as.package_version("0.7.9.9008")` zur Verfügung steht. Installieren Sie bei Bedarf die aktuelle Entwicklungsversion das polmineR-Pakets.
+Bitte beachten Sie, dass die Funktionalität für den folgenden Workflow erst mit polmineR-Version `r as.package_version("0.7.9.9008")` zur Verfügung steht. Installieren Sie bei Bedarf die aktuelle Entwicklungsversion des polmineR-Pakets.
 
 ```{r update_polmineR, eval = TRUE, message = FALSE}
 if (packageVersion("polmineR") < as.package_version("0.7.9.9008"))
@@ -75,7 +77,7 @@ kwic("GERMAPARL", query = "Migrationshintergrund")
 
 <br/>
 
-- Die Ausgabe des Ergebnisse erfolgt regulär im Viewer-Panel von RStudio. Ein kurzer YouTube-Videoclip vermittelt, wie die Anzeige der Konkordanzen aussieht.
+- Die Ausgabe des Ergebnisses erfolgt regulär im Viewer-Panel von RStudio. Ein kurzer YouTube-Videoclip vermittelt, wie die Anzeige der Konkordanzen aussieht.
 
 ----
 
@@ -236,6 +238,9 @@ Y
 
 * Die Analyse von Konkordanzen lässt sich sinnvoll auch mit der statistischen Analysen von Kookkurrenzen verbinden: Die Kookkurrenz-Analyse (`cooccurrences()`-Funktion) liefert Hinweise auf statische Auffälligkeiten des Sprachgebrauchs, die dann per KWIC näher analysiert und interpretiert werden. 
   
-* Ein sinnvoller Schritt zur Systematisierung von Interpretationen von Konkordanzen ist, diese zu kategorisieren bzw. typisieren. Dafür kann es hilfreich sein, diese nach Excel zu exportieren (Methode `mail()`), um dort in einer Zusatzspalte Kategorisierungen einzutragen bzw. Interpretationen zu notieren.
+* Ein sinnvoller Schritt zur Systematisierung von Interpretationen von Konkordanzen ist, diese zu kategorisieren bzw. zu typisieren. Dafür kann es hilfreich sein, diese nach Excel zu exportieren (Methode `mail()`), um dort in einer Zusatzspalte Kategorisierungen einzutragen bzw. Interpretationen zu notieren.
   
-* Bitte übersehen Sie bei der Arbeit mit Konkordanzen nicht, dass es sich um ein interpretative Arbeit handelt, die hermeneutisches Gespür erfordert! Wann etwas von wem gesagt wurde mag von Bedeutung sein. Zugleich ist die Grundannahme der Arbeit mit Konkordanzen, dass es Regelmäßigkeiten gibt, die es in interpretativer Arbeit aufzudecken gilt: Die Analyse von Konkordanzen ist nicht auf die einzelne Äußerung, sondern auf die Muster des Sprachgebrauchs ausgerichtet.
+* Bitte übersehen Sie bei der Arbeit mit Konkordanzen nicht, dass es sich um eine interpretative Arbeit handelt, die hermeneutisches Gespür erfordert! Wann etwas von wem gesagt wurde mag von Bedeutung sein. Zugleich ist die Grundannahme der Arbeit mit Konkordanzen, dass es Regelmäßigkeiten gibt, die es in interpretativer Arbeit aufzudecken gilt: Die Analyse von Konkordanzen ist nicht auf die einzelne Äußerung, sondern auf die Muster des Sprachgebrauchs ausgerichtet.
+
+## Literatur
+

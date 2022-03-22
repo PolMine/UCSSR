@@ -2,7 +2,7 @@
 title: "Säcke voller Wörter"
 subtitle: 'Rezepte zur Term-Dokument-Matrizen'
 author: "Andreas Blaette, Christoph Leonhardt"
-date: "Stand: 27. November 2018"
+date: 'Stand:  4. April 2022'
 output:
   ioslides_presentation:
     css: css/stylesheet.css
@@ -15,6 +15,8 @@ vignette: >
   %\VignetteIndexEntry{Bag-of-Words}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
+bibliography: Literatur_tdm.bib
+nocite: '@*'
 ---
 
 ## Vom 'bag-of-words' zur algorithmischen Textanalyse {.smaller}
@@ -40,7 +42,7 @@ library(polmineR)
 use("GermaParl")
 ```
 
-- Weitere hier verwendete Pakete werden falls erforderlich installiert und geladen.
+- Weitere hier verwendete Pakete werden, falls erforderlich, installiert und geladen.
 
 ```{r, message = FALSE}
 for (pkg in c("magrittr", "slam", "tm", "quanteda", "quanteda.textmodels", "Matrix")){
@@ -56,7 +58,7 @@ for (pkg in c("magrittr", "slam", "tm", "quanteda", "quanteda.textmodels", "Matr
 
 - Je nachdem, welches Paket für eine weitergehende algorithmische Analyse genutzt wird, können auch Klassen des *Matrix*-Pakets (`sparseMatrix`) oder die *document-feature matrix* (`dfm`) des *quanteda*-Pakets gefordert sein. Der Weg dahin führt über eine einfache Typumwandlung.
 
-- Wichtig für das Verständnis die `TermDocumentMatrix`-Klasse des *tm*-Pakets ist, dass diese letztlich identisch ist mit der `simple_triplet_matrix` des *slam*-Pakets und diesem nur ein Attribut mit der Angabe eines Gewichtungsfaktors hinzufügt. Dies ist grundsätzlich die Term-Frequenz.
+- Wichtig für das Verständnis der `TermDocumentMatrix`-Klasse des *tm*-Pakets ist, dass diese letztlich identisch ist mit der `simple_triplet_matrix` des *slam*-Pakets und diesem nur ein Attribut mit der Angabe eines Gewichtungsfaktors hinzufügt. Dies ist grundsätzlich die Term-Frequenz.
 
 - Eine `simple_triplet_matrix` wird definiert über drei Vektoren i, j, v. Der erste gibt die Reihe eines Wertes an, der zweite die Spalte eines Wertes und der dritte den Wert selbst. Indem nur definierte Werte der Matrix angegeben werden, lässt sich der Speicherplatzbedarf gering halten. Bei vielen Dokumenten und einem großen Vokabular könnten Term-Dokument-Matrizen ansonsten schnell riesig und zu große für den verfügbaren Speicher werden!
 
@@ -93,7 +95,7 @@ dtm <- polmineR::as.DocumentTermMatrix(bt16_speakers, col = "count")
 doit <- !file.exists("~/lab/tmp/bt2015speeches_lds.RData")
 ```
 
-- Im Fall von Plenarprotokollkorpora ist eine plausible Definition der Dokumente, die einer Dokument-Term-Matrix zugrunde liegen die einzelne Rede von Abgeordneten. Ein Korpus bzw. ein `partition`-Objekt können mit der `as.speeches()`-Methode in ein `partition_bundle` zerlegt werden.
+- Im Fall von Plenarprotokollkorpora ist eine plausible Definition der Dokumente, die einer Dokument-Term-Matrix zugrunde liegen, die einzelne Rede von Abgeordneten. Ein Korpus bzw. ein `partition`-Objekt können mit der `as.speeches()`-Methode in ein `partition_bundle` zerlegt werden.
 
 - Diese Zerlegung erfolgt anhand einer Heuristik, nach der als Rede der Beitrag eines Redners an einem Plenartag dient, der höchstens von 500 Worten anderer Redner unterbrochen wird.
 
@@ -318,7 +320,7 @@ Nun können wir ein erstes Wordfish-Modell berechnen.
 wfm_1 <- quanteda.textmodels::textmodel_wordfish(pg_dfm, c(4, 1))
 ```
 
-Wir können die `summary()` Methode verwenden um einen ersten Eindruck darüber zu erlangen, wie das Model die Fraktionen im politischen Raum angeordnet hat.
+Wir können die `summary()` Methode verwenden, um einen ersten Eindruck darüber zu erlangen, wie das Model die Fraktionen im politischen Raum angeordnet hat.
 
 ```{r}
 wordfish_summary <- summary(wfm_1)
@@ -389,4 +391,6 @@ quanteda.textmodels::textplot_scale1d(wfm_1, margin = "features",
 
 ## Fazit {.smaller}
 
-Ob *Term-Dokument-Matrix*, *Dokument-Term-Matrix* oder *Document-Feature-Matrix*, ob *sparse* oder nicht: Die Darstellung von Texten in Matrizen mit Worten auf der einen und Dokumenten auf der anderen Seite ist für eine Vielzahl von Anwendungsbereichen ind er computergestützen Textanalyse von enormer Bedeutung. polmineR bietet hierbei die Möglichkeit, Korpora in diese Formen zu überführen und für weitere Analysen nutzbar zu machen. Zu beachten ist, dass in dieser Darstellung Wortzusammenhänge aufgelöst werden. Diese *bag-of-words*-Ansätze stehen so im Gegensatz zum hermeneutisch-interpretativen von beispielsweise Keyword-in-Context-Analysen. Ein triangulatives Vorgehen kann im Sinne der Validierung deshalb nur angeraten werden.
+Ob *Term-Dokument-Matrix*, *Dokument-Term-Matrix* oder *Document-Feature-Matrix*, ob *sparse* oder nicht: Die Darstellung von Texten in Matrizen mit Worten auf der einen und Dokumenten auf der anderen Seite ist für eine Vielzahl von Anwendungsbereichen in der computergestützen Textanalyse von enormer Bedeutung. polmineR bietet hierbei die Möglichkeit, Korpora in diese Formen zu überführen und für weitere Analysen nutzbar zu machen. Zu beachten ist, dass in dieser Darstellung Wortzusammenhänge aufgelöst werden. Diese *bag-of-words*-Ansätze stehen so im Gegensatz zum hermeneutisch-interpretativen von beispielsweise Keyword-in-Context-Analysen. Ein triangulatives Vorgehen kann im Sinne der Validierung deshalb nur angeraten werden.
+
+## Literatur

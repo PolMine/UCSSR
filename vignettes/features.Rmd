@@ -2,7 +2,7 @@
 title: "Alle Worte sind gleich?"
 subtitle: 'Term-Extraktion mit polmineR'
 author: "Andreas Blaette"
-date: "Stand: 19. November 2018"
+date: 'Stand:  4. April 2022'
 output:
   ioslides_presentation:
     css: css/stylesheet.css
@@ -15,6 +15,8 @@ vignette: >
   %\VignetteIndexEntry{Sag mir welche Nachbarschaft Du hast}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
+bibliography: Literatur_features.bib
+nocite: '@*'
 ---
 
 ## Zur Ermittlung der Ungleichheit des Vokabulars {.smaller}
@@ -34,7 +36,7 @@ vignette: >
 
 - Diese Grundüberlegung findet in verschiedenen Domänen Anwendung
   - Diese statistischen Verfahren dienen in der Soziolinguistik der Bestimmung von "Schlagworten" bzw. *keywords*. Man führt dementsprechend eine Schlagwort-Berechnung durch.
-  - In Bereich des Text Mining spricht auch von einem Verfahren der "Term-Extraktion".
+  - Im Bereich des Text Mining spricht auch von einem Verfahren der "Term-Extraktion".
   - Im Feld des Machine Learning wird auch von *feature extraction* gesprochen: Die *features* eines Textes machen diesen unterscheidbar von anderen.
 
 - Die Rede von den *features* eines Textes (oder eines Sub-Korpus) erscheint als die allgemeinste Weise, die hervorstechenden Merkmale zu bezeichnen, die in der Analyse besonders zu beachten sind. Daher ist die Methode des *polmineR*-Pakets, die zur Keyword-/Term-/Feature-Extraktion zur Verfügung steht, als `features()`-Methode bezeichnet.
@@ -220,7 +222,7 @@ am_features_min <- am_features %>%
   subset(pos %in% c("NN", "ADJA", "VVFIN"))
 ```
 
-- Wortwolken sind mit Vorsicht zu genießen. Aber natürlich bietet es sich an, das extrahierte Vokabular als Wortwolke darzustellen. Die Wortwolke folgt auf der folgenden Folie, daran schließ die Ergebnistabelle an.
+- Wortwolken sind mit Vorsicht zu genießen. Aber natürlich bietet es sich an, das extrahierte Vokabular als Wortwolke darzustellen. Die Wortwolke folgt auf der folgenden Folie, daran schließt die Ergebnistabelle an.
 
 ```{r, echo = TRUE, warning = FALSE, eval = FALSE}
 wordcloud::wordcloud(
@@ -361,6 +363,8 @@ DT::datatable(dt)
 
 - Wenn man dem Vergleich ein thematisch definiertes Subkorpus zugrunde legt, lässt sich das semantische Feld des Themenbereichs bestimmen. Dies kann etwa der Ansatzpunkt für die Entwicklung von Diktionären sein.
 
-- Die Ermittlung statistisch signifikanten Vokabular kann auch für Zwecke der Bestimmung von features genutzt werden, auf die Zählungen oder andere textstatistische Maße eingeschränkt werden, so dass Speicherplatz geschont und die Qualität von Ergebnissen verbessert wird.
+- Die Ermittlung statistisch signifikanten Vokabulars kann auch für Zwecke der Bestimmung von features genutzt werden, auf die Zählungen oder andere textstatistische Maße eingeschränkt werden, so dass Speicherplatz geschont und die Qualität von Ergebnissen verbessert wird.
 
 - Insgesamt sind die geschilderten Verfahren ein flexibles wie effizientes Instrument, um effizient in Sachen Vokabular Wichtiges von Unwichtigem zu unterscheiden.
+
+## Literatur

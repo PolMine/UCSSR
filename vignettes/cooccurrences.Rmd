@@ -2,7 +2,7 @@
 title: "Die Nachbarschaft zählt"
 subtitle: 'Die Analyse von Kookkurrenzen mit polmineR'
 author: "Andreas Blaette"
-date: "Stand: 12. November 2018"
+date: 'Stand:  4. April 2022'
 output:
   ioslides_presentation:
     css: css/stylesheet.css
@@ -15,6 +15,8 @@ vignette: >
   %\VignetteIndexEntry{Sag mir welche Nachbarschaft Du hast}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
+bibliography: Literatur_cooccurrences.bib
+nocite: '@*'
 ---
 
 ## Warum die Nachbarschaft von Worten zählt {.smaller}
@@ -25,12 +27,12 @@ vignette: >
 
 - Das *polmineR*-Paket nutzt den Begriff der Kookkurrenzen und beinhaltet eine `cooccurrences()`-Methode, weil dieser eher technische Begriff die zunächst bloß statistische Qualität des überzufällig häufigen Auftretens von Token im Umfeld eines Suchbegriffs besser ausdrückt. Der Begriff der "Kollokation" beinhaltet eine stärkere inhaltliche Aussage, die eine qualitative Analyse erfordert, die über die reine Textstatistik hinausgeht.
 
-- Statistisch ermittelte Kookkurrenzen weisen auf sprachliche Muster hin, die Aufmerksamkeit verdienen. Der Übergang zu intersubjektiv absicherbaren Aussagen zu Deutungsmustern erfordert, dass an die *quantitative* Textanalyse von Kookkurrenzen eine *qualitative* Analyse von Konkordanzen (auch: Keyword-in-Context-Analyse, vgl. `kwic()`-Method) an die quantitative Analyse anschließt. 
+- Statistisch ermittelte Kookkurrenzen weisen auf sprachliche Muster hin, die Aufmerksamkeit verdienen. Der Übergang von intersubjektiv absicherbaren Aussagen zu Deutungsmustern erfordert, dass an die *quantitative* Textanalyse von Kookkurrenzen eine *qualitative* Analyse von Konkordanzen (auch: Keyword-in-Context-Analyse, vgl. `kwic()`-Method) anschließt. 
 
 
 ## Initialisierung {.smaller}
 
-- Ein Teil der im folgenden verwendeten Funktionen (Berechnung aller Kookkurrenzen in einem Korpus/einer Partition) sind im *polmineR*-Paket ab Version 0.7.10.9006 enthalten. Bei Bedarf wird die polmineR-Entwicklungsversion installiert.
+- Ein Teil der im Folgenden verwendeten Funktionen (Berechnung aller Kookkurrenzen in einem Korpus/einer Partition) sind im *polmineR*-Paket ab Version 0.7.10.9006 enthalten. Bei Bedarf wird die polmineR-Entwicklungsversion installiert.
 
 - Die Beispiele des Foliensatzes basieren auf dem *GermaParl*-Korpus. Der Datensatz in dem Paket muss nach dem Laden von polmineR mit der `use()`-Funktion aktiviert werden.
 
@@ -54,9 +56,9 @@ for (pkg in c("magrittr", "data.table", "networkD3", "igraph", "DT", "RColorBrew
 
 ## Grundlagen der Analyse von Kookkurrenzen {.smaller}
 
-- Die Grundlage der statistischen Bestimmungen von Kookkurrenzen ist eine Zählung der Häufigkeit von Worten im Umfeld der Treffer für einen Suchbegriff (oft auch: "node"). Die zentrale Frage bei der statistischen Analyse von Kookkurrenzen ist, ob bestimmte Worte im Wortumfeld der Treffer *überzufällig* oft auftreten: Es erfolgt ein Abgleich der Häufigkeien im Wortumfeld mit jenen im Korpus bzw. der Partition, die der Analyse zugrunde liegt.
+- Die Grundlage der statistischen Bestimmungen von Kookkurrenzen ist eine Zählung der Häufigkeit von Worten im Umfeld der Treffer für einen Suchbegriff (oft auch: "node"). Die zentrale Frage bei der statistischen Analyse von Kookkurrenzen ist, ob bestimmte Worte im Wortumfeld der Treffer *überzufällig* oft auftreten: Es erfolgt ein Abgleich der Häufigkeiten im Wortumfeld mit jenen im Korpus bzw. der Partition, die der Analyse zugrunde liegt.
 
-- Als statistischer Test zur Bestimmung von Kookkurrenzen ist insbesondere ein Log-Likelihood-Test gängig, der (gegenüber dem Chisquare-Test als alternativen Unterschiedtest) den Vorteil einer größeren Robustheit auch bei niedrigen Treffer zahlen bietet. Für die verwendeten statistischen Tests gibt es jeweils Schwellenwerte, ab denen eine definierte Irrtumswahrscheinlichkeit überschritten und statistische Signifikanz gegeben ist. 
+- Als statistischer Test zur Bestimmung von Kookkurrenzen ist insbesondere ein Log-Likelihood-Test gängig, der (gegenüber dem Chisquare-Test als alternativen Unterschiedtest) den Vorteil einer größeren Robustheit auch bei niedrigen Trefferzahlen bietet. Für die verwendeten statistischen Tests gibt es jeweils Schwellenwerte, ab denen eine definierte Irrtumswahrscheinlichkeit überschritten und statistische Signifikanz gegeben ist. 
 
 - Für diese Zählung ist von Bedeutung, wie groß das analysierte Wortumfeld sein soll. In lexikographischen Untersuchen ist ein vergleichsweise kleines Fenster von 3 bis 5 Worten links und rechts des interessierenden Worts gängig. Bei einem sozialwissenschaftlichen Forschungsinteresse kann das bedeutungstragende Wortumfeld oft größer sein (10 Worte links und rechts, oder mehr). 
 
@@ -105,7 +107,7 @@ cooccurrences("GERMAPARL", query = "Islam") %>%
   subset(!word %in% c("''", ",", "``"))
 ```
 
-- Beachte: Das vorangestellte Ausrufezeichen bei den Filterschritten, bei denen gezielt Worte der Stopwort-Liste ausgeschlossen werden "invertiert" den logischen Test, d.h. es werden Worte behalten, die *nicht* auf der Stopwort-Liste sind.
+- Beachte: Das vorangestellte Ausrufezeichen bei den Filterschritten, bei denen gezielt Worte der Stopwort-Liste ausgeschlossen werden, "invertiert" den logischen Test, d.h. es werden Worte behalten, die *nicht* auf der Stopwort-Liste sind.
 
 
 ## Gefilterter Wortkontext von "Islam" {.smaller}
@@ -145,7 +147,7 @@ kwic("GERMAPARL", query = "Islam", positivelist = "Der") %>% highlight(yellow = 
 
 ## Definition des Wortkontextes {.smaller}
 
-- Wenn die Argumente `left` und `right` nicht explizit benannt werden, nutzt die Methode Einstellungen, die per `getOption("polmineR.left")` bzw. `getOption("polmineR.right")` abgefragt werden können. Sie können folgendermaßen für eine R-Sitzung dauerhaft gesetzt werden können. 
+- Wenn die Argumente `left` und `right` nicht explizit benannt werden, nutzt die Methode Einstellungen, die per `getOption("polmineR.left")` bzw. `getOption("polmineR.right")` abgefragt werden können. Sie können folgendermaßen für eine R-Sitzung dauerhaft gesetzt werden. 
 
 ```{r}
 options("polmineR.left" = 10L)
@@ -167,7 +169,7 @@ cooccurrences("GERMAPARL", query = '"Islam"', s_attribute = "speaker")
 options("polmineR.pagelength" = 5L)
 ```
 
-- Oft wird man das Wortumfeld eines komplexeren lexikalischen Ausdrucks analysieren Worten - nicht nur den eines einzelnen Wortes. Die Syntax des *Corpus Query Processor* (CQP) ist auch bei der `cooccurrences()`-Methode verfügbar, so dass dies problemlos realisiert werden kann. Zwar prüft die Methode, ob das Argument `query` mit der CQP-Syntax formuliert ist, doch ist es besser, das logische Argument `cqp` explizit auf `TRUE` zu setzen.
+- Oft wird man das Wortumfeld eines komplexeren lexikalischen Ausdrucks analysieren - nicht nur den eines einzelnen Wortes. Die Syntax des *Corpus Query Processor* (CQP) ist auch bei der `cooccurrences()`-Methode verfügbar, so dass dies problemlos realisiert werden kann. Zwar prüft die Methode, ob das Argument `query` mit der CQP-Syntax formuliert ist, doch ist es besser, das logische Argument `cqp` explizit auf `TRUE` zu setzen.
 
 ```{r, render = knit_print}
 cooccurrences("GERMAPARL", '"Menschen" "mit" "Migrationshintergrund"', cqp = TRUE)
@@ -276,7 +278,7 @@ x <- wordcloud::wordcloud(
 x <- wordcloud::wordcloud(
   words = mmh[["word"]],
   freq = mmh[["count_coi"]],
-  colors = rep(brewer.pal(8, "Dark2"), times = 7),
+  colors = rep(RColorBrewer::brewer.pal(8, "Dark2"), times = 7),
   random.color = TRUE
   )
 ```
@@ -307,7 +309,7 @@ dotplot(mmh, cex = 0.8)
 
 ## Berechnung aller Kookkurrenzen {.smaller}
 
-- Der bisherige Zugang zur Berechnung von Kookkurrenzen war, gezielt das Wortumfeld zu einem Wort oder zu Treffern für einem Suchbegriff zu analysieren. Im Rahmen eines datengeleiteten und explorativen Zugriffs auf Korpora hat eine Analyse aller Kookkurrenzen in einem Korpus heuristiches Potential. 
+- Der bisherige Zugang zur Berechnung von Kookkurrenzen war, gezielt das Wortumfeld zu einem Wort oder zu Treffern für einem Suchbegriff zu analysieren. Im Rahmen eines datengeleiteten und explorativen Zugriffs auf Korpora hat eine Analyse aller Kookkurrenzen in einem Korpus heuristisches Potential. 
 
 - Als Beispiel untersuchen wir den Sprachgebrauch von Bundeskanzlerin Angela Merkel in 2008, dem Jahr der Lehman-Pleite. Der Workflow zur Generierung eines (gefilterten) Objekts mit allen Kookkurrenzen entspricht dem bereits Bekannten. Der wesentliche Unterschied ist, dass aus Gründen der Schonung von Speicherplatz eine Dekodierung der numerichen Token-IDs und die Berechnung der statistischen Testwerte explizit und gesondert erfolgt. Alle Kookkurrenzen in einem Korpus zu berechnen kann sehr viel Speicherplatz in Anspruch nehmen!
 
@@ -381,8 +383,10 @@ forceNetwork(
 
 ## Visualisierung, Hermeneutik, "close reading" {.smaller}
 
-- Bei der Arbeit mit allen Kookkurrenzen eines (Sub-)Korpus ist die Frage das inhaltlich hinreichend begründeten Filterns mindestens so wichtig wie bei "einfachen" Kookkurrenz-Analysen. Die Dokumentation zur `Cooccurrences()`-Methode enthält Hinweise auf die Funktionalität des polmineR-Pakets, mit einer `feature`-Selektion Kookkurrenzen systematisch zu filtern.
+- Bei der Arbeit mit allen Kookkurrenzen eines (Sub-)Korpus ist die Frage des inhaltlich hinreichend begründeten Filterns mindestens so wichtig wie bei "einfachen" Kookkurrenz-Analysen. Die Dokumentation zur `Cooccurrences()`-Methode enthält Hinweise auf die Funktionalität des polmineR-Pakets, mit einer `feature`-Selektion Kookkurrenzen systematisch zu filtern.
 
 - Man hüte sich vor den irreführenden Verlockungen der Visualisierung. Kookkurrenz-Graphen können tückisch sein! Zuweilen scheinen sie sehr intuitiv Bedeutungskomplexe zu vermitteln, und man meint zu sehen, was die zentralen Muster einen Diskurses sind. Man darf jedoch nicht die Möglichkeit aus dem Blick verlieren, dass dies blosse Bestätigungen bereits zuvor vorliegender Vermutungen sein kann, die weder systematisch hergeleitet sind, noch intersubjektiv überprüfbar sind. Auch Kookkurrenz-Graphen sind nur Wegweiser, was per "close reading" (Franco Moretti) Beachtung verdient.
 
 - Dies gilt auch für die "einfachen" Kookkurrenz-Analysen, welche im Mittelpunkt des Foliensatzes standen: Die Textstatistik gibt Hinweise auf die sprachlichen Muster, die statistisch hervorstechen, und die Beachtung verdienen. Das quantitative Zwischenergebnis darf jedoch nicht verwechselt werden mit einem inhaltlichen Ergebnis. Der Weg zu diesem führt nach wie vor in aller Regel über sorgfältige interpretative Arbeit anhand des ursprünglichen Textes, d.h. über Konkordanz/KWIC- und Volltext-Analysen.
+
+## Literatur

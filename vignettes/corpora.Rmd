@@ -2,7 +2,7 @@
 title: "Korpora in polmineR"
 subtitle: "Datenstruktur und erste Auswertungen"
 author: "Andreas Blaette"
-date: 'Stand: 10. Oktober 2018'
+date: 'Stand:  4. April 2022'
 output:
   ioslides_presentation:
     css: css/stylesheet.css
@@ -15,6 +15,8 @@ vignette: >
   %\VignetteIndexEntry{Korpora in polmineR}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
+bibliography: Literatur_corpora.bib
+nocite: '@*'
 ---
 
 ```{r, include = FALSE}
@@ -32,7 +34,7 @@ library(kableExtra)
 
 ## Technologie und Terminologie {.smaller}
 
-* Die im PolMine-Projekt aufbereiteten Korpora werden aus Ausgangsformaten (pdf, plain text, html) in standardisierte XML-Formate übersetzt. Die Standardisierung erfolgt entspricht Vorgaben der [Text Encoding Initiative (TEI)](http://www.tei-c.org/). 
+* Die im PolMine-Projekt aufbereiteten Korpora werden aus Ausgangsformaten (pdf, plain text, html) in standardisierte XML-Formate übersetzt. Die Standardisierung entspricht Vorgaben der [Text Encoding Initiative (TEI)](http://www.tei-c.org/). 
 
 * Das TEI-XML des GermaParl-Korpus kann als Beispiel dienen. Es ist über ein [GitHub-Repositorium](https://www.github.com/PolMine/GermaParlTEI) offen zugänglich. Es ist, sinnvoll, sich dieses Ausgangsformat anzusehen!
 
@@ -49,7 +51,7 @@ Der Foliensatz nutzt das `polmineR`-Paket und das `GermaParl`-Korpus. Die Instal
 
 Bitte beachten Sie, dass die Funktionalität für den folgenden Workflow erst mit polmineR-Version `r as.package_version("0.7.10")` zur Verfügung steht. Installieren Sie bei Bedarf die aktuelle Version das polmineR-Pakets.
 
-Für die folgenden Beispiel laden wir zunächst `polmineR`. Außerdem wird für die Beispiele das data.table-Paket benötigt.
+Für die folgenden Beispiele laden wir zunächst `polmineR`. Außerdem wird für die Beispiele das data.table-Paket benötigt.
 
 ```{r load_libraries, eval = TRUE, message = FALSE}
 library(polmineR)
@@ -214,7 +216,7 @@ barplot(
 
 ## Korpusgröße: Zwei S-Attribute {.smaller}
 
-Bei der `size()`-Methode kann auch ein zweites S-Attribut angegeben wird, dann wird eine Tabelle mit Korpusgrößen differenziert nach den beiden Merkmalen ausgegeben.
+Bei der `size()`-Methode kann auch ein zweites S-Attribut angegeben werden, dann wird eine Tabelle mit Korpusgrößen differenziert nach den beiden Merkmalen ausgegeben.
 
 Beachte: Der Rückgabewert ist hier ein `data.table`, nicht ein `data.frame`, das Standard-Datenformat von R für Tabellen. Viele Operationen können mit data.tables weitaus schneller als mit data.frames durchgeführt werden. Daher nutzt das polmineR-Paket intern intensiv data.tables. Ein Umwandlung in data.frames erfolgt nicht, ist aber problemlos möglich.
 
@@ -235,7 +237,7 @@ DT::datatable(df_min)
 
 ## Korpusgröße: Zwei Dimensionen {.smaller}
 
-In einem zweiten Beispiel zur Arbeit mit den Ergebnissen einer Untergliederung des Korpus nach zwei Kriterien stellen wir die Frage, wie die Redeanteile der Fraktionen zwischen den Legislaturperioden geschwankt hat.
+In einem zweiten Beispiel zur Arbeit mit den Ergebnissen einer Untergliederung des Korpus nach zwei Kriterien stellen wir die Frage, wie die Redeanteile der Fraktionen zwischen den Legislaturperioden geschwankt haben.
 
 ```{r}
 dt <- size("GERMAPARL", s_attribute = c("parliamentary_group", "lp"))
@@ -246,7 +248,7 @@ Die Tabelle, die wir jetzt haben, ist in einer sogenannten "extensiven" Form. Si
 
 ```{r}
 tab <- dcast(parliamentary_group ~ lp, data = dt_min, value.var = "size")
-setnames(tab, old = "parliamentary_group", new = "Fraktion")
+setnames(tab, old = "parliamentary_group", new = "Fraktion") # Umbenennung
 ```
 
 Das schauen wir uns an, wobei wir ein 'widget' benutzen, das mit der JavaScript-Bibliothek DataTable (nicht verwechseln mit data.table!) erzeugt wird. (Die Ausgabe lässt sich auch in Folien einbeziehen, die - wie diese - mit R Markdown geschrieben wurden.)
@@ -333,3 +335,5 @@ size("GERMAPARL", s_attribute = "speaker")[speaker == "Angela Merkel"]
 ```
 
 Nochmal das Stichwort "know your data": Wenn Sie eine Blick in das TEI-XML des GermaParl-Korpus geworfen haben: Zwischenrufe sind - bewusst! - Teil der "XMLifizierung" der Protokolle, in der sie ausgezeichnet sind. Für saubere Analysen muss man also mit Subkorpora arbeiten, die Zwischenrufe aus der Analyse ausschließen. Wie das geht, ist Gegenstand des nächsten Foliensatzes.
+
+## Literatur

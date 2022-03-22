@@ -2,7 +2,7 @@
 title: "Die Kunst des Zählens"
 subtitle: 'Die count()-Methode von polmineR richtig nutzen'
 author: "Andreas Blaette"
-date: "Stand: 10. Oktober 2018"
+date: "Stand:  4. April 2022"
 output:
   ioslides_presentation:
     css: css/stylesheet.css
@@ -15,6 +15,8 @@ vignette: >
   %\VignetteIndexEntry{Die Kunst des Zählens}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
+bibliography: Literatur_counting.bib
+nocite: '@*'
 ---
 
 ## Die Kunst des Zählens {.smaller}
@@ -287,7 +289,7 @@ for (pg in c("CDU/CSU", "GRUENE", "SPD", "LINKE")){
 
 - Mit der Lemmatisierung im Korpus zu arbeiten, kann eine effiziente Lösung sein, um die Flektionen eines Wortes im Korpus zu erfassen. Ein mögliches Problem ist jedoch, dass Wortneuschöpfungen unter Umständen nicht lemmatisiert werden konnten.
 
-- Eine mögliche Alternative ist die sorgfältige Entwicklung regulärer Ausdrücke, mit denen verschiedene sprachliche Varianten zu erfassen. Die Potentiale der CQP-Syntax wurden hier nur angerissen. Relevant kann insbesondere noch die Möglichkeit sein, Mehrworteinheiten zu erfassen (z.B. "Menschen mit Migrationshintergrund").
+- Eine mögliche Alternative ist die sorgfältige Entwicklung regulärer Ausdrücke, um damit verschiedene sprachliche Varianten zu erfassen. Die Potentiale der CQP-Syntax wurden hier nur angerissen. Relevant kann insbesondere noch die Möglichkeit sein, Mehrworteinheiten zu erfassen (z.B. "Menschen mit Migrationshintergrund").
 
 
 ## Häufigkeitsverteilungen {.smaller}
@@ -317,9 +319,9 @@ par(mfrow = c(1,1))
 dt <- dispersion("GERMAPARL", query = "Flüchtlinge", s_attribute = "year", freq = TRUE)
 ```
 
-- Der Rückgabewert die `dispersion()`-Methode ist wie bei der `count()`-Methode ein `data.table`. Die verlustfreie Umwandlung mit `as.data.frame()` ist möglich.
+- Der Rückgabewert der `dispersion()`-Methode ist wie bei der `count()`-Methode ein `data.table`. Die verlustfreie Umwandlung mit `as.data.frame()` ist möglich.
 
-- Das Ergebnis der Verteilungsanalyse lassen sich schnell und einfach als Balkendiagramm visualisieren. (Aus der Abbildung auf der folgenden Folie geht die Resonanz des Themas Flucht und Asyl im Bundestag deutlich hervor.)
+- Das Ergebnis der Verteilungsanalyse lässt sich schnell und einfach als Balkendiagramm visualisieren. (Aus der Abbildung auf der folgenden Folie geht die Resonanz des Themas Flucht und Asyl im Bundestag deutlich hervor.)
 
 ```{r, eval = FALSE}
 barplot(
@@ -389,7 +391,7 @@ ts <- xts(x = dt[["count"]], order.by = as.Date(dt[["date"]]))
 plot(ts)
 ```
 
-- Ist das schon aussagekräftig genug? Wir sollten daher Zählung auf einen größeren Zeitraum zu aggregieren.
+- Ist das schon aussagekräftig genug? Wir sollten daher die Zählung auf einen größeren Zeitraum aggregieren.
 
 
 ## Aggregation nach Woche - Monat - Quartal - Jahr {.smaller}
@@ -464,7 +466,7 @@ names(debates) <- paste(
 dict <- c("Asyl", "Flucht", "Flüchtlinge", "Geflüchtete")
 ```
 
-- Wir führen eine Zählung über das "debates"-`partition_bundle` durch und sortieren das daraus resultierende `data.table` in absteigender Reihenfolge. Das `partition_bundle` mit allen Debatten kann mit den Namen jener Partitionen indiziert werden, die einen Diktionäres-Score über einem Schwellenwert (hier: 25) liegen.
+- Wir führen eine Zählung über das "debates"-`partition_bundle` durch und sortieren das daraus resultierende `data.table` in absteigender Reihenfolge. Das `partition_bundle` mit allen Debatten kann mit den Namen jener Partitionen indiziert werden, deren Diktionärs-Score über einem Schwellenwert (hier: 25) liegen.
 
 ```{r, message = FALSE}
 dt <- count(debates, query = dict) %>% setorderv(cols = "TOTAL", order = -1L)
@@ -499,7 +501,7 @@ dt <- count(bt2008, p_attribute = c("word", "pos")) %>% subset(pos %in% c("NN", 
 
 ## Gekonnt Zählen (nicht nur) für Algorithmen {.smaller}
 
-- Zählungen aller Token in einer Partitionen sind Grundlage zum Beispiel für Verfahren der Term-Extraktion, oder können Grundlage für die Aufbereitung von Term-Dokument-Matrizen sein, die etwa als Ausgangspunkt einer Anwendung von topicmodel-Algorithmen dienen.
+- Zählungen aller Token in einer Partition sind Grundlage zum Beispiel für Verfahren der Term-Extraktion, oder können Grundlage für die Aufbereitung von Term-Dokument-Matrizen sein, die etwa als Ausgangspunkt einer Anwendung von topicmodel-Algorithmen dienen.
 
 - Im polmineR-Paket ist die `as.TermDocumentMatrix()`-Methode der Standard-Weg zur Aufbereitung von Term-Dokument-Matrizen. Die Methode kann auf `count_bundle`- oder `partition_bundle`-Objekte angewendet werden, oder auf einen `character`-Vektor, der ein Korpus angibt. Siehe hierzu die Dokumentation der genannten Methoden!
 
@@ -525,3 +527,6 @@ q <- iconv(token, from = "UTF-8", to = "latin1")
 dt2 <- dt[lemma == q]
 dt2[, .N, by = .(word)]
 ```
+
+
+## Literatur
