@@ -3,7 +3,7 @@ title: "The Neighbourhood Counts"
 subtitle: 'The Analysis of Cooccurrences using polmineR'
 author: "Andreas Blaette"
 english_version: "Christoph Leonhardt (2020-03-17)"
-date: "12 November 2018"
+date: "4 April 2022"
 output:
   ioslides_presentation:
     css: css/stylesheet.css
@@ -25,7 +25,7 @@ vignette: >
 
 * the `polmineR` package uses the term of cooccurrences and provides a `cooccurrences()` method because in contrast to the term collocations the more technical term cooccurrences describes the statistical qualities of the approach more fittingly. The term of collocation suggests a relationship between a query term and its context which is a more substantial characterization than can be provided by mere statistical means.
 
-* statistically derived cooccurrences indicate linguistic patterns which should be further analysed. The transition between scientific states which are open to intersubjective validation and interpretative patterns require an qualitative analysis of concordances (also called keyword-in-context-analysis, see `kwic()` method) subsequent to the quantative analysis via cooccurrences.
+* statistically derived cooccurrences indicate linguistic patterns which should be further analysed. The transition between scientific states which are open to intersubjective validation and interpretative patterns require a qualitative analysis of concordances (also called keyword-in-context-analysis, see `kwic()` method) subsequent to the quantative analysis via cooccurrences.
 
 
 ## Initialization {.smaller}
@@ -122,7 +122,7 @@ cooccurrences("UNGA", query = "Islam") %>%
 
 * seemingly, the filtered list is cleaned from noise. However, the chosen example illustrates that even rather unsuspicious filtering steps can lead to a relevant loss of information.
 
-* the quotation marks which are still part of the unfiltered analysis may well be interpreted as noise. However, their statistical occurrence is not random: speakers often refer to other speakers by quoting them or try to distance themselves from their statements using a proverbial style. In protocols this might be transcriped using quotation marks.
+* the quotation marks which are still part of the unfiltered analysis may well be interpreted as noise. However, their statistical occurrence is not random: speakers often refer to other speakers by quoting them or try to distance themselves from their statements using a proverbial style. In protocols this might be transcribed using quotation marks.
 
 * The same is true for pronouns which might suggest a unified understanding of a certain concept ("the Islam") which would be made invisible when applying the usual stop word lists
 
@@ -342,7 +342,7 @@ as_igraph(coocs) %>% plot()
 
 ## Visualization with 'networkD3' {.smaller}
 
-* there is a multitude of possibilities to visualize cooccurrence graph objects. In a final example we create a graph which is suited for interactive visualization with the `networkD3` package. As the point of depature we again create an
+* there is a multitude of possibilities to visualize cooccurrence graph objects. In a final example we create a graph which is suited for interactive visualization with the `networkD3` package. As the point of departure we again create an
 `igraph` object. The graph is shown on the next slide.
 
 ```{r, echo = TRUE, eval = FALSE}
@@ -392,4 +392,4 @@ forceNetwork(
 
 * Beware of the temptation of visualization. Cooccurrence graphs can be tricky as they can suggest discoursive patterns which are not really there and may show only an effect of confirmation bias. As with other quantitative measures, cooccurrence graphs are only signposts for potentially interesting patterns which should be validated via 'close reading' (Moretti).
 
-* this is also true for the 'ordinary' cooccurence analyses which were the focal point of these slides: Statistics of text provides hits for linguistic patterns which are standing out from a statistical point of view. This quantitative result should not be confused with a substantial result which can only be achieved by careful interpretative research conducted on the initial text, for example by concordance/KWIC analyes and the recourse to the full text.
+* this is also true for the 'ordinary' cooccurrence analyses which were the focal point of these slides: Statistics of text provides hits for linguistic patterns which are standing out from a statistical point of view. This quantitative result should not be confused with a substantial result which can only be achieved by careful interpretative research conducted on the initial text, for example by concordance/KWIC analyes and the recourse to the full text.

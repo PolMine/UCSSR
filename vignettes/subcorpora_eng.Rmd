@@ -3,7 +3,7 @@ title: "Subcorpora"
 subtitle: "Using 'partitions' in polmineR"
 author: "Andreas Blaette"
 english_version: "Christoph Leonhardt  (2020-03-17)"
-date: '10 October 2018'
+date: '4 April 2022'
 output:
   ioslides_presentation:
     css: css/stylesheet.css
@@ -204,9 +204,9 @@ writeLines(text = as.character(read(uk_fcrisis)), con = "uk_fcrisis.html")
 
 ## Date specific time slice {.smaller}
 
-* often is can be necessary to create a date specific `partition`, for instance if the effect of events on the discourse should be investigated.
+* often it can be necessary to create a date specific `partition`, for instance if the effect of events on the discourse should be investigated.
 
-* the most efficient way to achieve this is to cast the date information of the corpus into objects of the class `Date`. With these, operations such as greater or smaller than can be performed or sequences can be created. In the following example we count the frequency of the term "terrorism" in the United Nations General Assembly in the year before and after nine-eleven.
+* the most efficient way to achieve this is to cast the date information of the corpus into objects of the class `Date`. With these, operations such as greater or smaller then can be performed or sequences can be created. In the following example we count the frequency of the term "terrorism" in the United Nations General Assembly in the year before and after nine-eleven.
 
 
 ```{r, collapse = TRUE, message = FALSE}
