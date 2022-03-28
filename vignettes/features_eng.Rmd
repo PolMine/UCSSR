@@ -16,6 +16,8 @@ vignette: >
   %\VignetteIndexEntry{Are all Words equal?}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
+bibliography: Lit_features_eng.bib
+nocite: '@*'
 ---
 
 ## Detecting distinct vocabulary {.smaller}
@@ -369,3 +371,5 @@ DT::datatable(dt)
   * the identification of statistically significant vocabulary can be used to determine central features which can be used as the baseline of counting or other text statistical measures which saves memory space and might improve the quality of calculations.
 
   * in sum, the shown procedures provide a flexible and efficient tool to differentiate between important and unimportant parts of the vocabulary.
+  
+## References

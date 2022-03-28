@@ -15,6 +15,8 @@ vignette: >
   %\VignetteIndexEntry{KWIC Analyses using 'polmineR'}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
+bibliography: Lit_kwic_eng.bib
+nocite: '@*'
 ---
 
 ```{r, include = FALSE}
@@ -244,3 +246,5 @@ Y
 * A useful element to systematize the interpretations of concordances is to categorize them or arrange them by type. To this end, it can be helpful to export these concordances as Excel files (`mail` method) which can then be used for further categorisation.
 
 * Note that working with concordances can be mainly understood as interpretatitve research which requires hermeneutical intuition. Who says what at which point in time might be relevant, but it is the search of patterns in language use which is most important for the method.
+
+## References

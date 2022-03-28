@@ -16,6 +16,8 @@ vignette: >
   %\VignetteIndexEntry{The Art of Counting}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
+bibliography: Lit_counting_eng.bib
+nocite: '@*'
 ---
 
 ## The Art of Counting {.smaller}
@@ -526,3 +528,5 @@ q <- iconv(token, from = "UTF-8", to = "latin1")
 dt2 <- dt[lemma == q]
 dt2[, .N, by = .(word)]
 ```
+
+## References

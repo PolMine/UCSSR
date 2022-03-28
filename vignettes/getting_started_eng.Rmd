@@ -121,3 +121,7 @@ read(obama, meta = c("speaker", "date"))
 ```
 
 This should be enough for a first impression.
+
+## Tutorials on Installing R and RStudio
+[YouTube Tutorial](https://www.youtube.com/watch?v=TFGYlKvQEQ4&ab_channel=RProgramming-DDS)  
+[R Studio Education](https://rstudio-education.github.io/hopr/starting.html)

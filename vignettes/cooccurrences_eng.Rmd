@@ -15,6 +15,8 @@ vignette: >
   %\VignetteIndexEntry{The Neighbourhood Counts}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
+bibliography: Lit_cooccurrences_eng.bib
+nocite: '@*'
 ---
 
 ## "You shall know a word by the company it keeps" {.smaller}
@@ -393,3 +395,6 @@ forceNetwork(
 * Beware of the temptation of visualization. Cooccurrence graphs can be tricky as they can suggest discoursive patterns which are not really there and may show only an effect of confirmation bias. As with other quantitative measures, cooccurrence graphs are only signposts for potentially interesting patterns which should be validated via 'close reading' (Moretti).
 
 * this is also true for the 'ordinary' cooccurrence analyses which were the focal point of these slides: Statistics of text provides hits for linguistic patterns which are standing out from a statistical point of view. This quantitative result should not be confused with a substantial result which can only be achieved by careful interpretative research conducted on the initial text, for example by concordance/KWIC analyes and the recourse to the full text.
+
+## References
+

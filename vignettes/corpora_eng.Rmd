@@ -16,6 +16,8 @@ vignette: >
   %\VignetteIndexEntry{Corpora in polmineR}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
+bibliography: Lit_corpora_eng.bib
+nocite: '@*'
 ---
 
 ```{r, include = FALSE}
@@ -356,3 +358,5 @@ size("UNGA", s_attribute = "speaker")[speaker == "Trump"]
 ```
 
 Often, you might want to work only with a small subset of a corpus, i.e. a subcorpus. How this can be done using polmineR is explained in the next set of slides.
+
+## References
