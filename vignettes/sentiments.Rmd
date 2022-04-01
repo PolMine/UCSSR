@@ -19,7 +19,7 @@ bibliography: Literatur_sentiments.bib
 nocite: '@*'
 ---
 
-```{r klippy, echo=FALSE, include=TRUE}
+```{r klippy, echo=FALSE, include=TRUE, eval=FALSE}
 klippy::klippy()
 ```
 
@@ -70,11 +70,10 @@ library(data.table)
 library(xts)
 ```
 
-Wir laden auch polmineR und aktivieren das GermaParl-Korpus, das über das GermaParl-Paket verfügbar ist.
+Wir laden auch polmineR, wodurch das GermaParl-Korpus anschließend verfügbar ist.
 
 ```{r load_polmineR, eval = TRUE, message = FALSE}
 library(polmineR)
-use("GermaParl")
 ```
 
 
@@ -129,7 +128,7 @@ options("polmineR.right" = 10L)
 - Über eine "Pipe" generieren wir nun einen `data.frame` ("df") mit den Zählungen des SentiWS-Vokabulars im Wortumfeld von "Islam". Die Pipe ermöglicht es, die Schritte nacheinander durchzuführen, ohne Zwischenergebnisse zu speichern.
 
 ```{r, echo = TRUE}
-df <- context("GERMAPARL", query = "Islam", p_attribute = c("word", "pos"), verbose = FALSE) %>%
+df <- context("GERMAPARL", query = "Islam", p_attribute = c("word"), verbose = FALSE) %>%
   partition_bundle(node = FALSE) %>%
   set_names(s_attributes(., s_attribute = "date")) %>%
   weigh(with = SentiWS) %>% summary()
@@ -223,7 +222,7 @@ p <- partition("GERMAPARL", parliamentary_group = "CDU/CSU", interjection = FALS
 - In einem etwas gestrafften Verfahren generieren wird die Daten für die Sentiment-Analyse. Zuerst generieren wir den `data.frame` mit den absoluten Zählungen.
 
 ```{r}
-df <- context(p, query = "Islam", p_attribute = c("word", "pos"), verbose = FALSE) %>%
+df <- context(p, query = "Islam", p_attribute = c("word"), verbose = FALSE) %>%
   partition_bundle(node = FALSE) %>%
   set_names(s_attributes(., s_attribute = "date")) %>%
   weigh(with = SentiWS) %>%
@@ -343,5 +342,5 @@ for (aggregation_level in c("week", "month", "quarter", "year")){
   * Wie valide sind die Ergebnisse?
   * Ist der Übergang zur Arbeit mit Wort-Gewichten sinnvoll oder erforderlich?
   
-## Literatur
+## Literatur {.smaller}
 
