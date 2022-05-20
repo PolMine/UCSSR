@@ -31,11 +31,10 @@ if (!"kableExtra" %in% rownames(installed.packages())) install.packages("kableEx
 
 ## Initialisierung {.smaller}
 
-- Die Beispiele basieren auf dem *GermaParl*-Korpus. Der Datensatz in dem Paket muss nach dem Laden von *polmineR* mit dem `use()`-Befehl aktiviert werden.
+- Die Beispiele basieren auf dem *GermaParl*-Korpus. Der Datensatz ist nach dem Laden von polmineR verfügbar.
 
 ```{r initialize, eval = TRUE, message=FALSE}
 library(polmineR)
-use("GermaParl")
 ```
 
 - Außerdem nutzen wir das `magrittr`-Paket, um Befehle in einer sogenannten "Pipe" zu verketten. In einer Pipe wird das Ergebnis eines Befehls zum ersten Argument des jeweils nachfolgenden Befehls. Dadurch kann Code aussagekräftig und kompakt geschrieben werden. Das Paket wird bereits mit dem `polmineR` Paket geladen.
@@ -285,4 +284,4 @@ Viel Erfolg!
 |VVPP|Partizip Perfekt, voll| gegangen, angekommen|
 |VAFIN|finites Verb, aux| [du] bist, [wir] werden | 
 
-## Literatur
+## Literatur {.smaller}

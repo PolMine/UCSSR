@@ -34,11 +34,10 @@ nocite: '@*'
 
 ## Initialisierung {.smaller}
 
-- Die Beispiele basieren auf dem GermaParl-Korpus. Der Datensatz in dem Paket muss nach dem Laden von polmineR mit der `use()`-Funktion aktiviert werden.
+- Die Beispiele basieren auf dem GermaParl-Korpus. Der Datensatz ist nach dem Laden von polmineR verfügbar.
 
 ```{r initialize, eval = TRUE, message=FALSE}
 library(polmineR)
-use("GermaParl")
 ```
 
 - Außerdem werden die Pakete data.table, xts und lubridate benutzt. Bei Bedarf werden diese installiert und dann geladen.

@@ -32,20 +32,19 @@ nocite: '@*'
 
 - Ein Teil der im Folgenden verwendeten Funktionen (Berechnung aller Kookkurrenzen in einem Korpus/einer Partition) sind im *polmineR*-Paket ab Version 0.7.10.9006 enthalten. Bei Bedarf wird die polmineR-Entwicklungsversion installiert.
 
-- Die Beispiele des Foliensatzes basieren auf dem *GermaParl*-Korpus. Der Datensatz in dem Paket muss nach dem Laden von polmineR mit der `use()`-Funktion aktiviert werden.
+- Die Beispiele des Foliensatzes basieren auf dem *GermaParl*-Korpus. Der Datensatz ist nach dem Laden von polmineR verfügbar.
 
 
 ```{r initialize, eval = TRUE, message = FALSE}
 if (packageVersion("polmineR") < package_version("0.7.10.9006"))
   devtools::install_github("PolMine/polmineR", ref = "dev")
 library(polmineR)
-use("GermaParl")
 ```
 
 - Weitere hier verwendete Pakete werden, falls erforderlich, installiert und geladen.
 
 ```{r, message = FALSE}
-for (pkg in c("magrittr", "slam", "tm", "quanteda", "quanteda.textmodels", "Matrix")){
+for (pkg in c("magrittr", "slam", "tm", "quanteda", "quanteda.textmodels", "Matrix", "topicmodels")){
   if (!pkg %in% rownames(installed.packages())) install.packages(pkg)
   library(package = pkg, character.only = TRUE)
 }
@@ -92,7 +91,7 @@ dtm <- polmineR::as.DocumentTermMatrix(bt16_speakers, col = "count")
 ## Mit `as.speeches()` zum `partition_bundle` {.smaller}
 
 ```{r, echo = FALSE}
-doit <- !file.exists("~/lab/tmp/bt2015speeches_lds.RData")
+doit <- !file.exists("~/lab/tmp/lda_bt2015speeches_pos.RData")
 ```
 
 - Im Fall von Plenarprotokollkorpora ist eine plausible Definition der Dokumente, die einer Dokument-Term-Matrix zugrunde liegen, die einzelne Rede von Abgeordneten. Ein Korpus bzw. ein `partition`-Objekt können mit der `as.speeches()`-Methode in ein `partition_bundle` zerlegt werden.
@@ -211,7 +210,7 @@ pb@objects <- lapply(pb@objects, function(x){x@stat[, "pos" := NULL]; x@p_attrib
 ## Das nächste Topic-Modell {.smaller}
 
 ```{r, eval = doit, message = FALSE}
-dtm <- as.DocumentTermMatrix(pb, col = "count")
+dtm <- polmineR::as.DocumentTermMatrix(pb, col = "count")
 
 short_docs <- which(slam::row_sums(dtm) < 100)
 if (length(short_docs) > 0) dtm <- dtm[-short_docs,]
@@ -349,7 +348,7 @@ head(wordfish_summary$estimated.feature.scores, 4) # show first 4 terms
 Beide Werte können auf unterschiedliche Art und Weise visualisiert werden. Für Theta kann die implementierte Dotplot-Darstellung genutzt werden.
 
 ```{r, echo = TRUE}
-quanteda.textmodels::textplot_scale1d(wfm_1, doclabels = pg_dfm@Dimnames$docs)
+quanteda.textplots::textplot_scale1d(wfm_1, doclabels = pg_dfm@Dimnames$docs)
 ```
 
 Hier zeigt sich, dass die Interpretation eines Wordfish-Modells sorgsam vorgegangen werden muss. Auf welcher Skala macht diese Skalierung Sinn?
@@ -371,7 +370,7 @@ head(betaterm[order(betaterm$beta, decreasing = TRUE),], 10)
 Bekannt sind die sogenannten Eifelturm-Darstellungen, die sich aus dem Wordfish-Modell ergeben. Hierbei wird auf der x-Achse abgetragen, inwiefern ein Wort auf die Skalierung aufläd. Auf der y-Achse wird die geschätzte Wordhäufigkeit **psi** dargestellt. Für die Skalierung spielen vor allem dokumentspezifische und selten vorkommende Terme eine Rolle, während häufig vorkommende und auf Dokumentebene gleichmäßig verteilte Begriffe eine geringe Rolle spielen. 
 
 ```{r, echo = TRUE, eval = FALSE}
-quanteda.textmodels::textplot_scale1d(wfm_1, margin = "features",
+quanteda.textplots::textplot_scale1d(wfm_1, margin = "features",
                  highlighted = c("Solidität", "Vermögenssteuer", "Klimakiller",
                                 "Industriestandort", "Freiheit", "Solidarität"))
 ```
@@ -383,7 +382,7 @@ Die Abbildung wird auf der nächsten Folie angezeigt.
 
 
 ```{r, echo = FALSE, eval = TRUE}
-quanteda.textmodels::textplot_scale1d(wfm_1, margin = "features",
+quanteda.textplots::textplot_scale1d(wfm_1, margin = "features",
                  highlighted = c("Solidität", "Vermögenssteuer", "Klimakiller",
                                 "Industriestandort", "Freiheit", "Solidarität"))
 ```
@@ -393,4 +392,4 @@ quanteda.textmodels::textplot_scale1d(wfm_1, margin = "features",
 
 Ob *Term-Dokument-Matrix*, *Dokument-Term-Matrix* oder *Document-Feature-Matrix*, ob *sparse* oder nicht: Die Darstellung von Texten in Matrizen mit Worten auf der einen und Dokumenten auf der anderen Seite ist für eine Vielzahl von Anwendungsbereichen in der computergestützen Textanalyse von enormer Bedeutung. polmineR bietet hierbei die Möglichkeit, Korpora in diese Formen zu überführen und für weitere Analysen nutzbar zu machen. Zu beachten ist, dass in dieser Darstellung Wortzusammenhänge aufgelöst werden. Diese *bag-of-words*-Ansätze stehen so im Gegensatz zum hermeneutisch-interpretativen von beispielsweise Keyword-in-Context-Analysen. Ein triangulatives Vorgehen kann im Sinne der Validierung deshalb nur angeraten werden.
 
-## Literatur
+## Literatur {.smaller}

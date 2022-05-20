@@ -29,10 +29,10 @@ knitr::opts_chunk$set(widgetframe_widgets_dir = 'widgets' )
 required_packages <- c("vembedr", "htmltools", "devtools", "devtools", "widgetframe")
 for (pkg in required_packages)
   if (!pkg %in% rownames(installed.packages())) install.packages(pkg)
-if (!"annolite" %in% rownames(installed.packages()))
-  devtools::install_github("PolMine/annolite")
+if (!"fulltext" %in% rownames(installed.packages())) {
+devtools::install_github("PolMine/fulltext")
+}
 ```
-
 
 
 ## Konkordanzen und KWIC: Grundlagen {.smaller}
@@ -55,11 +55,10 @@ if (packageVersion("polmineR") < as.package_version("0.7.9.9008"))
   devtools::install_github("PolMine/polmineR", ref = "dev")
 ```
 
-Wir laden nun `polmineR` und aktivieren das GermaParl-Korpus: Der Datensatz in dem Paket muss nach dem Laden von `polmineR` mit dem `use()`-Befehl aktiviert werden.
+Wir laden nun `polmineR`, wodurch das GermaParl-Korpus anschließend verfügbar ist.
 
 ```{r initialize, eval = TRUE, message = FALSE}
 library(polmineR)
-use("GermaParl")
 ```
 
 
@@ -212,25 +211,24 @@ P <- partition(
   def = lapply(setNames(metadata, metadata), function(x) K@stat[[x]][i]),
   type = "plpr"
 )
-data <- annolite::as.fulltextdata(P, headline = "Cornelie Sonntag-Wolgast (2005-01-21)")
-data$annotations <- data.frame(
+f <- fulltext::as.fulltexttable(P, headline = "Cornelie Sonntag-Wolgast (SPD)", display = "block")
+annotations <- data.frame(
   text = c("", "", ""),
-  code = c("yellow", "lightgreen", "yellow"),
+  color = c("yellow", "lightgreen", "yellow"),
   annotation = c("", "", ""),
-  id_left = c(
+  start = c(
     min(K@cpos[match_id == i][direction == -1][["cpos"]]),
     min(K@cpos[match_id == i][direction == 0][["cpos"]]),
     min(K@cpos[match_id == i][direction == 1][["cpos"]])
     ),
-  id_right = c(
+  end = c(
     max(K@cpos[match_id == i][direction == -1][["cpos"]]),
     min(K@cpos[match_id == i][direction == 0][["cpos"]]),
     max(K@cpos[match_id == i][direction == 1][["cpos"]])
     )
 )
-W <- annolite::fulltext(data, dialog = NULL, box = TRUE, width = 1000, height = 400)
-Y <- widgetframe::frameWidget(W)
-Y
+f <- fulltext::highlight(f, annotations = annotations)
+fulltext::fulltext(f, box = FALSE)
 ```
 
 

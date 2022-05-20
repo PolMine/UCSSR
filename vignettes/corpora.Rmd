@@ -20,12 +20,12 @@ nocite: '@*'
 ---
 
 ```{r, include = FALSE}
-# Sys.setenv(CORPUS_REGISTRY = "") # to avoid that all system corpora show up
+Sys.setenv(CORPUS_REGISTRY = "") # to avoid that all system corpora show up
 options("kableExtra.html.bsTable" = TRUE)
 ```
 
 ```{r include = FALSE}
-if (! "icon" %in% rownames(installed.packages()) ) devtools::install_github("ropenscilabs/icon")
+library(fontawesome)
 ```
 
 ```{r, echo = FALSE}
@@ -61,7 +61,7 @@ library(data.table)
 
 ## Anzeige der vefügbaren Korpora {.smaller}
 
-Die `corpus()`-Methode (ohne Argumente) gibt eine Liste der Korpora an, auf die in Analysen zugegriffen werden kann. Die Tabelle gibt in der zweiten Spalte die Korpusgröße an. Der Spalte "template" gibt Auskunft, ob Regeln zur Formatierung bei Volltextanzeigen verfügbar sind.
+Die `corpus()`-Methode (ohne Argumente) gibt eine Liste der Korpora an, auf die in Analysen zugegriffen werden kann. Die Tabelle gibt in der zweiten Spalte die Korpusgröße an. Der Spalte "template" gibt Auskunft, ob Regeln zur Formatierung bei Volltextanzeigen verfügbar sind. Indem wir corpus() aufrufen, können wir prüfen, ob das GERMAPARL-Korpus verfügbar ist. Das GERMAPARL-Korpus wird erst nach dem Herunterladen und der Installation mit dieser Methode angezeigt. Die Korpora "REUTERS" und "GERMAPARLMINI" sind hingegen nach der Installation von polmineR verfügbar.
 
 ```{r}
 corpus()
@@ -71,23 +71,10 @@ In ihrer grundlegenden Verwendungsweise kann die `size()`-Methode genutzt werden
 
 ```{r}
 size("REUTERS")
+size("GERMAPARL")
 ```
 
-Die Korpora, die Sie hier sehen, sind als Beispieldaten im polmineR-Paket enthalten.
-
-## Aktivieren von Kopora in Datenpakten mit `use` {.smaller}
-
-Um die Korpora zu aktivieren, die in einem R-package residieren, nutzt man die Funktion `use()`. 
-
-```{r, message = FALSE}
-use("GermaParl")
-```
-
-Indem wir nun noch einmal `corpus()` aufrufen, können wir prüfen, dass nun auch das GERMAPARL-Korpus verfügbar ist.
-
-```{r}
-corpus()
-```
+REUTERS und GERMAPARLMINI sind Korpora, die als Beispieldaten im polmineR-Paket enthalten sind. Das GERMAPARL-Korpus ist nach dem Laden des polmineR-Pakets ebenfalls verfügbar, womit die folgenden Analysen durchgeführt werden können.
 
 Beachte: Entsprechend den Konventionen der CWB werden Korpora immer in Großbuchschraben geschrieben. 
 
@@ -145,7 +132,7 @@ kableExtra::kable(df) %>%
 
 ```
 
-`r icon::fa("lightbulb")`  Grundsätzlich ist diese Datenstruktur vergleichbar mit jener, die Sie vielleicht auch vom tidytext-package kennen.
+`r fontawesome::fa("lightbulb")`  Grundsätzlich ist diese Datenstruktur vergleichbar mit jener, die Sie vielleicht auch vom tidytext-package kennen.
 
 ## Strukturelle Attribute ('s-attributes') {.smaller}
 
@@ -212,7 +199,7 @@ barplot(
   )
 ```
 
-`r icon::fa("question")`  In den Jahren 1998, 2002, 2005, 2009 und 2013 sehen wir jeweils geringere Korpusumfänge. Welchen systematischen Grund hat das?
+`r fontawesome::fa("question")`  In den Jahren 1998, 2002, 2005, 2009 und 2013 sehen wir jeweils geringere Korpusumfänge. Welchen systematischen Grund hat das?
 
 ## Korpusgröße: Zwei S-Attribute {.smaller}
 
@@ -336,4 +323,4 @@ size("GERMAPARL", s_attribute = "speaker")[speaker == "Angela Merkel"]
 
 Nochmal das Stichwort "know your data": Wenn Sie eine Blick in das TEI-XML des GermaParl-Korpus geworfen haben: Zwischenrufe sind - bewusst! - Teil der "XMLifizierung" der Protokolle, in der sie ausgezeichnet sind. Für saubere Analysen muss man also mit Subkorpora arbeiten, die Zwischenrufe aus der Analyse ausschließen. Wie das geht, ist Gegenstand des nächsten Foliensatzes.
 
-## Literatur
+## Literatur {.smaller}

@@ -24,7 +24,7 @@ Dieser Foliensatz zum Einstieg umfasst Hiweise zu ...
   * Installation von R (Statistik- und Programmiersprache)
   * Installation von RStudio (Integrierte Entwicklungsumgebung)
   * Installation von polmineR (R-Paket zur Textanalyse)
-  * Installation von Korpora über R-Pakete (hier: GermaParl)
+  * Installation von Korpora über das R-Paket cwbtools (hier: das GermaParl-Korpus)
   * erstes Demo zum Befehlssatz des polmineR-Pakets
 
 Um aber gleich zu vermitteln, was diese Kombination soll und wohin die Reise geht, zuerst ein kurzer YouTube-Videoclip.
@@ -67,23 +67,20 @@ devtools::install_github("PolMine/polmineR", ref = "dev")
 
 ## Installation von Korpora {.smaller}
 
-Das polmineR-Paket enthält kleine Beispiel-Korpora, um die Funktionalität des Pakets zu illustrieren und zu testen. Die eigentlichen, weit größeren Korpora sind auf einem Server des PolMine-Projekts hinterlegt und werden über korpus-spezifische R-Pakete nachgeladen.
+Das polmineR-Paket enthält kleine Beispiel-Korpora, um die Funktionalität des Pakets zu illustrieren und zu testen. Weit größere Korpora, die für substantiellere Analysen geeignet sind, werden im Rahmen des PolMine-Projektes entwickelt. Diese werden auf Zenodo bereitgestellt und über das R-Paket cwbtools von dort heruntergeladen und installiert.
 
-Für unsere ersten Schritte nutzen wir das GermaParl-Korpus der Plenardebatten des Deutschen Bundestags. Dieses ist noch nicht über CRAN verfügbar, sondern steht über das 'drat'-Repositorium des PolMine-Projekts zur Verfügung. Um auf dieses einfach zugreifen zu können, wird zunächst das 'drat'-package installiert. Dann folgt die Installation von `cwbtools` als Voraussetzung zur Installation von Korpora aus Archivdateien, und dann des GermaParl-Pakets.
-
-```{r, eval = FALSE}
-install.packages("drat")
-drat::addRepo("polmine") # 'polmine' muss hier ausnahmsweise klein geschrieben werden!
-install.packages(pkgs = c("cwbtools", "GermaParl"))
-```
-
-Jetzt können wir das GermaParl-Paket laden und das Korpus vom PolMine-Webserver holen.
+Für unsere ersten Schritte nutzen wir das GermaParl-Korpus der Plenardebatten des Deutschen Bundestags. Dieses ist nicht über CRAN verfügbar. Mit Hilfe von cwbtools kann das Korpus direkt installiert werden.
 
 ```{r, eval = FALSE}
-GermaParl::germaparl_download_corpus() # hier kommt mehr als 1 GB, braucht sicher einen Moment!
+install.packages("cwbtools")
 ```
 
-Hiernach kann auch der UCSSR Foliensatz heruntergeladen werden. Die Installationsanweisungen finden Sie hier [UCSSR Download](https://github.com/PolMine/UCSSR). Die lokale Verfügbarkeit ist von Vorteil, wenn Sie offline mit den Folien arbeiten und einen praktischen Zugang zu den Rmarkdown Dateien haben möchten, auf denen die Folien basieren.
+
+```{r, eval = FALSE}
+cwbtools::corpus_install(doi = "10.5281/zenodo.3742113")  # hier kommt mehr als 1 GB, braucht sicher einen Moment!
+```
+
+Hiernach kann auch der UCSSR Foliensatz heruntergeladen werden. Die Installationsanweisungen finden Sie hier [UCSSR Download](https://github.com/PolMine/UCSSR). Die lokale Verfügbarkeit ist von Vorteil, wenn Sie offline mit den Folien arbeiten und einen praktischen Zugang zu den R Markdown Dateien haben möchten, auf denen die Folien basieren.
 
 
 ## Ein kurzer Test der Installation {.smaller}
@@ -94,10 +91,9 @@ Wir testen nun zuerst, ob polmineR geladen werden kann. Als Bildschirmausgabe so
 library(polmineR)
 ```
 
-Zweitens aktivieren wir das GermaParl-Korpus. Dann testen wir ob nun auch das "GERMAPARL"-Korpus (CWB-Korpora werden immer groß geschrieben) in der Liste der verfügbaren Korpora ist, ergänzend zu "REUTERS" und "GERMAPARLMINI", die im polmineR-Paket beheimatet sind.
+Dann testen wir, ob nun auch das "GERMAPARL"-Korpus (CWB-Korpora werden immer groß geschrieben) in der Liste der verfügbaren Korpora ist, ergänzend zu "REUTERS" und "GERMAPARLMINI", die im polmineR-Paket beheimatet sind.
 
 ```{r, eval = FALSE}
-use("GermaParl")
 c("REUTERS", "GERMAPARLMINI", "GERMAPARL") %in% corpus()[["corpus"]]
 ```
 
@@ -133,5 +129,5 @@ So viel zunächst als Einstieg!
 
 ## Tutorials zur Installation von R und RStudio
 
-[Youtube Tutorial](https://www.youtube.com/watch?v=X_Mxya2Fis0&ab_channel=StatistikamPC)  
+[YouTube Tutorial](https://www.youtube.com/watch?v=X_Mxya2Fis0&ab_channel=StatistikamPC)  
 [R Studio Education](https://rstudio-education.github.io/hopr/starting.html)

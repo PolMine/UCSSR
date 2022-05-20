@@ -24,7 +24,7 @@ options("kableExtra.html.bsTable" = TRUE) # macht schöne Tabellen-Ausgabe verf�
 ```
 
 ```{r include = FALSE}
-if (! "icon" %in% rownames(installed.packages()) ) devtools::install_github("ropenscilabs/icon")
+library(fontawesome)
 ```
 
 ```{r, echo = FALSE}
@@ -49,7 +49,6 @@ Der Foliensatz nutzt das `polmineR`-Paket und das `GermaParl`-Korpus. Die Instal
 
 ```{r, message = FALSE}
 library(polmineR)
-use("GermaParl")
 ```
 
 Bitte beachten Sie, dass die Funktionalität für den folgenden Workflow erst mit polmineR-Version `r as.package_version("0.7.10")` zur Verfügung steht. Die installierte Version prüfen Sie mit `packageVersion("polmineR")`. Installieren Sie bei Bedarf die aktuelle Version das polmineR-Pakets.
@@ -204,7 +203,7 @@ merkel_fcrisis <- partition(merkel2008, date = "2008-10-7")
 read(merkel_fcrisis)
 ```
 
-- Was mit der `read()`-Methode erzeugt wird, kann man auch in eine `character`-Vektor umwandeln, den man speichern kann.
+- Was mit der `read()`-Methode erzeugt wird, kann man auch in einen `character`-Vektor umwandeln, den man speichern kann.
 
 ```{r, message = FALSE}
 writeLines(text = as.character(read(merkel_fcrisis)), con = "merkel.html")
