@@ -20,7 +20,7 @@ nocite: '@*'
 ---
 
 ```{r, include = FALSE}
-Sys.setenv(CORPUS_REGISTRY = "") # to avoid that all system corpora show up
+# Sys.setenv(CORPUS_REGISTRY = "") # to avoid that all system corpora show up
 options("kableExtra.html.bsTable" = TRUE)
 ```
 
