@@ -20,7 +20,14 @@ nocite: '@*'
 ---
 
 ```{r, include = FALSE}
+regdir <- Sys.getenv("CORPUS_REGISTRY")
 Sys.setenv(CORPUS_REGISTRY = "") # to avoid that all system corpora show up
+RcppCWB::cl_load_corpus("GERMAPARL", registry = regdir)
+RcppCWB::cqp_load_corpus("GERMAPARL", registry = regdir)
+
+if (packageVersion("polmineR") < as.package_version("0.8.6"))
+  stop("at least polmineR v0.8.6 required")
+
 options("kableExtra.html.bsTable" = TRUE)
 ```
 
@@ -32,24 +39,12 @@ library(fontawesome)
 library(kableExtra)
 ```
 
-## Technologie und Terminologie {.smaller}
-
-* Die im PolMine-Projekt aufbereiteten Korpora werden aus Ausgangsformaten (pdf, plain text, html) in standardisierte XML-Formate übersetzt. Die Standardisierung entspricht Vorgaben der [Text Encoding Initiative (TEI)](http://www.tei-c.org/). 
-
-* Das TEI-XML des GermaParl-Korpus kann als Beispiel dienen. Es ist über ein [GitHub-Repositorium](https://www.github.com/PolMine/GermaParlTEI) offen zugänglich. Es ist, sinnvoll, sich dieses Ausgangsformat anzusehen!
-
-* Das XML-TEI ist geeignet für die dauerhafte Datenhaltung und zur Sicherung von Interoperabilität, nicht jedoch für eine effiziente Analyse. Als "indexing and query engine" nutzt das PolMine Projekt (das polmineR-Paket) die Corpus Workbench (CWB)
-
-* CWB-indizierte Korpora können insbesondere auch linguistische Annotationen speichern und für die Analyse verfügbar machen. Diese werden über "positionale Attribute" (p-attributes) verfügbar.
-
-* Metadaten sind in der Terminologie der CWB als strukturelle Attribute (s-attributes) verfügbar. Wichtig: S-Attribute sind nicht auf die Textebene beschränkt, sondern können auch Passagen von Text (z.B. Annotationen, Named Entities, in Parlamentsprotokollen: Zwischenrufe) unterhalb der Textebene auszeichnen.
-
 
 ## Erforderliche Installationen und Initialisierung
 
 Der Foliensatz nutzt das `polmineR`-Paket und das `GermaParl`-Korpus. Die Installation wurde im vorhergehenden Foliensatz ausführlicher erläutert.
 
-Bitte beachten Sie, dass die Funktionalität für den folgenden Workflow erst mit polmineR-Version `r as.package_version("0.7.10")` zur Verfügung steht. Installieren Sie bei Bedarf die aktuelle Version das polmineR-Pakets.
+Beachte: Die Funktionalität für einen Teil des hier beschriebenen Codes steht erst mit polmineR-Version `r as.package_version("0.8.6")` zur Verfügung steht. Bitte updaten, falls erforderlich!
 
 Für die folgenden Beispiele laden wir zunächst `polmineR`. Außerdem wird für die Beispiele das data.table-Paket benötigt.
 
@@ -59,41 +54,101 @@ library(data.table)
 ```
 
 
-## Anzeige der vefügbaren Korpora {.smaller}
+## Zum Anfang etwas Terminologie {.smaller}
 
-Die `corpus()`-Methode (ohne Argumente) gibt eine Liste der Korpora an, auf die in Analysen zugegriffen werden kann. Die Tabelle gibt in der zweiten Spalte die Korpusgröße an. Der Spalte "template" gibt Auskunft, ob Regeln zur Formatierung bei Volltextanzeigen verfügbar sind. Indem wir corpus() aufrufen, können wir prüfen, ob das GERMAPARL-Korpus verfügbar ist. Das GERMAPARL-Korpus wird erst nach dem Herunterladen und der Installation mit dieser Methode angezeigt. Die Korpora "REUTERS" und "GERMAPARLMINI" sind hingegen nach der Installation von polmineR verfügbar.
+* Die im PolMine-Projekt aufbereiteten Korpora werden aus Rohdaten (pdf, plain text, html) in standardisierte XML-Formate übersetzt. Die Standardisierung entspricht Vorgaben der [Text Encoding Initiative (TEI)](http://www.tei-c.org/). 
 
-```{r}
-corpus()
-```
+* Das TEI-XML des GermaParl-Korpus kann als Beispiel dienen. Es ist über ein [GitHub-Repositorium](https://www.github.com/PolMine/GermaParlTEI) offen zugänglich. Know your data - es ist sinnvoll, dieses Ausgangsformat zu kennen!
 
-In ihrer grundlegenden Verwendungsweise kann die `size()`-Methode genutzt werden, um die Größe eines Korpus direkt abzufragen.
+* Das XML-TEI ist geeignet für die dauerhafte Datenhaltung und zur Sicherung von Interoperabilität, nicht jedoch für eine effiziente Analyse. Als **indexing and query engine** nutzt das PolMine Projekt (das polmineR-Paket) die Corpus Workbench (CWB)
 
-```{r}
-size("REUTERS")
-size("GERMAPARL")
-```
+* CWB-indizierte Korpora können insbesondere auch linguistische Annotationen speichern und für die Analyse verfügbar machen. Diese werden über **positionale Attribute** (*p-attributes*) verfügbar.
 
-REUTERS und GERMAPARLMINI sind Korpora, die als Beispieldaten im polmineR-Paket enthalten sind. Das GERMAPARL-Korpus ist nach dem Laden des polmineR-Pakets ebenfalls verfügbar, womit die folgenden Analysen durchgeführt werden können.
-
-Beachte: Entsprechend den Konventionen der CWB werden Korpora immer in Großbuchschraben geschrieben. 
+* Metadaten sind in der Terminologie der CWB als **strukturelle Attribute** (*s-attributes*) verfügbar. Entsprechend den Elementen von XML-Dokumenten können *s-attributes* hierarchisch ineinander geschachtelt sein: *s-attributes* sind nicht auf die Dokumentebene beschränkt, sondern können auch darin eingelagert Passagen von Text (z.B. Annotationen, Named Entities, in Parlamentsprotokollen: Zwischenrufe) auszeichnen.
 
 
-## Nutzung von Korpora an anderen Speicherorten {.smaller}
+## registry-Verzeichnis und registry-Dateien {.smaller}
 
-Die CWB benötigt für den Zugriff auf Korpora eine Beschreibung der Korpora, die über txt-Dateien einem sogenannten 'registry'-Verzeichnis erfolgt. Tatsächlich wird immer beim Laden von polmineR ein temporäres registry-Verzeichnis angelegt, zu dem nach der Aktivierung von Korpora in Paketen weitere registry-Dateien hinzugefügt werden. Den Pfad zu diesem Verzeichnis können Sie mit der `registry()`-Funktion  abfragen. 
+* Korpora im CWB-Datenformat werden in *registry*-Dateien beschreiben, die in einem *registry*-Verzeichnis liegen. Die *registry*-Dateien deklarieren insbesondere die *p-* und *s-attributes* eines Korpus. Außerdem definieren *corpus properties* allgemeine Merkmale eines Korpus. Das ist inbesondere die Zeichenkodierung der Daten. Angaben zur Version, zum Datentypus oder zum Indizierungsdatum (*build date*) kommen optional hinzu.
 
-```{r, eval = FALSE}
-registry()
-```
+* Die Deklarationen der *registry*-Datei eines Korpus werden beim einmaligen Laden eines Korpus im Speicher gehalten, so dass diese Datei nicht immer wieder verarbeitet werden muss. 
 
-Die klassische Arbeitsweise mit der CWB sieht vor, dass man ein Standard-registry-Verzeichnis hat, das über die Umgebungsvariable CORPUS_REGISTRY definiert wird. Beim Start prüft polmineR, ob diese Umgebungsvariable definiert ist. Wenn ja, werden die registry-Dateien in diesem Verzeichnis in das oben beschriebene temporäre Verzeichnis kopiert. Die CORPUS_REGISTRY-Umgebungsvariable können Sie wie folgt definieren. Wichtig: Dies muss erfolgen, *bevor* Sie polmineR laden. 
+* Die Umgebungsvariable `CORPUS_REGISTRY` definiert die zentrale "Korpusregistratur" eines Systems. Die in diesem Verzeichnis definierten Korpora werden beim Laden von polmineR geladen.
+
+* Die CORPUS_REGISTRY-Umgebungsvariable lässt sich wie folgt definieren. Wichtig: Dies muss *vor* dem Laden von polmineR erfolgen. Tip: Umgebungsvariablen für R-Sitzungen können dauerhaft über die Datei .Renviron definiert werden. Durch Aufruf der Hilfe zu den Routinen beim Start von R erfahren Sie mehr (`?Startup`).
 
 ```{r, eval = FALSE}
 Sys.setenv(CORPUS_REGISTRY = "/PFAD/ZU/REGISTRY/VERZEICHNIS")
 ```
 
-Tip: Am leichtesten ist es, Umgebungsvariablen für R über die Datei .Renviron zu definieren, die von R immer beim Start evaluiert wird. Durch Aufruf der Hilfe zu den Routinen beim Start von R erfahren Sie mehr (`?Startup`).
+
+
+
+## Das temporäre registry-Verzeichnis {.smaller}
+
+* Ein besonderer Fall ist ein temporäres *registry*-Verzeichnis, das von polmineR beim Laden immer angelegt wird. Diese Sitzungs-Korpusregistrytur wird mit `registry()` abgefragt.
+
+```{r get_registry, eval = TRUE}
+registry()
+```
+
+* Diese temporäre registry wird insbesondere für modifizierte Kopien von registry-Dateien zu Beispielkorpora in R-Paketen genutzt. Diese Modifikationen sind erforderlich, um Pfadangaben zu aktualisieren.
+
+* Korpora in R-Paketen werden mit `use()` verfügbar gemacht, die insbesondere in Code-Beispielen genutzt werden. Daher sehen Sie im Beispiel-Code immer wieder diese beiden Zeilen:
+
+```{r, message = FALSE}
+use("polmineR")
+use("RcppCWB")
+```
+
+
+## Anzeige der vefügbaren Korpora {.smaller}
+
+* Die `corpus()`-Methode (ohne Argumente) gibt eine Liste der Korpora an, auf die in Analysen zugegriffen werden kann. Die Spalte **size** gibt die Korpusgröße an.
+
+```{r, message = TRUE, results = TRUE}
+corpus()[, c("corpus", "encoding", "type", "template", "size")]
+```
+
+* Aus Platzgründen haben wir in dieser Tabelle die Spalte mit dem jeweiligen registry-Verzeichnis ausgeschlossen.
+
+* `corpus()` ist auch nützlich als Vergewisserung, ob Korpora wie erwartet verfügbar sind. In unserem Fall sehen wir die Verfügbarkeit von GERMAPARL. GERMAPARLMINI ist als Beispielkorpus im polmineR-Paket enthalten, die Korpora REUTERS und UNGA sind in RcppCWB enthalten und sind hier ebenfalls verfügbar. Beachte: Entsprechend den Konventionen der CWB werden Korpora immer in Großbuchschraben geschrieben!
+
+
+## Korpora {.smaller}
+
+* Jede Analyse mit polmineR bezieht sich auf Korpora - auch wo Subkorpora analysiert werden, muss dieses zunächst als Subset eines Korpus gewonnen werden.
+
+* Grundsätzlich sind verschiedene auf Korpora anwendbare Methoden bezogen auf `corpus`-Objekte als Input, die mit der `corpus()`-Methode instantiert werden.
+
+```{r, message = FALSE}
+gparl <- corpus("GERMAPARL")
+```
+
+* Seit polmineR v0.8.6 können Korpora geladen werden, deren registry-Dateien in beliebigen Verzeichnissen liegen. Hierfür muss dann zusätzlich das Argument `registry_dir` verwendet werden.
+
+* Eine grundlegende, einfache Methode für Korpora ist `size()`. Man erhält die Zahl der Token im Korpus. Sie wird wie folgt auf ein `corpus`-Objekt angewendet, wie wir es gerade mit `gparl` angelegt haben.
+
+```{r}
+size(gparl)
+```
+
+
+## Es muss nicht immer gleich corpus() sein {.smaller}
+
+* Alle für `corpus`-Objekte verfügbaren Methoden können auch auf einen `character`-Vektor (der Länge 1) mit der (großgeschriebenen) Korpus-ID angewendet werden. Das `corpus`-Objekt wird dann intern instantiert. Das Ergebnis ist identisch.
+
+```{r}
+size("GERMAPARL")
+```
+
+* Die Lesbarkeit von Code lässt sich oft durch die Verwendung von "pipes" verbessern. Pipes haben in R mit dem Paket `magrittr` Verbreitung gefunden. Sie dazu die folgende Schreibweise. 
+
+```{r}
+corpus("GERMAPARL") %>% size()
+```
+
+* Sie sehen die Nutzung von Pipes an vielen Stellen der polmineR-Dokumentation und auch in diesen Folien. Zwingend ist das nicht. Man sollte den Code einfach so schreiben, wie er am besten lesbar erscheint.
 
 
 ## Liniguistische Annotationen: Positionale Attribute {.smaller}
@@ -120,7 +175,7 @@ df <- data.frame(lapply(
   c("word", "pos", "lemma"),
   function(p_attribute){
     ts <- get_token_stream("GERMAPARL", left = 0, right = 9, p_attribute = p_attribute)
-    Encoding(ts) <- registry_get_encoding("GERMAPARL")
+    Encoding(ts) <- encoding("GERMAPARL")
     ts
   }
     
@@ -132,17 +187,17 @@ kableExtra::kable(df) %>%
 
 ```
 
-`r fontawesome::fa("lightbulb")`  Grundsätzlich ist diese Datenstruktur vergleichbar mit jener, die Sie vielleicht auch vom tidytext-package kennen.
+`r fontawesome::fa("lightbulb")`  Grundsätzlich ist diese Datenstruktur vergleichbar mit jener jener des tidytext-Ansatzes.
 
 ## Strukturelle Attribute ('s-attributes') {.smaller}
 
-Metadaten eines Korpus werden als strukturelle Attribute (s-attributes) bezeichnet. Welche S-Attribute bei einem Korpus verfügbar sind, fragen Sie mit der Methode `s_attributes()` ab.
+Metadaten eines Korpus werden als strukturelle Attribute (s-attributes) bezeichnet. Welche s-attributes bei einem Korpus verfügbar sind, fragt man mit `s_attributes()` ab.
 
 ```{r}
 s_attributes("GERMAPARL")
 ```
 
-Die Dokumentation eines Korpus sollte erklären, was die S-Attribute bedeuten. Um zu ermitteln, welche Ausprägungen es für ein S-Attribute gibt, nutzen Sie das Argument `s_attribute`.
+Die Dokumentation eines Korpus sollte erklären, was die S-Attribute bedeuten. Um zu ermitteln, welche Ausprägungen es für ein S-Attribute gibt, wird das Argument `s_attribute` definiert.
 
 ```{r}
 s_attributes("GERMAPARL", s_attribute = "year")
@@ -151,13 +206,13 @@ s_attributes("GERMAPARL", s_attribute = "year")
 
 ## Korpusgröße {.smaller}
 
-Oben wurde schon erwähnt, dass Sie mit der `size()`-Methode die Größe eines Korpus abfragen können.
+Oben wurde schon erwähnt, dass man mit der `size()`-Methode die Größe eines Korpus abfragen kann.
 
 ```{r}
 size("GERMAPARL")
 ```
 
-Wenn Sie zusätzlich mit dem Argument `s_attribute` ein S-Attribut angeben, schlüsseln Sie die Korpusgröße entsprechend auf.
+Wird zusätzlich das Argument `s_attribute` definiert, werden die Subkorpus-Größen angegeben, die bei einer Aufteilung des Korpus entsprechend dem s-attribute entstehen.
 
 ```{r}
 size("GERMAPARL", s_attribute = "lp")
@@ -200,6 +255,7 @@ barplot(
 ```
 
 `r fontawesome::fa("question")`  In den Jahren 1998, 2002, 2005, 2009 und 2013 sehen wir jeweils geringere Korpusumfänge. Welchen systematischen Grund hat das?
+
 
 ## Korpusgröße: Zwei S-Attribute {.smaller}
 

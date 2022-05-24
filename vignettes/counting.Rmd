@@ -27,7 +27,7 @@ nocite: '@*'
 
 - Es ist zu unterscheiden zwischen absoluten Häufigkeiten (`count`) und relativen Frequenzen (`frequencies`, Normalisierung der Häufigkeit durch Division mit Korpus- bzw. Subkorpusgröße, meist als `freq` abgekürzt). In Analysen ist inhaltlich zu begründen, weshalb man mit Häufigkeiten oder Frequenzen arbeitet.
 
-- Die grundlegenden hier erläuterten Methoden sind `count`, `dispersion` und `as.TermDocumentMatrix`. Wie alle anderen Basis-Methoden des polmineR-Pakets sind diese für Korpora  und `partition`-Objekte verfügbar.
+- Die grundlegenden hier erläuterten Methoden sind `count()`, `dispersion()` und `as.TermDocumentMatrix()`. Wie alle anderen Basis-Methoden des polmineR-Pakets sind diese für Korpora, `corpus`  und `partition`-Objekte verfügbar.
 
 - Als Beispiele dienen u.a.: Die Gewinnung von Zeitreihen, die diktionärsbasierte Klassifikation von Partitionen.
  
@@ -40,7 +40,7 @@ nocite: '@*'
 library(polmineR)
 ```
 
-- Außerdem werden die Pakete data.table, xts und lubridate benutzt. Bei Bedarf werden diese installiert und dann geladen.
+- Außerdem werden die Pakete [data.table](), [xts]() und [lubridate](da) benutzt. Bei Bedarf werden diese installiert und dann geladen.
 
 ```{r, message = FALSE}
 for (pkg in c("data.table", "xts", "lubridate"))
@@ -50,7 +50,7 @@ library(data.table)
 library(xts)
 ```
 
-- nicht jedoch das *lubridate*-Paket, um Konflikte mit gleichlautenden Funktionen des *data.table*-Pakets zu vermeiden.
+- Hinweis: *lubridate* laden wir hier nicht, um Konflikte mit gleichlautenden Funktionen des *data.table*-Pakets zu vermeiden.
 
 
 ## Grundlagen des Zählens: Die `count()`-Methode {.smaller}
@@ -76,7 +76,7 @@ count("GERMAPARL", query = c("Fluchtursachen", "Herkunftsländer"))
 
 ## Nutzung der Ergebnisse eines Zählvorgangs {.smaller}
 
-- In einem kleinen Beispiel wollen wir ansehen, wie intensiv bestimmte Begriffe genutzt werden.
+- In einem kleinen Beispiel wollen wir ansehen, wie häufig bestimmte Begriffe genutzt werden.
 
 ```{r}
 queries <- c(
@@ -111,14 +111,14 @@ barplot(height = df$count, names.arg = df$query, las = 2)
 
 ## `count()`-Methode und `partition`-Objekte {.smaller}
 
-- Die `count()`-Methode kann auf `partition()`-Objekte genauso wie auf Korpora als Ganzes angewendet werden. 
+- Die `count()`-Methode kann auf `partition()`-Objekte genauso wie auf Korpora angewendet werden. 
 
 ```{r, collapse = TRUE, message = FALSE}
 bt2015 <- partition("GERMAPARL", year = 2015)
 count(bt2015, query = "Flüchtlinge")
 ```
 
-- Es ist möglich, die `partition()`-Methode und die `count()`-Methode in einer "Pipe" zu verbinden (Diese wird durch das magrittr Paket bereitgestellt, das mit polmineR installiert wird). Dies bedeutet, Funktionen oder Methoden mit dem Pipe-Operator ("%>%") zu verketten, wobei dann der Rückgabewert einer Methode zum (ersten) Argument der darauffolgenden Methode werden kann.
+- Es ist übrigens möglich, die `partition()`-Methode und die `count()`-Methode in einer "Pipe" zu verbinden (Diese wird durch das magrittr Paket bereitgestellt, das mit polmineR installiert wird). Eine Pipe ermöglicht, Funktionen oder Methoden mit dem Pipe-Operator (`%>%`) zu verketten, wobei dann der Rückgabewert einer Methode zum (ersten) Argument der darauffolgenden Methode werden kann.
 
 ```{r, collapse = TRUE, message = FALSE}
 partition("GERMAPARL", year = 2015) %>%
@@ -167,7 +167,7 @@ for (pg in c("CDU/CSU", "GRUENE", "SPD", "LINKE")){
   p <- partition(
     "GERMAPARL",
     parliamentary_group = pg, year = 2016, interjection = FALSE
-    )
+  )
   dt <- count(p, query = queries)
   barplot(
     height = dt$freq * 100000, names.arg = dt$query, las = 2, main = pg,
@@ -364,7 +364,6 @@ head(ts)
 
 - Besser sind die Dinge über ein Zeitreihen-Diagramm zu erkennen.
 
-
 ```{r, eval = TRUE, echo = TRUE, fig.height = 4, fig.width = 4}
 plot.xts(
   ts,
@@ -430,7 +429,7 @@ plot(as.xts(ts_year), main = "Aggregation: Jahr")
 
 ## Arbeit mit Zeitreihen: "Learnings" {.smaller}
 
-- Die Analyse von Verteilungen nach verschiedenen S-Attributen ist Grundlage diachroner und synchroner Analysen. Schwerpunkt der Beispiele waren Zeitreihen-Daten. Hierfür empfiehlt es sich, mit spezialisierten Paketen (wie `xts` oder `zoo`) zu arbeiten.
+- Die Analyse von Verteilungen nach verschiedenen strukturellen Attributen ist Grundlage diachroner und synchroner Analysen. Schwerpunkt der Beispiele waren Zeitreihen-Daten. Hierfür empfiehlt es sich, mit spezialisierten Paketen (wie `xts` oder `zoo`) zu arbeiten.
 
 - Sprachliche Zeitreihen-Daten sind Beobachtungen, die unregelmäßig gemacht werden. Temperatur-Messungen werden täglich durchgeführt, doch der Bundestag tagt nicht täglich und Zeitungen erscheinen meist an Sonn- und Feiertagen nicht. Daher ist es für die Analyse und Visualisierung relevant, eine Aggregation der Daten für ein größeres Zeitintervall als den Tag durchzuführen (Woche, Monat, Quartal, Jahr). Auch deswegen empfiehlt es sich, spezialisierte Pakete (`xts` oder `zoo`) zu verwenden.
 
@@ -439,7 +438,7 @@ plot(as.xts(ts_year), main = "Aggregation: Jahr")
 
 ## Diktionärsbasierte Klassifikation I | Für Fortgeschrittene {.smaller}
 
-Zählungen können nicht nur über Korpora und `partition`-Objekte durchgeführt werden, sondern auch über `partition_bundle`-Objekte. Dafür gibt es verschiedene Einsatzszenarien. Hier wird ein Basis-Rezept für eine diktionärsbasierte Klassifikation angeboten. Der erste Schritt ist, ein `partition_bundle` mit den nach Daten und Tagesordnungspunkten unterteilten Partitionen eines Korpus aufzubereiten (hier nur für 2016).
+Zählungen können nicht nur über Korpora und `partition`-Objekte durchgeführt werden, sondern auch über `partition_bundle`-Objekte. Dafür gibt es verschiedene Einsatzszenarien. Hier folgt ein Basis-Rezept für eine diktionärsbasierte Klassifikation. Der erste Schritt ist, ein `partition_bundle` mit den nach Daten und Tagesordnungspunkten unterteilten Partitionen eines Korpus aufzubereiten (hier nur für 2016).
 
 ```{r, message = FALSE, fig.width = 4}
 bt2016 <- partition("GERMAPARL", year = 2016)
