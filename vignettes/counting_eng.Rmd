@@ -3,7 +3,7 @@ title: "The Art of Counting"
 subtitle: 'Using the count() method of polmineR'
 author: "Andreas Blaette"
 english_version: "Christoph Leonhardt (2020-03-17)"
-date: "10 October 2018"
+date: "4 April 2022"
 output:
   ioslides_presentation:
     css: css/stylesheet.css
@@ -16,6 +16,8 @@ vignette: >
   %\VignetteIndexEntry{The Art of Counting}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
+bibliography: Lit_counting_eng.bib
+nocite: '@*'
 ---
 
 ## The Art of Counting {.smaller}
@@ -353,7 +355,7 @@ head(ts)
 
 ## Visualization using `xts` {.smaller}
 
-* a better way to visualize the relationshops is to use a time series plot. The result is shown on the next slide.
+* a better way to visualize the relationships is to use a time series plot. The result is shown on the next slide.
 
 ```{r, eval = FALSE, echo = TRUE, fig.height = 4, fig.width = 10}
 plot.xts(
@@ -433,7 +435,7 @@ plot(as.xts(ts_year), main = "Aggregation: Year")
 
 * linguistic time series data are observations which occurr irregularily. While measuring temperature can be performed daily, parliaments and assemblies do not meet every day and newspapers are not published on sundays or on holidays. Thus, it is relevant for the analysis (and resulting visualizations) to aggregate data in a way that accounts for that, i.e. aggregating bigger time spans. 
 
-* in diachronic analyses in particular, the possible change of meaning of terms should be considered: Does a political term mean today what it meant 20 years ago? To create valid results when counting, is will often be necessary to additionally perform some random concordance analyses to ensure that a relevant change of word meaning is not overlooked.
+* in diachronic analyses in particular, the possible change of meaning of terms should be considered: Does a political term mean today what it meant 20 years ago? To create valid results when counting, will often be necessary to additionally perform some random concordance analyses to ensure that a relevant change of word meaning is not overlooked.
 
 
 ## Dictionary based classification I | Advanced Applications {.smaller}
@@ -526,3 +528,5 @@ q <- iconv(token, from = "UTF-8", to = "latin1")
 dt2 <- dt[lemma == q]
 dt2[, .N, by = .(word)]
 ```
+
+## References

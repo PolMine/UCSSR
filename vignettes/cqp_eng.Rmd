@@ -3,7 +3,7 @@ title: "'polmineR' and the CQP Syntax"
 subtitle: 'Use Cases with the UNGA Corpus'
 author: "Andreas Blaette"
 english_version: "Christoph Leonhardt (2020-03-17)"
-date: "8 October 2018"
+date: "4 April 2022"
 output:
   ioslides_presentation:
     css: css/stylesheet.css
@@ -15,7 +15,9 @@ editor_options:
 vignette: >
   %\VignetteIndexEntry{polmineR' and the CQP Syntax}
   %\VignetteEncoding{UTF-8}
-  %\VignetteEngine{knitr::rmarkdown}  
+  %\VignetteEngine{knitr::rmarkdown}
+bibliography: Lit_cqp_eng.bib
+nocite: '@*'
 ---
 
 
@@ -306,3 +308,5 @@ Good Luck!
 |PR.*| pronoun, personal or posessive | I [would like], its [48th meeting], their [financial contributions]
 |RB| adverb | [I] therefore [take it], properly [discussed]
 |VB.*| verb, any form | be, consider, remind, [has been] postponed
+
+## References

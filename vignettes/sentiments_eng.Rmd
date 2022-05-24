@@ -3,7 +3,7 @@ title: "Dictionaries and Sentiment Analysis"
 subtitle: 'UNGA - polmineR - Syuzhet'
 author: "Andreas Blaette"
 english_version: "Christoph Leonhardt  (2020-03-17)"
-date: "25 July 2018 / 30 September 2019"
+date: "4 April 2022"
 output:
   ioslides_presentation:
     css: css/stylesheet.css
@@ -15,6 +15,8 @@ vignette: >
   %\VignetteIndexEntry{Dictionaries and Sentiment Analysis}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
+bibliography: Lit_sentiments_eng.bib
+nocite: '@*'
 ---
 
 ```{r klippy, echo=FALSE, include=TRUE}
@@ -23,7 +25,7 @@ klippy::klippy()
 
 ## Fundamentals of sentiment analysis {.smaller}
 
-Sentiment analyses are very popular. Text Mining blogs are showing the many possibilities to capture the variation of text evaluations with a numerical indicator and how to analyse and display changes over time.
+Sentiment analyses are very popular. Text Mining blogs are showing the numerous possibilities to capture the variation of text evaluations with a numerical indicator and how to analyse and display changes over time.
 
 Which movies are rated particularly good or particularly bad? This can be examined by using film reviews. What is the response of customers to a new product launched on the market? Comments in social media can be examined for this purpose. There is certainly a range of useful application scenarios for sentiment analyses, especially beyond science.
 
@@ -244,3 +246,5 @@ Y
 * How do you interpret the results of the time series analysis?
 * How valid are the results?
 * Is the transition to working with word weightings useful or necessary?
+
+## References

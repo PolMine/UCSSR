@@ -3,7 +3,7 @@ title: "Corpora in polmineR"
 subtitle: "Data Structure and first Applications"
 author: "Andreas Blaette"
 english_version: "Christoph Leonhardt (2020-03-17)"
-date: '10 October 2018'
+date: '4 April 2022'
 output:
   ioslides_presentation:
     css: css/stylesheet.css
@@ -16,6 +16,8 @@ vignette: >
   %\VignetteIndexEntry{Corpora in polmineR}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
+bibliography: Lit_corpora_eng.bib
+nocite: '@*'
 ---
 
 ```{r, include = FALSE}
@@ -222,7 +224,7 @@ barplot(
 
 For the `size()` method a second s-attribute can be provided as well. Then, a table is returned in which the corpus size is represented according to both characteristics.
 
-Note: The return value here is a `data.table` instead of a `data.frame` which is the default data format of R for tables. Many operations are can be performed faster with data.tables instead of data.frames. For this reason, the polmineR package prominently uses data.tables internally. A conversion of these data.tables can be achieved easily.
+Note: The return value here is a `data.table` instead of a `data.frame` which is the default data format of R for tables. Many operations can be performed faster with data.tables instead of data.frames. For this reason, the polmineR package prominently uses data.tables internally. A conversion of these data.tables can be achieved easily.
 
 ```{r}
 dt <- size("UNGA", s_attribute = c("speaker", "year"))
@@ -355,4 +357,6 @@ First some words of encouragement: The first steps of working with data.tables c
 size("UNGA", s_attribute = "speaker")[speaker == "Trump"]
 ```
 
-Often, you might want to work only with a small subset of a corpus, i.e. a subcorpus. How thos can be done using polmineR is explained in the next set of slides.
+Often, you might want to work only with a small subset of a corpus, i.e. a subcorpus. How this can be done using polmineR is explained in the next set of slides.
+
+## References

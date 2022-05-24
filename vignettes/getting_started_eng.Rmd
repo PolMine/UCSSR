@@ -3,7 +3,7 @@ title: "First Steps"
 subtitle: 'Requirements and Installation'
 author: "Andreas Blaette"
 english_version: "Christoph Leonhardt (2020-03-17)"
-date: 'September 2018'
+date: '4 April 2022'
 output:
   ioslides_presentation:
     css: css/stylesheet.css
@@ -49,7 +49,7 @@ install.packages("polmineR")
 
 Windows users can work with precompiled dependencies, so it should work 'out of the box'. Users of MacOS and Linux have to install the libraries [pcre](https://www.pcre.org/) and [GLib](https://de.wikipedia.org/wiki/GLib) in the terminal *before* installing polmineR. The installation workflow for MacOS is described [here](https://polmine.github.io/polmineR/index.html).
 
-The polmineR package is consistently improved. The most recent development version is available on [GitHub](https://github.com/PolMine/polmineR), a plattform to administrate and share open-source software. The development version fixes known bugs and contains new functionilites as well as improved documentation. The installation is performed using `install_github()` from the `devtools` package.
+The polmineR package is consistently improved. The most recent development version is available on [GitHub](https://github.com/PolMine/polmineR), a plattform to administrate and share open-source software. The development version fixes known bugs and contains new functionalities as well as improved documentation. The installation is performed using `install_github()` from the `devtools` package.
 
 ```{r, eval = FALSE}
 install.packages("devtools")
@@ -121,3 +121,7 @@ read(obama, meta = c("speaker", "date"))
 ```
 
 This should be enough for a first impression.
+
+## Tutorials on Installing R and RStudio
+[YouTube Tutorial](https://www.youtube.com/watch?v=TFGYlKvQEQ4&ab_channel=RProgramming-DDS)  
+[R Studio Education](https://rstudio-education.github.io/hopr/starting.html)

@@ -3,7 +3,7 @@ title: "Subcorpora"
 subtitle: "Using 'partitions' in polmineR"
 author: "Andreas Blaette"
 english_version: "Christoph Leonhardt  (2020-03-17)"
-date: '10 October 2018'
+date: '4 April 2022'
 output:
   ioslides_presentation:
     css: css/stylesheet.css
@@ -15,7 +15,9 @@ editor_options:
 vignette: >
   %\VignetteIndexEntry{Subcorpora}
   %\VignetteEncoding{UTF-8}
-  %\VignetteEngine{knitr::rmarkdown}  
+  %\VignetteEngine{knitr::rmarkdown} 
+bibliography: Lit_subcorpora_eng.bib
+nocite: '@*'
 ---
 
 ```{r, include = FALSE}
@@ -204,9 +206,9 @@ writeLines(text = as.character(read(uk_fcrisis)), con = "uk_fcrisis.html")
 
 ## Date specific time slice {.smaller}
 
-* often is can be necessary to create a date specific `partition`, for instance if the effect of events on the discourse should be investigated.
+* often it can be necessary to create a date specific `partition`, for instance if the effect of events on the discourse should be investigated.
 
-* the most efficient way to achieve this is to cast the date information of the corpus into objects of the class `Date`. With these, operations such as greater or smaller than can be performed or sequences can be created. In the following example we count the frequency of the term "terrorism" in the United Nations General Assembly in the year before and after nine-eleven.
+* the most efficient way to achieve this is to cast the date information of the corpus into objects of the class `Date`. With these, operations such as greater or smaller then can be performed or sequences can be created. In the following example we count the frequency of the term "terrorism" in the United Nations General Assembly in the year before and after nine-eleven.
 
 
 ```{r, collapse = TRUE, message = FALSE}
@@ -262,3 +264,5 @@ count(uk_2009_days, query = c("crisis", "bank", "financial")) %>% show()
 * the S4 system which is used by polmineR for this implementation is assumed to be more complex and difficult to manage than the older S3 system. However, it ensures greater control over error messaging and thus, quality control. Further information about object oriented programming in R can be found in the online book ["Advanced R" by Hadley Wickham](http://adv-r.had.co.nz/S4.html).
 
 * after understanding the mechanisms of `partition` and `partition_bundle` objects we now have the basics for all further, substantially interesting approaches of analysis. In the next slides we have a look at the art of counting.
+
+## References

@@ -3,7 +3,7 @@ title: "KWIC Analyses using 'polmineR'"
 subtitle: 'Syntax und Rezepte'
 author: "Andreas Blaette"
 english_version: "Christoph Leonhardt (2020-03-17)"
-date: "10 October 2018"
+date: "4 April 2022"
 output:
   ioslides_presentation:
     css: css/stylesheet.css
@@ -15,6 +15,8 @@ vignette: >
   %\VignetteIndexEntry{KWIC Analyses using 'polmineR'}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
+bibliography: Lit_kwic_eng.bib
+nocite: '@*'
 ---
 
 ```{r, include = FALSE}
@@ -36,9 +38,9 @@ if (!"annolite" %in% rownames(installed.packages()))
 
 ## Concordances and KWIC: Foundations {.smaller}
 
-* the analysis of the context of words and query terms can serve as an analytical link between quantative counting operations and qualitative-interpretative approaches of content analysis. In the field of linguistics, this analysis of word contexts is called 'concordance analysis'. In the tradition of context analysis in social science this approach often is called Keyword-in-Context-Analysis (or 'KWIC'). Since it nicely conveys the central meaning of the approach, in polmineR the method is called `kwic`. In the following, the term 'concordances' is also used for the quanlitative examination of word contexts of query terms.
+* the analysis of the context of words and query terms can serve as an analytical link between quantative counting operations and qualitative-interpretative approaches of content analysis. In the field of linguistics, this analysis of word contexts is called 'concordance analysis'. In the tradition of context analysis in social science this approach often is called Keyword-in-Context-Analysis (or 'KWIC'). Since it nicely conveys the central meaning of the approach, in polmineR the method is called `kwic`. In the following, the term 'concordances' is also used for the qualitative examination of word contexts of query terms.
 
-* in advance, an important decision is how many words to the left and the right side of the query should be displayed. In linguistical analyses (e.g. in lexicographical approaches) a window of five words to the left and to the right is common. How many context do you need for your application? To satisfy specific disciplinary needs, more than five words might be necessary.
+* in advance, an important decision is how many words to the left and the right side of the query should be displayed. In linguistical analyses (e.g. in lexicographical approaches) a window of five words to the left and to the right is common. How much context do you need for your application? To satisfy specific disciplinary needs, more than five words might be necessary.
 
 * sometimes, it will not be enough to read and interpret just a small extract in the context window of a word. If necessary, the full text should be used for validation. This can be achieved by using the `read()` method.
 
@@ -122,7 +124,7 @@ kwic(unga_2005, query = '[pos = "J.*"] "immigration"', cqp = TRUE)
 options("polmineR.pagelength" = 4L)
 ```
 
-* it might be necessary to analyse context window which is larger than the default value of 5 tokens to each side. Use the arguments `left` and `right` for this.
+* it might be necessary to analyse a context window which is larger than the default value of 5 tokens to each side. Use the arguments `left` and `right` for this.
 
 ```{r, eval = TRUE, render = knit_print, message = FALSE}
 kwic("UNGA", query = "border", left = 15, right = 15)
@@ -241,6 +243,8 @@ Y
 
 * the analysis of concordances can be used in tandem with statistical analyses of cooccurrences: Cooccurrence analysis (`cooccurrences()` function) provides indications of statistical remarkable word usage which can be analysed and interpreted qualitatively by the means of the Keyword-in-Context-Analysis.
 
-* A useful element to systematize the interpretations of concordances is to categorize them or arange them by type. To this end, it can be helpful to export these concordances as Excel files (`mail` method) which can then be used for further categorisation.
+* A useful element to systematize the interpretations of concordances is to categorize them or arrange them by type. To this end, it can be helpful to export these concordances as Excel files (`mail` method) which can then be used for further categorisation.
 
 * Note that working with concordances can be mainly understood as interpretatitve research which requires hermeneutical intuition. Who says what at which point in time might be relevant, but it is the search of patterns in language use which is most important for the method.
+
+## References

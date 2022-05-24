@@ -3,7 +3,7 @@ title: "Are all Words equal?"
 subtitle: 'Term Extraction with polmineR'
 author: "Andreas Blaette"
 english_version: "Christoph Leonhardt (2020-03-17)"
-date: "19 November 2018"
+date: "4 April 2022"
 output:
   ioslides_presentation:
     css: css/stylesheet.css
@@ -16,6 +16,8 @@ vignette: >
   %\VignetteIndexEntry{Are all Words equal?}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
+bibliography: Lit_features_eng.bib
+nocite: '@*'
 ---
 
 ## Detecting distinct vocabulary {.smaller}
@@ -325,7 +327,7 @@ DT::datatable(dt)
 
 ## Noun-Adjective-Noun Sequences {.smaller}
 
-* a last example should illstrate that these analyses can applied to a vast variety of linguistic sequences. We could use multiword expressions with three terms to identify relevant noun-adjective-noun sequences. At first, we just increase the number of analyzed words.
+* a last example should illustrate that these analyses can be applied to a vast variety of linguistic sequences. We could use multiword expressions with three terms to identify relevant noun-adjective-noun sequences. At first, we just increase the number of analyzed words.
 
 
 ```{r, eval = TRUE, message = FALSE}
@@ -369,3 +371,5 @@ DT::datatable(dt)
   * the identification of statistically significant vocabulary can be used to determine central features which can be used as the baseline of counting or other text statistical measures which saves memory space and might improve the quality of calculations.
 
   * in sum, the shown procedures provide a flexible and efficient tool to differentiate between important and unimportant parts of the vocabulary.
+  
+## References
