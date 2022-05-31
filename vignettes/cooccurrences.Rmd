@@ -1,0 +1,391 @@
+---
+title: "Die Nachbarschaft zählt"
+subtitle: 'Die Analyse von Kookkurrenzen mit polmineR'
+author: "Andreas Blaette"
+date: 'Stand:  4. April 2022'
+output:
+  ioslides_presentation:
+    css: css/stylesheet.css
+    logo: img/polmine.png
+    widescreen: yes
+  slidy_presentation: default
+editor_options:
+  chunk_output_type: console
+vignette: >
+  %\VignetteIndexEntry{Sag mir welche Nachbarschaft Du hast}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+bibliography: Literatur_cooccurrences.bib
+nocite: '@*'
+---
+
+## Warum die Nachbarschaft von Worten zählt {.smaller}
+
+- In der Korpuslinguistik wird ein Satz gern zitiert: "You shall know a word by the company it keeps" (Firth, J. R. 1957: 11). Der semantische Gehalt eines Wortes wird durch das regelmäßig wiederkehrende Wortumfeld geprägt.
+
+- Der Firth'sche Satz begründet quantitative Techniken der Kollokations- bzw. Kookkurrenzanalyse. Anhand der Häufigkeit und statistischen Auffälligkeit von Worten im Umfeld eines Wortes, oder von Treffern für einen Suchbegriff werden Kollokationen bzw. Kookkurrenzen bestimmt.
+
+- Das *polmineR*-Paket nutzt den Begriff der Kookkurrenzen und beinhaltet eine `cooccurrences()`-Methode, weil dieser eher technische Begriff die zunächst bloß statistische Qualität des überzufällig häufigen Auftretens von Token im Umfeld eines Suchbegriffs besser ausdrückt. Der Begriff der "Kollokation" beinhaltet eine stärkere inhaltliche Aussage, die eine qualitative Analyse erfordert, die über die reine Textstatistik hinausgeht.
+
+- Statistisch ermittelte Kookkurrenzen weisen auf sprachliche Muster hin, die Aufmerksamkeit verdienen. Der Übergang von intersubjektiv absicherbaren Aussagen zu Deutungsmustern erfordert, dass an die *quantitative* Textanalyse von Kookkurrenzen eine *qualitative* Analyse von Konkordanzen (auch: Keyword-in-Context-Analyse, vgl. `kwic()`-Method) anschließt. 
+
+
+## Initialisierung {.smaller}
+
+- Ein Teil der im Folgenden verwendeten Funktionen (Berechnung aller Kookkurrenzen in einem Korpus/einer Partition) sind im *polmineR*-Paket ab Version 0.7.10.9006 enthalten. Bei Bedarf wird die polmineR-Entwicklungsversion installiert.
+
+- Die Beispiele des Foliensatzes basieren auf dem *GermaParl*-Korpus. Der Datensatz ist nach dem Laden von polmineR verfügbar.
+
+
+```{r initialize, eval = TRUE, message = FALSE}
+if (packageVersion("polmineR") < package_version("0.7.10.9006"))
+  devtools::install_github("PolMine/polmineR", ref = "dev")
+library(polmineR)
+```
+
+- Weitere hier verwendete Pakete werden falls erforderlich installiert und geladen.
+
+```{r, message = FALSE, warning=FALSE}
+for (pkg in c("magrittr", "data.table", "networkD3", "igraph", "DT", "RColorBrewer", "tm")){
+  if (!pkg %in% rownames(installed.packages())) install.packages(pkg)
+  library(package = pkg, character.only = TRUE)
+}
+```
+
+
+## Grundlagen der Analyse von Kookkurrenzen {.smaller}
+
+- Die Grundlage der statistischen Bestimmungen von Kookkurrenzen ist eine Zählung der Häufigkeit von Worten im Umfeld der Treffer für einen Suchbegriff (oft auch: "node"). Die zentrale Frage bei der statistischen Analyse von Kookkurrenzen ist, ob bestimmte Worte im Wortumfeld der Treffer *überzufällig* oft auftreten: Es erfolgt ein Abgleich der Häufigkeiten im Wortumfeld mit jenen im Korpus bzw. der Partition, die der Analyse zugrunde liegt.
+
+- Als statistischer Test zur Bestimmung von Kookkurrenzen ist insbesondere ein Log-Likelihood-Test gängig, der (gegenüber dem Chisquare-Test als alternativen Unterschiedtest) den Vorteil einer größeren Robustheit auch bei niedrigen Trefferzahlen bietet. Für die verwendeten statistischen Tests gibt es jeweils Schwellenwerte, ab denen eine definierte Irrtumswahrscheinlichkeit überschritten und statistische Signifikanz gegeben ist. 
+
+- Für diese Zählung ist von Bedeutung, wie groß das analysierte Wortumfeld sein soll. In lexikographischen Untersuchen ist ein vergleichsweise kleines Fenster von 3 bis 5 Worten links und rechts des interessierenden Worts gängig. Bei einem sozialwissenschaftlichen Forschungsinteresse kann das bedeutungstragende Wortumfeld oft größer sein (10 Worte links und rechts, oder mehr). 
+
+- Die Zahl der statistisch signifikante Kookkurrenzen ist in hohem Maße abhängigg von der Größe des (Sub-)Korpus. Eine Analyse aller statistisch signifikanten Kookkurrenzen kann nicht immer realisiert werden. Entsprechend wichtig ist eine begründete Nutzung von Filter- und Reduktionskriterien.
+
+
+## Berechnung von Kookkurrenzen mit polmineR {.smaller}
+
+- Die `cooccurrences()`-Methode zur Berechnung von Kookkurrenzen kann auf Korpora als Ganzes angewendet werden, sowie auf `partition`-Objekte, die ein Subkorpus definieren.
+
+- Mit dem folgenden Befehlsaufruf werden die Kookkurrenzen zum Suchbegriff "Islam" berechnet, wobei hier ein Fenster von 10 Worten links und rechts des Suchtreffers genutzt wird.
+
+```{r}
+cooccurrences("GERMAPARL", query = 'Islam', left = 10, right = 10)
+```
+
+- Die `cooccurrences()`-Methode generiert ein Objekt der `cooccurrences`-Klasse. Der Dokumentation dieser Klasse, die sie mit `?"cooccurrences-class"` aufrufen können, können Sie entnehmen, welche Methoden zur weiteren Verarbeitung des Objekts zur Verfügung stehen.
+
+- Wenn ein `cooccurrences`-Objekt ausgegeben wird (impliziter Aufruf der `show()`-Methode), erfolgt in einer RStudio-Sitzung die Ausgabe der Statistik-Tabelle des Objekts im linken oberen Fenster. In diesem Foliensatz binden wir die Ergebnistabellen in das HTML ein; die Tabelle zur ersten Beispiel-Analyse folgt auf der nächsten Folie.
+
+```{r, eval = FALSE}
+cooccurrences("GERMAPARL", query = "Islam")
+```
+
+
+## Kookkurrenzen zu "Islam" {.smaller}
+
+```{r, echo = FALSE, eval = TRUE, render = knit_print}
+cooccurrences("GERMAPARL", query = "Islam")
+```
+
+
+## Filtern von Ergebnissen {.smaller}
+
+- Die in R gängige `subset()`-Methode kann auf ein `cooccurrences`-Objekt angewendet werden, um Ergebnisse zu filtern. Im folgenden Beispiel wird die Kookkurrenz-Analyse für das Wortumfeld von "Islam" gefiltert: 
+
+  - nach dem statistischen Testwert (`ll`-Wert von mindestens 11.83),
+  - einer Mindesthäufigkeit der Kookkurrenzen (`count_coi` von mindestens 5) 
+  - und es werden Worte einer Standard-Stopwortliste ausgeschlossen. 
+
+```{r, eval = FALSE}
+cooccurrences("GERMAPARL", query = "Islam") %>% 
+  subset(ll >= 11.83) %>%
+  subset(count_coi >= 5) %>% 
+  subset(!tolower(word) %in% tm::stopwords("de")) %>%
+  subset(!word %in% c("''", ",", "``"))
+```
+
+- Beachte: Das vorangestellte Ausrufezeichen bei den Filterschritten, bei denen gezielt Worte der Stopwort-Liste ausgeschlossen werden, "invertiert" den logischen Test, d.h. es werden Worte behalten, die *nicht* auf der Stopwort-Liste sind.
+
+
+## Gefilterter Wortkontext von "Islam" {.smaller}
+
+```{r, echo = FALSE, eval = TRUE, render = knit_print, message = FALSE}
+cooccurrences("GERMAPARL", query = "Islam") %>% 
+  subset(ll >= 11.83) %>%
+  subset(count_coi >= 5) %>% 
+  subset(!tolower(word) %in% tm::stopwords("de")) %>%
+  subset(!word %in% c("''", ",", "``"))
+```
+
+
+## Tücken des Filterns {.smaller}
+
+- Die gefilterte Liste ist scheinbar um ein Rauschen in den Daten befreit und sieht viel sauberer aus. Allerdings lässt sich am gewählten Beispiel verdeutlichen, dass auch scheinbar unverdächtige Filter-Schritte einen für Interpretationen relevanten Informationsverlust verursachen können.
+
+- Die in der ungefilterten Analyse auftretenden Anführungszeichen mögen als störendes Rauschen erschienen sein. Sie werden jedoch nicht zufällig statistisch signifikant: Redner des Bundestags beziehen sich wiederholt zitiertend und auch distanzierend auf Formeln wie "Der Islam gehört zu Deutschland", "Der Islam ist die Lösung" oder jene der "Einbürgerung des Islam". Das wird im Protkoll durch die Anführungszeichen zum Ausdruck. Die - kritische - Beschäftigung mit den verschiedenen auf den Islam bezogenen Formeln ist ein wiederkehrendes Merkmal jenes Diskurses, die Anführungszeichen werden keinesfalls zufällig statistisch signifikant!
+
+- Gleiches gilt für die Pronomen "der", "dem" und "des", die wir im zweiten Schritt über die Stopwort-Liste aus der Analyse ausgeschlossen hatten. Was ist damit gemeint? Sie könnten aus  sprachlichen Wendungen resultieren, die vermittelt über das Singular des Pronomens vom Islam als unitarischer Religion ausgehen ("... der Islam ... ", "... dem Islam ...", "... des Islam ..."). Die mit dem sprachlichen Ausdruck implizierte Annahme einer Einheitlichkeit des Islam wäre inhaltlich bedeutsam, gerät aber durch die Nutzung einer Stopwort-Liste aus dem Blick.
+
+
+## Von der Kookkurrenz- zur Konkordanz-Analyse {.smaller}
+
+```{r, echo = FALSE}
+options("polmineR.pagelength" = 3L)
+```
+
+- Was hier der Fall ist, kann letztlich nur die Beschäftigung mit jenen Passagen erweisen, welche die statistische Signifikanz von "der", "dem", "des" im Wortumfeld von "Islam" hervorrufen. D.h. erforderlich ist eine Konkordanz-Analyse zum statistisch signifikanten Vokabular.
+
+- Mit dem Argument `positivelist` lassen sich bei der `kwic()`-Methode die Ergebnisse auf jene beschränken, bei denen über die Liste definierte Worte im Kontext auftreten. Im folgenden Beispiel fügen wir noch eine farbliche Hervorhebung hinzu.
+
+```{r, render = knit_print, message = FALSE}
+kwic("GERMAPARL", query = "Islam", positivelist = "Der") %>% highlight(yellow = "Der")
+```
+
+
+## Definition des Wortkontextes {.smaller}
+
+- Wenn die Argumente `left` und `right` nicht explizit benannt werden, nutzt die Methode Einstellungen, die per `getOption("polmineR.left")` bzw. `getOption("polmineR.right")` abgefragt werden können. Sie können folgendermaßen für eine R-Sitzung dauerhaft gesetzt werden. 
+
+```{r}
+options("polmineR.left" = 10L)
+options("polmineR.right" = 10L)
+```
+
+- Je größer der Wortkontext wird, desto wahrscheinlicher ist es, dass der Wortkontext die Grenzen eines Textes  bzw. einer Textpassage überschreitet. Das Argument `s_attribute` kann zur Bestimmung eines strukturellen Attributs genutzt werden, über dessen einzelne Abschnitte ein Suchfenster nicht hinauslappen soll.
+
+- So kann etwa im Fall des hier verwendeten Plenarprotokoll-Korpus vermieden werden, dass der Text von annotierten Zwischenrufen irrtümlich in die Auswertung von Kookkurrenzen eingeht.
+
+```{r, eval = FALSE}
+cooccurrences("GERMAPARL", query = '"Islam"', s_attribute = "speaker")
+```
+
+
+## Nutzung der CQP-Syntax {.smaller}
+
+```{r, echo = FALSE}
+options("polmineR.pagelength" = 5L)
+```
+
+- Oft wird man das Wortumfeld eines komplexeren lexikalischen Ausdrucks analysieren - nicht nur den eines einzelnen Wortes. Die Syntax des *Corpus Query Processor* (CQP) ist auch bei der `cooccurrences()`-Methode verfügbar, so dass dies problemlos realisiert werden kann. Zwar prüft die Methode, ob das Argument `query` mit der CQP-Syntax formuliert ist, doch ist es besser, das logische Argument `cqp` explizit auf `TRUE` zu setzen.
+
+```{r, render = knit_print}
+cooccurrences("GERMAPARL", '"Menschen" "mit" "Migrationshintergrund"', cqp = TRUE)
+```
+
+
+## Partitionen als Basis von Kookkurrenzen {.smaller}
+
+- Interessante Fragestellungen werden oft den diachronen Wandel oder die synchrone Variation von Kookkurrenzen betreffen. Die `cooccurrences()`-Methode kann natürlich auch auf Partitionen angewendet werden.
+
+- Im folgenden Beispiel stellen wir die Frage, wie sich die Assoziationen zum "Islam" zwischen CDU/CSU und Bündnis 90/Die Grünen in der Phase ab 2001 unterscheiden. Zunächst wird eine Partition für diesen Zeitraum angelegt. 
+
+
+```{r, message = FALSE, eval = TRUE}
+btsub <- partition("GERMAPARL", year = 2002:2011, interjection = FALSE)
+```
+
+- Dann legen wir Subkorpora zum Subkorpus an und berechnen die Kookkurrenzen. (Ergebnisse auf den folgenden Seite.)
+
+```{r, eval = FALSE}
+islam_union <- partition(btsub, parliamentary_group = "CDU/CSU") %>%
+  cooccurrences(query = '"Islam(s|)"', cqp = TRUE, s_attribute = "speaker") %>%
+  subset(count_coi >= 3) %>% subset(ll >= 11.83)
+islam_gruene <- partition(btsub, parliamentary_group = "GRUENE") %>%
+  cooccurrences(query = '"Islam(s|)"', cqp = TRUE, s_attribute = "speaker") %>%
+  subset(count_coi >= 3) %>% subset(ll >= 11.83)
+```
+
+
+## Kookkurrenzen von "Islam" (CDU/CSU) {.smaller}
+
+```{r, echo = FALSE}
+options("polmineR.pagelength" = 10L)
+```
+
+```{r, eval = TRUE, message = FALSE, echo = FALSE, render = knit_print}
+partition(btsub, parliamentary_group = "CDU/CSU") %>%
+  cooccurrences(query = '"Islam(s|)"', cqp = TRUE, s_attribute = "speaker", progress = FALSE) %>%
+  subset(count_coi >= 3) %>%#
+  subset(ll >= 11.83)
+```
+
+
+## Kookkurrenzen von "Islam" (B'90/Die Grünen) {.smaller}
+
+```{r, eval = TRUE, message = FALSE, echo = FALSE, render = knit_print}
+partition(btsub, parliamentary_group = "GRUENE") %>%
+  cooccurrences(query = '"Islam(s|)"', cqp = TRUE, s_attribute = "speaker", progress = FALSE) %>%
+  subset(count_coi >= 3) %>%
+  subset(ll >= 11.83)
+```
+
+
+## Filtern mittels Part-of-Speech-Annotation {.smaller}
+
+- Über das Argument `p_attribute` gibt man an, welches positionale Attribut die Grundlage für die Kookkurrenz-Berechnung sein soll. An Stelle der Wortform können somit auch eine im Korpus verfügbare Lemmatisierung (Attribut "lemma") oder Wortstämme ("stem") verwendet werden. Sprachliche Variation wird dadurch reduziert, was der statistischen Signifikanz von Ergebnissen förderlich sein kann.
+
+- Es können auch zwei p-Attribute bestimmt werden, so dass die Zählung der Häufigkeit von Token im Wortumfeld zum Beispiel eine Part-of-Speech-Annotation mitberücksichtig. Die p-Attribute stehen in den Auswertungs-Tabellen zur Verfügung und können Grundlage für einen Filter-Schritt sein, z.B. nach Inhaltsworten.
+
+- Die Rechenzeit kann sich hier deutlich erhöhen. Ausschlaggebend dafür ist dabei die erforderliche Berechnung der Häufigkeiten *aller* auftretenden Kombinationen von p-Attributen im Referenzkorpus. 
+
+```{r, eval = FALSE}
+mmh_query <- '"Menschen" "mit" "Migrationshintergrund"'
+cooccurrences("GERMAPARL", query = mmh_query, p_attribute = c("word", "pos")) %>%
+  subset(count_coi >= 3) %>% 
+  subset(ll >= 11.83) %>%
+  subset(pos %in% c("NN", "ADJA"))
+```
+
+
+## POS-gefilterte Kookkurrenzen {.smaller}
+
+```{r, eval = TRUE, message = FALSE, echo = FALSE, render = knit_print}
+mmh_query <- '"Menschen" "mit" "Migrationshintergrund"'
+mmh <- cooccurrences("GERMAPARL", query = mmh_query, p_attribute = c("word", "pos")) %>%
+  subset(count_coi >= 3) %>% 
+  subset(ll >= 11.83) %>%
+  subset(pos %in% c("NN", "ADJA"))
+mmh
+```
+
+
+## Wordcloud-Visualisierung von Kookkurrenzen {.smaller}
+
+- Eine beliebte Visualisierung des Vokabulars einer Textsammlung sind Wortwolken. Auch für Kookkurrenzen lässt sich ohne Probleme eine Wortwolke "zaubern".
+
+- Ein Vorteil ist dabei, dass die Selektion des Vokabulars auf einem statistischen Testwert beruht (nicht nur, wie so oft, auf einer bloßen Wortzählung in Kombination mit Stopwort-Listen).
+
+- Der folgende Code macht sich zunutze, dass Spalten der statistischen Auswertungen im `data.table` des `cooccurrences`-Objekts direkt über die Angabe des Namens der Spalte angesprochen werden könnten.
+
+- Hinweis: Die Farbpalette stammt aus dem RColorBrewer-Paket. Die Farbgebung ist in diesem Fall zufällig. Natürlich gäbe es vielfältige Möglichkeiten einer inhaltlich begründeten Farbwahl!
+
+```{r, echo = TRUE, warning = FALSE, eval = FALSE}
+x <- wordcloud::wordcloud(
+  words = mmh[["word"]],
+  freq = mmh[["count_coi"]],
+  colors = rep(RColorBrewer::brewer.pal(8, "Dark2"), times = 7),
+  random.color = TRUE
+  )
+```
+
+
+## Wortwolken-Visualisierung von Kookkurrenzen {.flexbox .vcenter}
+
+```{r, echo = FALSE, warning = FALSE, eval = TRUE}
+x <- wordcloud::wordcloud(
+  words = mmh[["word"]],
+  freq = mmh[["count_coi"]],
+  colors = rep(RColorBrewer::brewer.pal(8, "Dark2"), times = 7),
+  random.color = TRUE
+  )
+```
+
+
+## Dotplot-Visualisierung von Kookkurrenzen {.smaller}
+
+- So gängig und nett Wortwolken sind, so angreifbar sind sie im wissenschaftlichen Kontext: Die Anordnung der Worte erfolgt ausgehend von zufälligen Anfangswerten und ist nicht replizierbar. Wo am Ende welches Wort platziert ist, hat keine inhaltliche Begründung. 
+
+- Wortwolken können in einer Präsentation effizient einen schnellen Eindruck zu einem semantischen Feld oder einem Diktionär vermitteln.
+
+- Ihr systematischer Aussagewert ist jedoch beschränkt, weshalb sie in Publikationen nur im Ausnahmefall platziert werden sollten.
+
+- Eine mögliche Alternative zu Wortwolken sind 'dot plots', die den Blick insbesondere auf die statistischen Testwerte lenken.
+
+- Im polmineR-Paket ist eine `dotplot()`-Methode für `cooccurrences()`-Objekte definiert (Abbildung auf der folgenden Seite).
+
+```{r, eval = FALSE}
+dotplot(mmh, cex = 0.8)
+```
+
+
+## Dotplot-Visualisierung von Kookkurrenzen {.flexbox .vcenter}
+
+```{r, echo = FALSE}
+dotplot(mmh, cex = 0.8)
+```
+
+## Berechnung aller Kookkurrenzen {.smaller}
+
+- Der bisherige Zugang zur Berechnung von Kookkurrenzen war, gezielt das Wortumfeld zu einem Wort oder zu Treffern für einem Suchbegriff zu analysieren. Im Rahmen eines datengeleiteten und explorativen Zugriffs auf Korpora hat eine Analyse aller Kookkurrenzen in einem Korpus heuristisches Potential. 
+
+- Als Beispiel untersuchen wir den Sprachgebrauch von Bundeskanzlerin Angela Merkel in 2008, dem Jahr der Lehman-Pleite. Der Workflow zur Generierung eines (gefilterten) Objekts mit allen Kookkurrenzen entspricht dem bereits Bekannten. Der wesentliche Unterschied ist, dass aus Gründen der Schonung von Speicherplatz eine Dekodierung der numerichen Token-IDs und die Berechnung der statistischen Testwerte explizit und gesondert erfolgt. Alle Kookkurrenzen in einem Korpus zu berechnen kann sehr viel Speicherplatz in Anspruch nehmen!
+
+```{r, message = FALSE}
+m2008 <- partition("GERMAPARL", year = 2008, speaker = "Angela Merkel", interjection = FALSE)
+terms_to_drop <- terms(m2008, p_attribute = "word") %>% noise() %>% unlist()
+coocs <- Cooccurrences(m2008, p_attribute = "word", left = 5L, right = 5L, stoplist = terms_to_drop) %>% 
+  decode() %>% # 
+  ll() %>%
+  subset(ll >= 11.83) %>%
+  subset(ab_count >= 5)
+```
+
+
+## Visualisierung von Kookkurrenz-Graphen {.smaller .columns-2}
+
+- Die Visualisierung einer vollständigen Kookkurrenz-Analyse als Netzwerk ist ein "eye catcher". Der schnellste Weg zum Ziel ist, das `Cooccurrences`-Objekt (Großschreibung beachten!) in ein `igraph`-Objekt umzuwandeln, das geplottet werden kann. 
+
+- Nennenswerten optischen Reiz hat das noch nicht. Hier soll nur vermittelt sein, dass ein umstandsloser Workflow zur Welt der Netzwerkanalyse und "graph visualisation" führt! Eine Welt, die unendliche Möglichkeiten sowohl für gestalterische Ideen, als auch für Zeitverschwendung bereit hält.
+
+```{r, message = FALSE, fig.width = 4, fig.height = 4}
+as_igraph(coocs) %>% plot()
+```
+
+
+
+## Visualisierung mit 'networkD3' {.smaller}
+
+- Es gibt vielfältige Möglichkeiten, Kookkurrenz-Graphen zu visualisieren. In einem letzten Beispiel generieren wir ausgehend von einem `ìgraph`-Objekt das Datenformat für eine interaktive Visualisierung mit dem `networkD3`-Paket, die auf der folgenden Folie wiedergegeben wird.
+
+```{r, echo = TRUE, eval = FALSE}
+G <- as_igraph(coocs)
+
+links <- as.data.frame(cbind(as_edgelist(G, names = FALSE), rep(1, length(E(G)))))
+links[,1] <- links[,1] - 1L # "zero-based" Index für Kanten 
+links[,2] <- links[,2] - 1L # dito
+colnames(links) <- c("source", "target", "value")
+
+nodes <- data.frame(name = V(G)$name, group = rep(1, length(V(G)$name)), size = 3)
+
+forceNetwork(
+  Links = links, Nodes = nodes, Source = "source",
+  Target = "target", Value = "value", NodeID = "name",
+  Group = "group",
+  opacity = 0.75, fontSize = 20, zoom = TRUE
+)
+```
+
+
+## Kookkurrenz-Graph, interaktiv  {.smaller}
+
+```{r, echo = FALSE, eval = TRUE, message = FALSE}
+library(networkD3)
+G <- as_igraph(coocs)
+
+links <- as.data.frame(cbind(as_edgelist(G, names = FALSE), rep(1, length(E(G)))))
+links[,1] <- links[,1] - 1L
+links[,2] <- links[,2] - 1L 
+colnames(links) <- c("source", "target", "value")
+
+nodes <- data.frame(name = V(G)$name, group = rep(1, length(V(G)$name)), size = 3)
+
+forceNetwork(
+  Links = links, Nodes = nodes, Source = "source",
+  Target = "target", Value = "value", NodeID = "name",
+  Group = "group",
+  opacity = 0.75, fontSize = 20, zoom = TRUE
+)
+```
+
+
+## Visualisierung, Hermeneutik, "close reading" {.smaller}
+
+- Bei der Arbeit mit allen Kookkurrenzen eines (Sub-)Korpus ist die Frage des inhaltlich hinreichend begründeten Filterns mindestens so wichtig wie bei "einfachen" Kookkurrenz-Analysen. Die Dokumentation zur `Cooccurrences()`-Methode enthält Hinweise auf die Funktionalität des polmineR-Pakets, mit einer `feature`-Selektion Kookkurrenzen systematisch zu filtern.
+
+- Man hüte sich vor den irreführenden Verlockungen der Visualisierung. Kookkurrenz-Graphen können tückisch sein! Zuweilen scheinen sie sehr intuitiv Bedeutungskomplexe zu vermitteln, und man meint zu sehen, was die zentralen Muster einen Diskurses sind. Man darf jedoch nicht die Möglichkeit aus dem Blick verlieren, dass dies blosse Bestätigungen bereits zuvor vorliegender Vermutungen sein kann, die weder systematisch hergeleitet sind, noch intersubjektiv überprüfbar sind. Auch Kookkurrenz-Graphen sind nur Wegweiser, was per "close reading" (Franco Moretti) Beachtung verdient.
+
+- Dies gilt auch für die "einfachen" Kookkurrenz-Analysen, welche im Mittelpunkt des Foliensatzes standen: Die Textstatistik gibt Hinweise auf die sprachlichen Muster, die statistisch hervorstechen, und die Beachtung verdienen. Das quantitative Zwischenergebnis darf jedoch nicht verwechselt werden mit einem inhaltlichen Ergebnis. Der Weg zu diesem führt nach wie vor in aller Regel über sorgfältige interpretative Arbeit anhand des ursprünglichen Textes, d.h. über Konkordanz/KWIC- und Volltext-Analysen.
+
+## Literatur

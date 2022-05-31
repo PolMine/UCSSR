@@ -1,0 +1,133 @@
+---
+title: "Erste Schritte"
+author: "Andreas Blaette"
+date: 'Stand: 4. April 2022'
+output:
+  ioslides_presentation:
+    css: css/stylesheet.css
+    logo: img/polmine.png
+    widescreen: yes
+  slidy_presentation: default
+subtitle: Voraussetzungen und Installationen
+editor_options:
+  chunk_output_type: console
+vignette: >
+  %\VignetteIndexEntry{Erste Schritte}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}  
+---
+
+## R, RStudio, polmineR und CWB-indizierte Korpora {.smaller}
+
+Dieser Foliensatz zum Einstieg umfasst Hiweise zu ... 
+
+  * Installation von R (als Statistik- und Programmiersprache)
+  * Installation von RStudio (als Integrierte Entwicklungsumgebung / IDE)
+  * Installation von polmineR (als R-Paket für Textanalysen)
+  * Installation von Korpora über das R-Paket cwbtools (hier: GermaParl)
+  * erstes Demo zum Befehlssatz des polmineR-Pakets
+
+Um aber gleich zu vermitteln, was diese Kombination soll und wohin die Reise geht, zuerst ein kurzer YouTube-Videoclip.
+
+----
+
+```{r, eval = TRUE, echo = FALSE}
+vembedr::embed_youtube("frpQm2UcZJk")
+```
+
+
+## Installation von R und RStudio {.smaller}
+
+Die Korpora des PolMine-Projektes, insbesondere GermaParl und UNGA, stehen als linguistisch annotierte und indizierte Korpora zur Verfügung, die in die [Corpus Workbench (CWB)](http://cwb.sourceforge.net/) eingepflegt worden sind. Die Analysen können mit dem R-Paket [polmineR](https://CRAN.R-project.org/package=polmineR) durchgeführt werden.
+
+Voraussetzung zur Nutzung dieser Analyseumgebung ist die Installation von R und RStudio. Besondere Systemanforderungen gibt es für grundlegende Analysen nicht. Der wesentliche limitierende Faktor bei komplexen statistischen Operationen ist oft der verfügbare Hauptspeicher (gut sind 8GB, mit 16GB kommt man schon sehr weit).
+
+Die [Statistik- und Programmiersprache R](https://de.wikipedia.org/wiki/R_(Programmiersprache)) ist eine freie Software-Entwicklung des [R Project for Statistical Computing](https://www.r-project.org/). Sie kann für gängige Betriebssysteme (Windows, macOS, Linux) über die Server des Comprehensive R Archive Network (CRAN) heruntergeladen und installiert werden. Zum CRAN-Server an der Universität Münster gelangen Sie zum Beispiel [hier](https://cran.uni-muenster.de/).
+
+RStudio ergänzt R als [Integrierte Entwicklungsumgebung](https://de.wikipedia.org/wiki/Integrierte_Entwicklungsumgebung) (kurz IDE, für *integrated development environment*) um eine Einbettung von R in eine graphische Benutzeroberfläche, die eine Vielzahl nützlicher Funktionen bereit hält und die enorm helfen kann, produktiv mit R zu arbeiten. Die Arbeit mit der Open Source-Version von RStudio Desktop wird nachdrücklich empfohlen, zum Download gelangen Sie [hier](https://www.rstudio.com/products/rstudio/download/#download). Als Einstieg in RStudio können Sie die Webinar-Serie [RStudio Essentials](https://resources.rstudio.com/) nutzen.
+
+
+## Installation von polmineR {.smaller}
+
+Das offizielle Release des polmineR-Pakets ist [bei CRAN publiziert](https://CRAN.R-project.org/package=polmineR) und kann mit der Funktion `install.packages()` installiert werden: 
+
+```{r install_polmineR, eval = FALSE}
+install.packages("polmineR")
+```
+
+Windows- und macOS-Nutzer_innen können dabei mit vorkompilierten Paketen arbeiten, so dass im Regelfall alles 'out of the box' funktioniert. Nutzer_innen von Linux müssen *vor* der Installation von polmineR im Terminal für das RcppCWB-Paket die C-Bibliotheken [pcre](https://www.pcre.org/) und [GLib](https://de.wikipedia.org/wiki/GLib) installieren. Genaue und aktuelle Informationen dazu findet man im [README von RcppCWB bei GitHub](https://www.github.com/PolMine/RcppCWB).
+
+Das polmineR-Paket wird aktiv weiterentwickelt. Die aktuelle Entwicklungsversion ist über [GitHub](https://github.com/PolMine/polmineR) als Plattform zur Verwaltung quelloffener Software verfügbar. Sie behebt bekannte Fehler ("Bugs"), enthält oftmals neue Funktionen und bietet in der Regel über eine verbesserte Dokumentation. Die Installation erfolgt mit `install_github` aus dem `devtools`-package.
+
+```{r install_polmineR_dev, eval = FALSE}
+install.packages("devtools")
+devtools::install_github("PolMine/polmineR", ref = "dev")
+```
+
+
+## Installation von Korpora {.smaller}
+
+Das polmineR-Paket enthält kleine Beispiel-Korpora, um die Funktionalität des Pakets zu illustrieren und zu testen. Weit größere Korpora, die für substantiellere Analysen geeignet sind, werden im Rahmen des PolMine-Projektes entwickelt. Diese werden auf Zenodo bereitgestellt und über das R-Paket [cwbtools](https://CRAN.R-project.org/package=cwbtools) von dort heruntergeladen und installiert.
+
+Für unsere ersten Schritte nutzen wir das GermaParl-Korpus der Plenardebatten des Deutschen Bundestags (v1.0.6), das wir über [Zenodo](https://doi.org/10.5281/zenodo.3742113) bereit stellen. Mit Hilfe von [cwbtools](https://CRAN.R-project.org/package=cwbtools) kann das Korpus direkt installiert werden.
+
+```{r, eval = FALSE}
+install.packages("cwbtools")
+```
+
+
+```{r, eval = FALSE}
+cwbtools::corpus_install(doi = "10.5281/zenodo.3742113")  # mehr als 1 GB, gute Konnektivität hilft!
+```
+
+Hiernach kann auch der UCSSR Foliensatz heruntergeladen werden. Die Installationsanweisungen finden Sie hier [UCSSR Download](https://github.com/PolMine/UCSSR). Die lokale Verfügbarkeit ist von Vorteil, wenn Sie offline mit den Folien arbeiten und einen praktischen Zugang zu den R Markdown Dateien haben möchten, auf denen die Folien basieren.
+
+
+## Ein kurzer Test der Installation {.smaller}
+
+Wir testen nun zuerst, ob polmineR geladen werden kann. 
+
+```{r load_polmineR, eval = FALSE}
+library(polmineR)
+```
+
+Dann testen wir, ob nun auch das "GERMAPARL"-Korpus (CWB-Korpora werden immer groß geschrieben) in der Liste der verfügbaren Korpora ist, ergänzend zu "REUTERS" und "GERMAPARLMINI", die im polmineR-Paket daheim sind.
+
+```{r, eval = FALSE}
+c("REUTERS", "GERMAPARLMINI", "GERMAPARL") %in% corpus()[["corpus"]]
+```
+
+Schließlich prüfen wir, ob das GERMAPARL-Korpus so gross ist, wie wir es erwarten ...
+
+```{r, eval = FALSE}
+size("GERMAPARL")
+```
+
+Mehr als 100 000 000 Worte? Das reicht für den Start.
+
+
+## Erste Gehversuche {.smaller}
+
+Probieren wir die folgenden Befehle aus. Diese werden dann in den folgenden Foliensätzen ausführlicher erläutert.
+
+```{r basic_functionality, eval = FALSE}
+partition("GERMAPARL", year = "2001") # Anlegen eines Subkorpus ("Partition")
+kwic("GERMAPARL", query = "Integration") # einfache Ansicht von Konkordanzen
+kwic("GERMAPARL", '[pos = "NN"] "mit" "Migrationshintergrund"', cqp = TRUE) # Nutzung CQP-Syntax
+cooccurrences("GERMAPARL", "Islam") # eine erste Kookkurrenz-Berechnung
+count("GERMAPARL", query = c("Islam", "Muslime", "Koran")) # simples Zählen
+```
+
+Das Zählen ist ja dann auch die Grundlage für viele weitergehende statistischer Operationen. Zentral für das Design von polmineR-Pakets ist der Anspruch, dass es auch immer möglich bleiben muss, den Volltext zu lesen. Probieren wir das aus.
+
+```{r reading_merkel, eval = FALSE}
+merkel <- partition("GERMAPARLMINI", date = "2009-11-10", speaker = "Merkel", regex = TRUE)
+read(merkel, meta = c("speaker", "date"))
+```
+
+So viel zunächst als Einstieg!
+
+## Tutorials zur Installation von R und RStudio
+
+[YouTube Tutorial](https://www.youtube.com/watch?v=X_Mxya2Fis0&ab_channel=StatistikamPC)  
+[R Studio Education](https://rstudio-education.github.io/hopr/starting.html)

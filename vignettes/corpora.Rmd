@@ -1,0 +1,382 @@
+---
+title: "Korpora in polmineR"
+subtitle: "Datenstruktur und erste Auswertungen"
+author: "Andreas Blaette"
+date: 'Stand:  4. April 2022'
+output:
+  ioslides_presentation:
+    css: css/stylesheet.css
+    logo: img/polmine.png
+    widescreen: yes
+  slidy_presentation: default
+editor_options:
+  chunk_output_type: console
+vignette: >
+  %\VignetteIndexEntry{Korpora in polmineR}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+bibliography: Literatur_corpora.bib
+nocite: '@*'
+---
+
+```{r, include = FALSE}
+regdir <- Sys.getenv("CORPUS_REGISTRY")
+Sys.setenv(CORPUS_REGISTRY = "") # to avoid that all system corpora show up
+RcppCWB::cl_load_corpus("GERMAPARL", registry = regdir)
+RcppCWB::cqp_load_corpus("GERMAPARL", registry = regdir)
+
+if (packageVersion("polmineR") < as.package_version("0.8.6"))
+  stop("at least polmineR v0.8.6 required")
+
+options("kableExtra.html.bsTable" = TRUE)
+```
+
+```{r include = FALSE}
+library(fontawesome)
+```
+
+```{r, echo = FALSE}
+library(kableExtra)
+```
+
+
+## Erforderliche Installationen und Initialisierung
+
+Der Foliensatz nutzt das `polmineR`-Paket und das `GermaParl`-Korpus. Die Installation wurde im vorhergehenden Foliensatz ausführlicher erläutert.
+
+Beachte: Die Funktionalität für einen Teil des hier beschriebenen Codes steht erst mit polmineR-Version `r as.package_version("0.8.6")` zur Verfügung steht. Bitte updaten, falls erforderlich!
+
+Für die folgenden Beispiele laden wir zunächst `polmineR`. Außerdem wird für die Beispiele das data.table-Paket benötigt.
+
+```{r load_libraries, eval = TRUE, message = FALSE}
+library(polmineR)
+library(data.table)
+```
+
+
+## Zum Anfang etwas Terminologie {.smaller}
+
+* Die im PolMine-Projekt aufbereiteten Korpora werden aus Rohdaten (pdf, plain text, html) in standardisierte XML-Formate übersetzt. Die Standardisierung entspricht Vorgaben der [Text Encoding Initiative (TEI)](http://www.tei-c.org/). 
+
+* Das TEI-XML des GermaParl-Korpus kann als Beispiel dienen. Es ist über ein [GitHub-Repositorium](https://www.github.com/PolMine/GermaParlTEI) offen zugänglich. Know your data - es ist sinnvoll, dieses Ausgangsformat zu kennen!
+
+* Das XML-TEI ist geeignet für die dauerhafte Datenhaltung und zur Sicherung von Interoperabilität, nicht jedoch für eine effiziente Analyse. Als **indexing and query engine** nutzt das PolMine Projekt (das polmineR-Paket) die Corpus Workbench (CWB)
+
+* CWB-indizierte Korpora können insbesondere auch linguistische Annotationen speichern und für die Analyse verfügbar machen. Diese werden über **positionale Attribute** (*p-attributes*) verfügbar.
+
+* Metadaten sind in der Terminologie der CWB als **strukturelle Attribute** (*s-attributes*) verfügbar. Entsprechend den Elementen von XML-Dokumenten können *s-attributes* hierarchisch ineinander geschachtelt sein: *s-attributes* sind nicht auf die Dokumentebene beschränkt, sondern können auch darin eingelagert Passagen von Text (z.B. Annotationen, Named Entities, in Parlamentsprotokollen: Zwischenrufe) auszeichnen.
+
+
+## registry-Verzeichnis und registry-Dateien {.smaller}
+
+* Korpora im CWB-Datenformat werden in *registry*-Dateien beschreiben, die in einem *registry*-Verzeichnis liegen. Die *registry*-Dateien deklarieren insbesondere die *p-* und *s-attributes* eines Korpus. Außerdem definieren *corpus properties* allgemeine Merkmale eines Korpus. Das ist inbesondere die Zeichenkodierung der Daten. Angaben zur Version, zum Datentypus oder zum Indizierungsdatum (*build date*) kommen optional hinzu.
+
+* Die Deklarationen der *registry*-Datei eines Korpus werden beim einmaligen Laden eines Korpus im Speicher gehalten, so dass diese Datei nicht immer wieder verarbeitet werden muss. 
+
+* Die Umgebungsvariable `CORPUS_REGISTRY` definiert die zentrale "Korpusregistratur" eines Systems. Die in diesem Verzeichnis definierten Korpora werden beim Laden von polmineR geladen.
+
+* Die CORPUS_REGISTRY-Umgebungsvariable lässt sich wie folgt definieren. Wichtig: Dies muss *vor* dem Laden von polmineR erfolgen. Tip: Umgebungsvariablen für R-Sitzungen können dauerhaft über die Datei .Renviron definiert werden. Durch Aufruf der Hilfe zu den Routinen beim Start von R erfahren Sie mehr (`?Startup`).
+
+```{r, eval = FALSE}
+Sys.setenv(CORPUS_REGISTRY = "/PFAD/ZU/REGISTRY/VERZEICHNIS")
+```
+
+
+
+
+## Das temporäre registry-Verzeichnis {.smaller}
+
+* Ein besonderer Fall ist ein temporäres *registry*-Verzeichnis, das von polmineR beim Laden immer angelegt wird. Diese Sitzungs-Korpusregistrytur wird mit `registry()` abgefragt.
+
+```{r get_registry, eval = TRUE}
+registry()
+```
+
+* Diese temporäre registry wird insbesondere für modifizierte Kopien von registry-Dateien zu Beispielkorpora in R-Paketen genutzt. Diese Modifikationen sind erforderlich, um Pfadangaben zu aktualisieren.
+
+* Korpora in R-Paketen werden mit `use()` verfügbar gemacht, die insbesondere in Code-Beispielen genutzt werden. Daher sehen Sie im Beispiel-Code immer wieder diese beiden Zeilen:
+
+```{r, message = FALSE}
+use("polmineR")
+use("RcppCWB")
+```
+
+
+## Anzeige der vefügbaren Korpora {.smaller}
+
+* Die `corpus()`-Methode (ohne Argumente) gibt eine Liste der Korpora an, auf die in Analysen zugegriffen werden kann. Die Spalte **size** gibt die Korpusgröße an.
+
+```{r, message = TRUE, results = TRUE}
+corpus()[, c("corpus", "encoding", "type", "template", "size")]
+```
+
+* Aus Platzgründen haben wir in dieser Tabelle die Spalte mit dem jeweiligen registry-Verzeichnis ausgeschlossen.
+
+* `corpus()` ist auch nützlich als Vergewisserung, ob Korpora wie erwartet verfügbar sind. In unserem Fall sehen wir die Verfügbarkeit von GERMAPARL. GERMAPARLMINI ist als Beispielkorpus im polmineR-Paket enthalten, die Korpora REUTERS und UNGA sind in RcppCWB enthalten und sind hier ebenfalls verfügbar. Beachte: Entsprechend den Konventionen der CWB werden Korpora immer in Großbuchschraben geschrieben!
+
+
+## Korpora {.smaller}
+
+* Jede Analyse mit polmineR bezieht sich auf Korpora - auch wo Subkorpora analysiert werden, muss dieses zunächst als Subset eines Korpus gewonnen werden.
+
+* Grundsätzlich sind verschiedene auf Korpora anwendbare Methoden bezogen auf `corpus`-Objekte als Input, die mit der `corpus()`-Methode instantiert werden.
+
+```{r, message = FALSE}
+gparl <- corpus("GERMAPARL")
+```
+
+* Seit polmineR v0.8.6 können Korpora geladen werden, deren registry-Dateien in beliebigen Verzeichnissen liegen. Hierfür muss dann zusätzlich das Argument `registry_dir` verwendet werden.
+
+* Eine grundlegende, einfache Methode für Korpora ist `size()`. Man erhält die Zahl der Token im Korpus. Sie wird wie folgt auf ein `corpus`-Objekt angewendet, wie wir es gerade mit `gparl` angelegt haben.
+
+```{r}
+size(gparl)
+```
+
+
+## Es muss nicht immer gleich corpus() sein {.smaller}
+
+* Alle für `corpus`-Objekte verfügbaren Methoden können auch auf einen `character`-Vektor (der Länge 1) mit der (großgeschriebenen) Korpus-ID angewendet werden. Das `corpus`-Objekt wird dann intern instantiert. Das Ergebnis ist identisch.
+
+```{r}
+size("GERMAPARL")
+```
+
+* Die Lesbarkeit von Code lässt sich oft durch die Verwendung von "pipes" verbessern. Pipes haben in R mit dem Paket `magrittr` Verbreitung gefunden. Sie dazu die folgende Schreibweise. 
+
+```{r}
+corpus("GERMAPARL") %>% size()
+```
+
+* Sie sehen die Nutzung von Pipes an vielen Stellen der polmineR-Dokumentation und auch in diesen Folien. Zwingend ist das nicht. Man sollte den Code einfach so schreiben, wie er am besten lesbar erscheint.
+
+
+## Liniguistische Annotationen: Positionale Attribute {.smaller}
+
+* Korpora werden in die CWB in tokenisierter Form importiert (Tokenisierung = Zergliederung des ursprünglichen Fließtextes in Worte / "Token"). 
+
+* Jedem Token des Korpus wird bei der Indizierung ein eindeutiger numerischer Wert zugewiesen ("corpus position", Abkürzung "cpos").
+
+* Ergänzend zu der ursprüngliche Wortform im Ursprungstext, wird bei linguistisch annotierten Korpora (im Regelfall) eine Wortarterkennung ("part-of-speech"-Annotation, kurz "pos") und eine Lemmatisierung der Token (Rückführung des Worts auf Grundform ohne Flektion, "lemma") durchgeführt.
+
+* Mit der `p_attributes()`-Methode frägt man die p-Attribute eines Korpus ab.
+
+```{r}
+p_attributes("GERMAPARL")
+```
+
+Die Tabelle auf der folgenden Seite vermittelt die Datenstruktur mit positionalen Attributen (p-attributes) und Korpus-Positionen (cpos). Der Text kann von oben nach unten gelesen werden. 
+
+
+## CWB-Datenstruktur: Tokenstream {.smaller}
+
+```{r, echo = FALSE}
+df <- data.frame(lapply(
+  c("word", "pos", "lemma"),
+  function(p_attribute){
+    ts <- get_token_stream("GERMAPARL", left = 0, right = 9, p_attribute = p_attribute)
+    Encoding(ts) <- encoding("GERMAPARL")
+    ts
+  }
+    
+))
+colnames(df) <- c("word", "pos", "lemma")
+df <- data.frame(cpos = 0:9, df)
+kableExtra::kable(df) %>% 
+  kableExtra::kable_styling(bootstrap_options = "striped", font_size = 20L, position = "center")
+
+```
+
+`r fontawesome::fa("lightbulb")`  Grundsätzlich ist diese Datenstruktur vergleichbar mit jener jener des tidytext-Ansatzes.
+
+## Strukturelle Attribute ('s-attributes') {.smaller}
+
+Metadaten eines Korpus werden als strukturelle Attribute (s-attributes) bezeichnet. Welche s-attributes bei einem Korpus verfügbar sind, fragt man mit `s_attributes()` ab.
+
+```{r}
+s_attributes("GERMAPARL")
+```
+
+Die Dokumentation eines Korpus sollte erklären, was die S-Attribute bedeuten. Um zu ermitteln, welche Ausprägungen es für ein S-Attribute gibt, wird das Argument `s_attribute` definiert.
+
+```{r}
+s_attributes("GERMAPARL", s_attribute = "year")
+```
+
+
+## Korpusgröße {.smaller}
+
+Oben wurde schon erwähnt, dass man mit der `size()`-Methode die Größe eines Korpus abfragen kann.
+
+```{r}
+size("GERMAPARL")
+```
+
+Wird zusätzlich das Argument `s_attribute` definiert, werden die Subkorpus-Größen angegeben, die bei einer Aufteilung des Korpus entsprechend dem s-attribute entstehen.
+
+```{r}
+size("GERMAPARL", s_attribute = "lp")
+```
+
+
+## Rezept: Balkendiagramm mit Korpusumfang {.smaller}
+
+In einem kleinen Beispiel wollen wir mit einem Balkendiagramm visualisieren, wie die Zahl der Worte in den Plenarprotokollen variiert. Zunächst ermitteln wir mit der `s_attributes()`-Methode die Größe des Korpus differenziert nach Jahren.
+
+```{r, eval = TRUE}
+s <- size("GERMAPARL", s_attribute = "year")
+```
+
+Dann machen wir daraus ein Balkendiagramm, wobei wir auf der Y-Achse die Größe des Korpus in Tausend Token angeben.
+
+```{r, eval = FALSE}
+barplot(
+  height = s$size / 1000,
+  names.arg = s$year,
+  main = "Größe GermaParl nach Jahr",
+  ylab = "Token (in Tausend)", xlab = "Jahr",
+  las = 2
+  )
+```
+
+Die damit erzeugt Grafik kommt auf der folgenden Folie.
+
+----
+
+```{r, echo = FALSE}
+barplot(
+  height = s$size / 1000, # Höhe der Balken
+  names.arg = s$year, # Labels auf der X-Achse
+  las = 2, # Drehung der Labels auf der X-Achse um 90 Grad
+  main = "Größe GermaParl nach Jahr", # Überschrift der Abbildung
+  ylab = "Token (in Tausend)", # Beschriftung Y-Achse
+  xlab = "Jahr" # Beschriftung der X-Achse
+  )
+```
+
+`r fontawesome::fa("question")`  In den Jahren 1998, 2002, 2005, 2009 und 2013 sehen wir jeweils geringere Korpusumfänge. Welchen systematischen Grund hat das?
+
+
+## Korpusgröße: Zwei S-Attribute {.smaller}
+
+Bei der `size()`-Methode kann auch ein zweites S-Attribut angegeben werden, dann wird eine Tabelle mit Korpusgrößen differenziert nach den beiden Merkmalen ausgegeben.
+
+Beachte: Der Rückgabewert ist hier ein `data.table`, nicht ein `data.frame`, das Standard-Datenformat von R für Tabellen. Viele Operationen können mit data.tables weitaus schneller als mit data.frames durchgeführt werden. Daher nutzt das polmineR-Paket intern intensiv data.tables. Ein Umwandlung in data.frames erfolgt nicht, ist aber problemlos möglich.
+
+```{r}
+dt <- size("GERMAPARL", s_attribute = c("speaker", "party"))
+df <- as.data.frame(dt) # Umwandlung in data.frame
+df_min <- subset(df, speaker != "") # In wenigen Fällen wurde Sprecher nicht erkannt
+head(df_min)
+```
+
+
+## Redeanteile {.smaller}
+
+```{r, echo = FALSE}
+DT::datatable(df_min)
+```
+
+
+## Korpusgröße: Zwei Dimensionen {.smaller}
+
+In einem zweiten Beispiel zur Arbeit mit den Ergebnissen einer Untergliederung des Korpus nach zwei Kriterien stellen wir die Frage, wie die Redeanteile der Fraktionen zwischen den Legislaturperioden geschwankt haben.
+
+```{r}
+dt <- size("GERMAPARL", s_attribute = c("parliamentary_group", "lp"))
+dt_min <- subset(dt, parliamentary_group != "") # Bearbeitung data.table wie data.frame
+```
+
+Die Tabelle, die wir jetzt haben, ist in einer sogenannten "extensiven" Form. Sie kann folgendermaßen in eine Normalform gebracht werden.
+
+```{r}
+tab <- dcast(parliamentary_group ~ lp, data = dt_min, value.var = "size")
+setnames(tab, old = "parliamentary_group", new = "Fraktion") # Umbenennung
+```
+
+Das schauen wir uns an, wobei wir ein 'widget' benutzen, das mit der JavaScript-Bibliothek DataTable (nicht verwechseln mit data.table!) erzeugt wird. (Die Ausgabe lässt sich auch in Folien einbeziehen, die - wie diese - mit R Markdown geschrieben wurden.)
+
+```{r, eval = FALSE}
+DT::datatable(tab)
+```
+
+
+## Wortzahl nach Fraktion und Jahr {.smaller}
+
+```{r, echo = FALSE, eval = TRUE}
+DT::datatable(tab)
+```
+
+## Vorbereitungen für den barplot {.smaller}
+
+Für den gruppierten barplot brauchen wir eine Matrix, welche die Höhe der Balken angibt.
+
+```{r}
+pg <- tab[["Fraktion"]] # Für Beschriftung des barplot "retten" wir die Fraktionen
+tab[["Fraktion"]] <- NULL # Spalte "Fraktionen" wird an dieser Stelle beseitigt
+m <- as.matrix(tab) # Umwandlung des data.table in Matrix
+m[is.na(m)] <- 0 # Wo NA-Werte in der Tabelle sind, ist die Korpusgröße 0
+```
+
+Der letzte "Dreh" ist ein Vektor mit den Farben, die den Fraktionen üblicherweise zugeordnet sind. Dieser ist benannt, so dass über eine Indizierung die Zuweisung der Farben erfolgen kann, ohne dass man versehentlich verrutschen könnte.
+
+```{r}
+colors <- c(
+  "CDU/CSU" = "black", FDP = "yellow",
+  SPD = "red", GRUENE = "green", LINKE = "pink", PDS = "pink",
+  fraktionslos = "lightgrey", parteilos = "darkgrey"
+  )
+```
+
+
+## Let's go {.smaller}
+
+Den barplot auszugeben, ist nun keine Zauberei mehr.
+
+```{r, eval = FALSE}
+barplot(
+  m / 1000, # Höhe der Balken - Zahl Worte, in Tausend
+  ylab = "Worte (in Tausend)", # Beschriftung der Y-Achse
+  beside = TRUE, # Gruppierung
+  col = colors[pg] # Farben der Balken, Indizierung gewährleistet richtige Reihenfolge
+  )
+# Um die Legende zweispaltig gestalten zu können, erstellen wir die Legende gesondert.
+legend(
+  x = "top", # Platzierung Legende oben mittig
+  legend = pg, # Beschriftung mit Benennung Fraktion
+  fill = colors[pg], # Indizierung gewährleistet, dass nichts verrutschen kann
+  ncol = 2, # zweispaltige Legende
+  cex = 0.7 # kleine Schrift
+  )
+```
+
+
+
+## Korpus nach Legislaturperiode und Fraktion {.flexbox .vcenter}
+
+```{r, echo = FALSE}
+barplot(m / 1000, ylab = "Worte (in Tausend)", beside = TRUE, col = colors[pg])
+legend(x = "top", legend = pg, fill = colors[pg], ncol = 2, cex = 0.7)
+```
+
+
+## Kenne deine Daten! {.smaller}
+
+Das Beispiel einer Visualisierung der Korpusgröße nach Fraktionszugehörigkeit und Legislaturperiode ist nicht ganz zufällig gewählt. In der 15. Wahlperiode gibt es einen gar nicht so kleinen Redeanteil von Sprechern, die "fraktionslos" sind. Wenn Sie die gleiche Analyse auf Ebene von Parteizugehörigkeit durchführen: Was sehen Sie da? Die fraktionslosen Abgeordneten der 15. Wahlperiode sind Angehörige der PDS. 
+
+Dies ist keine Einführung in das GermaParl-Korpus, aber der richtige Ort für den Hinweis, dass jede gute Analyse ein gutes Verständnis der Daten zur Voraussetzung hat.
+
+Lesen Sie die Dokumentation der Daten und sehen Sie sich die Daten an, in diesem Fall das TEI-XML. Was für jede andere Datenart eine Selbstverständlichkeit ist, gilt auf für Korpora: Wenn man zu wenig über die Daten weiß, ist die Wahrscheinlichkeit schlechter Forschung groß.
+
+
+## Diskussion und Ausblick {.smaller}
+
+Zunächst eine Ermutigung: Der Einstieg in die Arbeit mit data.tables erfordert Umdenken, lohnt sich aber, nicht nur wegen der Effizienz dieser Datenstruktur. Als Beispiel dient das folgende "snippet".
+
+```{r}
+size("GERMAPARL", s_attribute = "speaker")[speaker == "Angela Merkel"]
+```
+
+Nochmal das Stichwort "know your data": Wenn Sie eine Blick in das TEI-XML des GermaParl-Korpus geworfen haben: Zwischenrufe sind - bewusst! - Teil der "XMLifizierung" der Protokolle, in der sie ausgezeichnet sind. Für saubere Analysen muss man also mit Subkorpora arbeiten, die Zwischenrufe aus der Analyse ausschließen. Wie das geht, ist Gegenstand des nächsten Foliensatzes.
+
+## Literatur {.smaller}

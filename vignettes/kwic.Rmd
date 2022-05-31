@@ -1,0 +1,244 @@
+---
+title: "KWIC-Analysen mit 'polmineR'"
+subtitle: 'Syntax und Rezepte'
+author: "Andreas Blaette"
+date: 'Stand:  4. April 2022'
+output:
+  ioslides_presentation:
+    css: css/stylesheet.css
+    logo: img/polmine.png
+    widescreen: true
+editor_options: 
+  chunk_output_type: console
+vignette: >
+  %\VignetteIndexEntry{KWIC-Analysen mit 'polmineR'}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+bibliography: Literatur_kwic.bib
+nocite: '@*'
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(widgetframe_self_contained = FALSE)
+knitr::opts_chunk$set(widgetframe_isolate_widgets = TRUE)
+knitr::opts_chunk$set(widgetframe_widgets_dir = 'widgets' ) 
+```
+
+
+```{r install_required_packages, eval = TRUE, echo = FALSE, message = FALSE}
+required_packages <- c("vembedr", "htmltools", "devtools", "devtools", "widgetframe")
+for (pkg in required_packages)
+  if (!pkg %in% rownames(installed.packages())) install.packages(pkg)
+if (!"fulltext" %in% rownames(installed.packages())) {
+devtools::install_github("PolMine/fulltext")
+}
+```
+
+
+## Konkordanzen und KWIC: Grundlagen {.smaller}
+
+  * Die Analyse von Wortumfeldern von Worten und Suchbegriffen übernimmt als analytischer Schritt eine Scharnierfunktion zwischen quantitativen Zählverfahren und einem qualitativ-interpretativen Zugang zu Textdaten. In der Linguistik wird dabei von "Konkordanzen" gesprochen, in der sozialwissenschaftlichen Tradition der Inhaltsanalyse von "Keyword-In-Context"-Analysen (kurz "KWIC"). Der Kürze und Prägnanz wegen heißt die Methode im polmineR-Paket kurz `kwic()`. Im Folgenden wird aber auch von "Konkordanzen" als Ansicht von Wortkontexten zu Treffern von Suchanfragen gesprochen.
+  
+  * Eine wichtige Vorentscheidung ist die Festlegung, wie viele Worte nach links und nach rechts angezeigt werden sollen. In linguistischen Analysen (etwa in der Lexikographie, d.h. bei der Entwicklung von Lexika) ist ein Fenster von 5 Worten links und rechts gebräuchlich. Wie viel Kontext benötigen Sie in Ihrem jeweiligen disziplinären Anwendungsfeld für eine (Grob-)Kontextualisierung? Häufig kann das mehr sein, als im linguistischen Verwendungskontext von Konkordanzen / dem KWIC-Verfahren.
+  
+  * Zum Teil wird es nicht ausreichen, nur einen kurzen Textausschnitt im Umfeld eines Wortes zu lesen und zu interpretieren. Wenn erforderlich, sollte die Lektüre des Volltextes eines Suchtreffers erfolgen. Dies leistet im `polmineR`-Paket die `read()`-Methode.
+  
+
+## Erforderliche Installationen und Initialisierung {.smaller}
+
+Der Foliensatz nutzt das `polmineR`-Paket und das `GermaParl`-Korpus. Die Installation wird in einem eigenen Foliensatz ausführlicher erläutert.
+
+Bitte beachten Sie, dass die Funktionalität für den folgenden Workflow erst mit polmineR-Version `r as.package_version("0.7.9.9008")` zur Verfügung steht. Installieren Sie bei Bedarf die aktuelle Entwicklungsversion des polmineR-Pakets.
+
+```{r update_polmineR, eval = TRUE, message = FALSE}
+if (packageVersion("polmineR") < as.package_version("0.7.9.9008"))
+  devtools::install_github("PolMine/polmineR", ref = "dev")
+```
+
+Wir laden nun `polmineR`, wodurch das GermaParl-Korpus anschließend verfügbar ist.
+
+```{r initialize, eval = TRUE, message = FALSE}
+library(polmineR)
+```
+
+
+## `kwic()`-Methode: Erste Schritte {.smaller}
+
+```{r, echo = FALSE}
+options("polmineR.pagelength" = 4L)
+```
+
+- Die `kwic()`-Methode kann auf Objekte der Klassen `character` (auf ein Korpus als Ganzes), `partition` und `context` angewendet werden. Den Suchbegriff definieren Sie über das Argument `query`.
+
+```{r, eval = TRUE, message = FALSE, render = knit_print}
+kwic("GERMAPARL", query = "Migrationshintergrund")
+```
+
+<br/>
+
+- Die Ausgabe des Ergebnisses erfolgt regulär im Viewer-Panel von RStudio. Ein kurzer YouTube-Videoclip vermittelt, wie die Anzeige der Konkordanzen aussieht.
+
+----
+
+```{r, eval = TRUE, echo = FALSE, message = FALSE}
+vembedr::embed_youtube("F4UkFI0aolI", height = 400, width = 600)
+```
+
+
+## Partitionen und Konkordanzen {.smaller}
+
+```{r, echo = FALSE, message = FALSE}
+options("polmineR.pagelength" = 3L)
+```
+
+Wie nahezu alle Basis-Methoden von `polmineR`, kann auch die `kwic()`-Methode auf Korpora als Ganzes angewendet werden, sowie auf Partitionen. Wie Sie Partitionen erstellen können, entnehmen Sie dem entsprechenden Foliensatz. Hier führen wir die obige Suche (nach "Migrationshintergrund") für die Bundestagsdebatten des Jahres 2005 durch.
+
+```{r, eval = TRUE,  render = knit_print, message = FALSE}
+bt2005 <- partition("GERMAPARL", year = 2005)
+kwic(bt2005, query = "Migrationshintergrund")
+```  
+
+
+## Nutzung der CQP-Syntax {.smaller}
+
+```{r, echo = FALSE, message = FALSE}
+options("polmineR.pagelength" = 5L)
+```
+
+Bei der Formulierung von Suchanfragen können Sie die CQP-Syntax verwenden. Setzen Sie dafür das Argument `cqp` auf `TRUE`. (Wenn Sie das nicht explizit angeben, prüft polmineR selbstständig, ob die CQP-Syntax verwendet wird.)
+
+```{r, eval = TRUE, render = knit_print, message = FALSE}
+kwic(bt2005, query = '[pos = "NN"] "mit" "Migrationshintergrund"', cqp = TRUE)
+```  
+
+
+## KWIC: Anpassung des Wortkontexts {.smaller}
+
+```{r, echo = FALSE, message = FALSE}
+options("polmineR.pagelength" = 4L)
+```
+
+Es kann erforderlich sein, ein größeres Wortumfeld zu analysieren, als nur (wie voreingestellt) fünf Worte links und rechts. Nutzen Sie für die Bestimmung des Wortumfelds die Argumente `left` und `right`.
+
+```{r, eval = TRUE, render = knit_print, message = FALSE}
+kwic("GERMAPARL", query = "Ausländer", left = 15, right = 15)
+```
+
+
+## KWIC: Anpassung des Wortkontexts (Teil 2) {.smaller}
+
+Wenn die Argumente `left` und `right` nicht explizit definiert werden, werden in den globalen Optionen definierte Wortkontexte herangezogen. Welche Werte hier gesetzt sind, können Sie folgendermaßen ermitteln.
+
+```{r}
+getOption("polmineR.left")
+getOption("polmineR.right")
+```
+
+Und folgendermaßen können Sie die Werte für die Größe des Wortkontexts dauerhaft für eine Sitzung definieren.
+
+```{r}
+options(polmineR.left = 10)
+options(polmineR.right = 10)
+```
+
+```{r, echo = FALSE}
+options("polmineR.pagelength" = 5L)
+options("polmineR.left" = 5L)
+options("polmineR.right" = 5L)
+```
+
+
+## KWIC: Anzeige von Metadaten {.smaller}
+
+Merkmale einer Sprecherin wie Fraktions- bzw. Parteizugehörigkeit (Parteiendifferenzthese!), Geschlecht werden oft einen Unterschied machen: Zeigen Sie die Metadaten zu einer Konkordanz mit dem Argument `s_attributes` an. 
+
+```{r, eval = TRUE, render = knit_print, message = FALSE}
+kwic(bt2005, query = "Ausländer", s_attributes = "party", verbose = FALSE)
+```
+
+
+## KWIC: Anzeige von Metadaten (Fortsetzung) {.smaller}
+
+```{r, echo = FALSE, message = FALSE}
+options("polmineR.pagelength" = 3L)
+```
+
+Mehrere Attribute werden kombiniert mit c(), das "c" steht hier für "combine".
+
+```{r, eval = TRUE, render = knit_print, message = FALSE}
+kwic(bt2005, query = "Ausländer", s_attributes = c("party", "date"), verbose = FALSE)
+```
+
+Wenn Sie nicht sicher sind, welche Metadaten (s-attributes) zur Verfügung stehen, nutzen Sie die `s_attributes()`-Methode, um diese zu ermitteln:
+
+```{r, message = FALSE, eval = FALSE}
+s_attributes(bt2005)
+```
+
+
+## Markieren von Worten im Wortumfeld {.smaller}
+
+Mit dem Argument `positivelist` kann die Liste der Ergebnisse auf jene Konkordanzen eingeschränkt werden, bei denen ein bestimmtes Wort, oder eine Liste definierter Worte im Wortumfeld der Treffer zu einem Suchbegriff auftritt. Mit der `highlight()`-Methode können zudem Worte farblich markiert werden.
+
+```{r, eval = TRUE, render = knit_print, message = FALSE}
+K <- kwic(
+  "GERMAPARL", query = "Islam", s_attributes = c("party", "date"),
+  positivelist = "Terror"
+)
+K <- highlight(K, yellow = "Terror")
+K
+```
+
+
+## Von der Konkordanz zur Volltextanzeige {.smaller}
+
+Das unmittelbare Wortumfeld ist nur der Ausschnitt eines vollständigen Textes. Um den Volltext zu einer Konkordanz zu lesen, fangen Sie das KWIC-Ergebnis mit einer Variable (hier: K) auf. Dann wenden Sie die `read()`-Methode auf das Objekt K an. Mit dem Argument `i` geben Sie die Konkordanz an, für die Sie den Volltext lesen möchten.
+
+```{r, eval = FALSE, message = FALSE}
+K <- kwic(bt2005, query = "Ausländer")
+read(K, i = 1)
+```
+
+
+## Volltextausgabe {.smaller}
+
+```{r generate_fulltext_output, message = FALSE, echo = FALSE}
+i <- 1L
+metadata <- c("speaker", "date", "party")
+K <- kwic(bt2005, query = "Ausländer", s_attributes = metadata)
+P <- partition(
+  K@corpus,
+  def = lapply(setNames(metadata, metadata), function(x) K@stat[[x]][i]),
+  type = "plpr"
+)
+f <- fulltext::as.fulltexttable(P, headline = "Cornelie Sonntag-Wolgast (SPD)", display = "block")
+annotations <- data.frame(
+  text = c("", "", ""),
+  color = c("yellow", "lightgreen", "yellow"),
+  annotation = c("", "", ""),
+  start = c(
+    min(K@cpos[match_id == i][direction == -1][["cpos"]]),
+    min(K@cpos[match_id == i][direction == 0][["cpos"]]),
+    min(K@cpos[match_id == i][direction == 1][["cpos"]])
+    ),
+  end = c(
+    max(K@cpos[match_id == i][direction == -1][["cpos"]]),
+    min(K@cpos[match_id == i][direction == 0][["cpos"]]),
+    max(K@cpos[match_id == i][direction == 1][["cpos"]])
+    )
+)
+f <- fulltext::highlight(f, annotations = annotations)
+fulltext::fulltext(f, box = FALSE)
+```
+
+
+## Ausblick: Konkordanzen im Forschungsprozess {.smaller}
+
+* Die Analyse von Konkordanzen lässt sich sinnvoll auch mit der statistischen Analysen von Kookkurrenzen verbinden: Die Kookkurrenz-Analyse (`cooccurrences()`-Funktion) liefert Hinweise auf statische Auffälligkeiten des Sprachgebrauchs, die dann per KWIC näher analysiert und interpretiert werden. 
+  
+* Ein sinnvoller Schritt zur Systematisierung von Interpretationen von Konkordanzen ist, diese zu kategorisieren bzw. zu typisieren. Dafür kann es hilfreich sein, diese nach Excel zu exportieren (Methode `mail()`), um dort in einer Zusatzspalte Kategorisierungen einzutragen bzw. Interpretationen zu notieren.
+  
+* Bitte übersehen Sie bei der Arbeit mit Konkordanzen nicht, dass es sich um eine interpretative Arbeit handelt, die hermeneutisches Gespür erfordert! Wann etwas von wem gesagt wurde mag von Bedeutung sein. Zugleich ist die Grundannahme der Arbeit mit Konkordanzen, dass es Regelmäßigkeiten gibt, die es in interpretativer Arbeit aufzudecken gilt: Die Analyse von Konkordanzen ist nicht auf die einzelne Äußerung, sondern auf die Muster des Sprachgebrauchs ausgerichtet.
+
+## Literatur
+
