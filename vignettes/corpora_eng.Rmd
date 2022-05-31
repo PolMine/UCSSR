@@ -21,12 +21,11 @@ nocite: '@*'
 ---
 
 ```{r, include = FALSE}
-Sys.setenv(CORPUS_REGISTRY = "") # to avoid that all system corpora show up
 options("kableExtra.html.bsTable" = TRUE)
 ```
 
 ```{r include = FALSE}
-if (! "icon" %in% rownames(installed.packages()) ) devtools::install_github("ropenscilabs/icon")
+library(fontawesome)
 ```
 
 ```{r, echo = FALSE}
@@ -65,35 +64,20 @@ library(data.table)
 
 The `corpus()` method (without parameters) returns a list of corpora which are available for analysis. The second column of the table indicates the size of the corpus. The column "template" informs you about whether rules are provided about how text should be formatted in full text view.
 
-```{r}
-corpus()
+```{r, eval = FALSE}
+corpus()[, c("corpus", "encoding", "type", "template", "size")]
 ```
 
-In its most basic use case, the `size()` method can be used to learn about the size in tokens of a corpus.
-
-```{r}
-size("REUTERS")
+```{r, echo = FALSE}
+# avoid printing all corpora here
+corpus()[corpus()$corpus %in% c("GERMAPARL", "UNGA"), c("corpus", "encoding", "type", "template", "size")]
 ```
 
-The corpora you see here are part of the sample data of the polmineR package.
+Note: To save some space, the column for the individual registry directory of a corpus is omitted in this display.
 
-
-## Activating corpora stored in data packages with `use` {.smaller}
-
-To activate corpora which are stored in a data package, the function `use()` is used.
-
-```{r, message = FALSE}
-use("UNGA")
-```
-
-By calling the `corpus()` method again, we can check if the UNGA corpus is actually available now. 
-
-```{r}
-corpus()
-```
+By calling the `corpus()` method, we can also check if the UNGA corpus is actually available. 
 
 Note: According to the conventions of the CWB corpora are always written in upper case.
-
 
 ## Using corpora stored in other locations {.smaller}
 

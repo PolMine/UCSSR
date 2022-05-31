@@ -35,7 +35,6 @@ if (!"kableExtra" %in% rownames(installed.packages())) install.packages("kableEx
 
 ```{r initialize, eval = TRUE, message=FALSE}
 library(polmineR)
-use("UNGA")
 ```
 
 * in addition, the `magrittr` package is used to chain operations via the so-called 'Pipe'. Using the pipe means to chain methods and functions via the pipe operator ("%>%") and to use the return value of the left expression as the input value of the right expression.
@@ -259,7 +258,9 @@ dispersion("UNGA", query = '"[Dd]iscrimination.*"', s_attribute = "year")
 ## CQP: Useful for `cooccurrences()` as well {.smaller}
 
 ```{r, message = FALSE}
-cooccurrences("UNGA", query = '[(lemma = "love") & (pos = "N.+")]', cqp = TRUE) %>%
+cooccurrences("UNGA", 
+              query = '[(lemma = "love") & (pos = "N.+")]', 
+              cqp = TRUE) %>%
   data.table::as.data.table() %>% subset(rank_ll < 5) %>% 
   subset(select = c("word", "count_partition", "count_coi", "count_ref", "ll", "rank_ll")) %>%
   DT::datatable() # Embedding in slides as htmlwidget

@@ -49,7 +49,7 @@ install.packages("polmineR")
 
 Windows users can work with precompiled dependencies, so it should work 'out of the box'. Users of MacOS and Linux have to install the libraries [pcre](https://www.pcre.org/) and [GLib](https://de.wikipedia.org/wiki/GLib) in the terminal *before* installing polmineR. The installation workflow for MacOS is described [here](https://polmine.github.io/polmineR/index.html).
 
-The polmineR package is consistently improved. The most recent development version is available on [GitHub](https://github.com/PolMine/polmineR), a plattform to administrate and share open-source software. The development version fixes known bugs and contains new functionalities as well as improved documentation. The installation is performed using `install_github()` from the `devtools` package.
+The polmineR package is consistently improved. The most recent development version is available on [GitHub](https://github.com/PolMine/polmineR), a platform to administrate and share open-source software. The development version fixes known bugs and contains new functionalities as well as improved documentation. The installation is performed using `install_github()` from the `devtools` package.
 
 ```{r, eval = FALSE}
 install.packages("devtools")
@@ -59,24 +59,18 @@ devtools::install_github("PolMine/polmineR", ref = "dev")
 
 ## Installing Corpora {.smaller}
 
-The polmineR package contains small sample corpora to illstrate the functionality of the package. The actual corpora are stored on a server of the PolMine project and can be downloaded via corpus specific R packages.
+The polmineR package contains small sample corpora to illstrate the functionality of the package. The actual and larger corpora which can be used for more substantial analyses are stored on Zenodo and are made available via the [cwbtools](https://CRAN.R-project.org/package=cwbtools) R package which facilitates the download and installation of the data.
 
-A new installation mechanism is used for the UNGA package. First a (relatively small) package is installed, which only contains test or demonstration data. The actual data of the UNGA corpus is then downloaded subsequently. This is done through the 'drat' repository of the PolMine project at GitHub. Therefore, the 'drat' package is installed first.
+For the following first steps we make use of a corpus of debates in the United Nations General Assembly (UNGA). The corpus can be downloaded from [Zenodo](https://zenodo.org/record/3831472). Using the [cwbtools](https://CRAN.R-project.org/package=cwbtools) package, the corpus can be installed easily.
 
 ```{r, eval = FALSE}
-install.packages("drat")
-drat::addRepo("polmine") # in this case 'polmine' must be written in lower case!
-
 install.packages("cwbtools")
-install.packages("UNGA")
 ```
-
-Now we can load the UNGA package and get the actual corpus
 
 ```{r, eval = FALSE}
-library("UNGA")
-unga_download_corpus()
+cwbtools::corpus_install(doi = "10.5281/zenodo.3831472")
 ```
+
 
 ## Testing the Installation {.smaller}
 
@@ -86,11 +80,10 @@ To test if UNGA is available, we first load the polmineR package.
 library(polmineR)
 ```
 
-Then, we activate the UNGA corpus. We check if the UNGA corpus (corpora are written in upper case all the time) is mentioned on the list of available corpora in addition to "REUTERS" and "GERMAPARLMINI" which are sample data of the polmineR package. 
+We can check if the UNGA corpus (corpora are written in upper case all the time) is mentioned on the list of available corpora.
 
 ```{r, eval = FALSE}
-use("UNGA")
-c("REUTERS", "GERMAPARLMINI", "UNGA") %in% corpus()[["corpus"]]
+"UNGA" %in% corpus()[["corpus"]]
 ```
 
 Finally, we check if the UNGA corpus has the correct size.

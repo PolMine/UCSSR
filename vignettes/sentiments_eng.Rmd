@@ -52,7 +52,7 @@ The following explanations use the `polmineR` package and the `GermaParl` corpus
 The following code checks whether these packages are installed and installs them if necessary.
 
 ```{r install_required_packages, eval = TRUE}
-required_packages <- c("zoo", "magrittr", "devtools")
+required_packages <- c("zoo", "magrittr", "devtools", "syuzhet")
 for (pkg in required_packages){
   if (pkg %in% rownames(installed.packages()) == FALSE) install.packages(pkg)
 }
@@ -81,7 +81,6 @@ We also load polmineR and activate the UNGA corpus, which is available through t
 
 ```{r load_polmineR, eval = TRUE, message = FALSE}
 library(polmineR)
-use("UNGA")
 ```
 
 

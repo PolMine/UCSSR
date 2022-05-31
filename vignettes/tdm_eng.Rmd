@@ -45,7 +45,6 @@ set.seed(42)
 if (packageVersion("polmineR") < package_version("0.7.10.9006"))
   devtools::install_github("PolMine/polmineR", ref = "dev")
 library(polmineR)
-use("UNGA")
 ```
 
 * additional packages which we want to use later should be installed as well if necessary.

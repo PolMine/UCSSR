@@ -49,7 +49,6 @@ nocite: '@*'
 
 ```{r initialize, eval = TRUE, message = FALSE}
 library(polmineR)
-use("UNGA")
 ```
 
 * additional packages which we want to use later should be installed as well if necessary.
@@ -318,7 +317,7 @@ dt[,"pos_1" := NULL][,"pos_2" := NULL][,"exp_coi" := round(exp_coi, 2)][, "chisq
 
 * the result is shown on the next slide.
 
-## Adjektiv-Nomen-Konstruktionen {.smaller}
+## Adjective-Noun-Sequences{.smaller}
 
 ```{r, eval = knit_print, eval = TRUE, echo = FALSE}
 DT::datatable(dt)

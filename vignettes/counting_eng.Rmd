@@ -39,7 +39,6 @@ nocite: '@*'
 
 ```{r initialize, eval = TRUE, message=FALSE}
 library(polmineR)
-use("UNGA")
 ```
 
 * in addition, the packages `magrittr`, `data.table` and `xts` are used. If needed, these have to be installed and loaded.

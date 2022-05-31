@@ -31,14 +31,14 @@ required_packages <- c("vembedr", "htmltools", "devtools", "devtools", "widgetfr
 for (pkg in required_packages)
   if (!pkg %in% rownames(installed.packages())) install.packages(pkg)
 if (!"annolite" %in% rownames(installed.packages()))
-  devtools::install_github("PolMine/annolite")
+  devtools::install_github("PolMine/fulltext")
 ```
 
 
 
 ## Concordances and KWIC: Foundations {.smaller}
 
-* the analysis of the context of words and query terms can serve as an analytical link between quantative counting operations and qualitative-interpretative approaches of content analysis. In the field of linguistics, this analysis of word contexts is called 'concordance analysis'. In the tradition of context analysis in social science this approach often is called Keyword-in-Context-Analysis (or 'KWIC'). Since it nicely conveys the central meaning of the approach, in polmineR the method is called `kwic`. In the following, the term 'concordances' is also used for the qualitative examination of word contexts of query terms.
+* the analysis of the context of words and query terms can serve as an analytical link between quantitative counting operations and qualitative-interpretative approaches of content analysis. In the field of linguistics, this analysis of word contexts is called 'concordance analysis'. In the tradition of context analysis in social science this approach often is called Keyword-in-Context-Analysis (or 'KWIC'). Since it nicely conveys the central meaning of the approach, in polmineR the method is called `kwic`. In the following, the term 'concordances' is also used for the qualitative examination of word contexts of query terms.
 
 * in advance, an important decision is how many words to the left and the right side of the query should be displayed. In linguistical analyses (e.g. in lexicographical approaches) a window of five words to the left and to the right is common. How much context do you need for your application? To satisfy specific disciplinary needs, more than five words might be necessary.
 
@@ -62,7 +62,6 @@ if (packageVersion("polmineR") < as.package_version("0.7.9.9010"))
 
 ```{r initialize, eval = TRUE, message = FALSE}
 library(polmineR)
-use("UNGA")
 ```
 
 
@@ -158,7 +157,10 @@ options("polmineR.right" = 5L)
 * characteristics of a speaker such as its party (not applicable for the UNGA corpus) or other associations can be useful for analysis. To display metadata alongside the concordances, the name of the s-attribute has to be passed to the `s_attributes` argument.
 
 ```{r, eval = TRUE, render = knit_print, message = FALSE}
-kwic(unga_2005, query = "immigration", s_attributes = "state_organization", verbose = FALSE)
+kwic(unga_2005, 
+     query = "immigration",
+     s_attributes = "state_organization", 
+     verbose = FALSE)
 ```
 
 
@@ -171,7 +173,10 @@ options("polmineR.pagelength" = 3L)
 * several attributes can be combined with `c()` which here means 'combine'.
 
 ```{r, eval = TRUE, render = knit_print, message = FALSE}
-kwic(unga_2005, query = "immigration", s_attributes = c("state_organization", "date"), verbose = FALSE)
+kwic(unga_2005, 
+     query = "immigration", 
+     s_attributes = c("state_organization", "date"), 
+     verbose = FALSE)
 ```
 
 * if you are not sure which metadata (s-attributes) are available in a corpus or partition, use the `s_attributes()` method:
@@ -187,7 +192,9 @@ s_attributes(unga_2005)
 
 ```{r, eval = TRUE, render = knit_print, message = FALSE}
 K <- kwic(
-  "UNGA", query = "Islam", s_attributes = c("state_organization", "date"),
+  "UNGA", 
+  query = "Islam", 
+  s_attributes = c("state_organization", "date"),
   positivelist = "terror"
 )
 K <- highlight(K, yellow = "terror")
@@ -201,7 +208,7 @@ K
 * the immediate word context only represents a small part of the full text. To see the full text of a concordance, store the `kwic` result in a variable (here: K). Then, apply the `read()` method to this object. The argument `i` indicates the index of the concordance for which the full text is wanted.
 
 ```{r, eval = FALSE, message = FALSE}
-K <- kwic(unga_2005, query = "immigration")
+K <- kwic(unga_2005, query = "immigration", s_attribute = "state_organization")
 read(K, i = 1)
 ```
 
@@ -217,25 +224,24 @@ P <- partition(
   def = lapply(setNames(metadata, metadata), function(x) K@stat[[x]][i]),
   type = "plpr"
 )
-data <- annolite::as.fulltextdata(P, headline = "Cornelie Sonntag-Wolgast (2005-01-21)")
-data$annotations <- data.frame(
+f <- fulltext::as.fulltexttable(P, headline = "State or Organization: International Organization for Migration", display = "block", interjections = FALSE)
+annotations <- data.frame(
   text = c("", "", ""),
-  code = c("yellow", "lightgreen", "yellow"),
+  color = c("yellow", "lightgreen", "yellow"),
   annotation = c("", "", ""),
-  id_left = c(
-    min(K@cpos[hit_no == i][direction == -1][["cpos"]]),
-    min(K@cpos[hit_no == i][direction == 0][["cpos"]]),
-    min(K@cpos[hit_no == i][direction == 1][["cpos"]])
+  start = c(
+    min(K@cpos[match_id == i][direction == -1][["cpos"]]),
+    min(K@cpos[match_id == i][direction == 0][["cpos"]]),
+    min(K@cpos[match_id == i][direction == 1][["cpos"]])
     ),
-  id_right = c(
-    max(K@cpos[hit_no == i][direction == -1][["cpos"]]),
-    min(K@cpos[hit_no == i][direction == 0][["cpos"]]),
-    max(K@cpos[hit_no == i][direction == 1][["cpos"]])
+  end = c(
+    max(K@cpos[match_id == i][direction == -1][["cpos"]]),
+    min(K@cpos[match_id == i][direction == 0][["cpos"]]),
+    max(K@cpos[match_id == i][direction == 1][["cpos"]])
     )
 )
-W <- annolite::fulltext(data, dialog = NULL, box = TRUE, width = 1000, height = 400)
-Y <- widgetframe::frameWidget(W)
-Y
+f <- fulltext::highlight(f, annotations = annotations)
+fulltext::fulltext(f, box = FALSE)
 ```
 
 
