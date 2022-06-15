@@ -50,7 +50,7 @@ library(kableExtra)
 
 This collection of slides uses the `polmineR` package and the `UNGA` corpus. The installation procedure was thoroughly explained in the previous set of slide. 
 
-Please note: The functionalities explained here are only available in polmineR version `r as.package_version("0.7.10")` or above. Install the correct version of the package accordingly.
+Please note: The functionalities explained here were tested for the current polmineR version `r as.package_version("0.8.6")`. Install the correct version of the package accordingly.
 
 For the following examples, we load the `polmineR` package. In addition, the `data.table` package is needed.
 
@@ -132,7 +132,7 @@ kableExtra::kable(df) %>%
 ```
 
 
-`r icon::fa("lightbulb")`  Essentially, this data structure is comparable with the structure you might know from the tidytext package.
+`r fontawesome::fa("lightbulb")`  Essentially, this data structure is comparable with the structure you might know from the tidytext package.
 
 
 ## Structural attributes ('s-attributes') {.smaller}
@@ -201,7 +201,7 @@ barplot(
 )
 ```
 
-`r icon::fa("question")` In the years 1993 and 2018 we see a drastically smaller corpus size. What might be the reason for this?
+`r fontawesome::fa("question")` In the years 1993 and 2018 we see a drastically smaller corpus size. What might be the reason for this?
 
 
 ## Corpus Size: Two s-attributes {.smaller}

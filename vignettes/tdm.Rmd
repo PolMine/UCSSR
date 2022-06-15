@@ -30,14 +30,15 @@ nocite: '@*'
 
 ## Initialisierung {.smaller}
 
-- Ein Teil der im Folgenden verwendeten Funktionen (Berechnung aller Kookkurrenzen in einem Korpus/einer Partition) sind im *polmineR*-Paket ab Version 0.7.10.9006 enthalten. Bei Bedarf wird die polmineR-Entwicklungsversion installiert.
+- Bitte beachten Sie, dass die Funktionalität für den folgenden Workflow für die aktuelle polmineR-Version `r as.package_version("0.8.6")` getestet wurde. Bei Bedarf wird die polmineR-Entwicklungsversion installiert.
 
 - Die Beispiele des Foliensatzes basieren auf dem *GermaParl*-Korpus. Der Datensatz ist nach dem Laden von polmineR verfügbar.
 
 
 ```{r initialize, eval = TRUE, message = FALSE}
-if (packageVersion("polmineR") < package_version("0.7.10.9006"))
-  devtools::install_github("PolMine/polmineR", ref = "dev")
+if (packageVersion("polmineR") < as.package_version("0.8.6")) {
+install.packages("polmineR")
+}
 library(polmineR)
 ```
 

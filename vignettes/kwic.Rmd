@@ -48,11 +48,12 @@ devtools::install_github("PolMine/fulltext")
 
 Der Foliensatz nutzt das `polmineR`-Paket und das `GermaParl`-Korpus. Die Installation wird in einem eigenen Foliensatz ausführlicher erläutert.
 
-Bitte beachten Sie, dass die Funktionalität für den folgenden Workflow erst mit polmineR-Version `r as.package_version("0.7.9.9008")` zur Verfügung steht. Installieren Sie bei Bedarf die aktuelle Entwicklungsversion des polmineR-Pakets.
+Bitte beachten Sie, dass die Funktionalität für den folgenden Workflow für die aktuelle polmineR-Version `r as.package_version("0.8.6")` getestet wurde. Installieren Sie bei Bedarf die aktuelle Entwicklungsversion des polmineR-Pakets.
 
 ```{r update_polmineR, eval = TRUE, message = FALSE}
-if (packageVersion("polmineR") < as.package_version("0.7.9.9008"))
-  devtools::install_github("PolMine/polmineR", ref = "dev")
+if (packageVersion("polmineR") < as.package_version("0.8.6")) {
+install.packages("polmineR")
+}
 ```
 
 Wir laden nun `polmineR`, wodurch das GermaParl-Korpus anschließend verfügbar ist.

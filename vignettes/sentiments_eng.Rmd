@@ -54,15 +54,16 @@ The following code checks whether these packages are installed and installs them
 ```{r install_required_packages, eval = TRUE}
 required_packages <- c("zoo", "magrittr", "devtools", "syuzhet")
 for (pkg in required_packages){
-  if (pkg %in% rownames(installed.packages()) == FALSE) install.packages(pkg)
+  if (!pkg %in% rownames(installed.packages())) install.packages(pkg)
 }
 ```
 
-Please note that the functionality for the following workflow is only available with polmineR version `r as.package_version("0.7.9.9005")`. If required, install the current development version of polmineR.
+Please note: The functionality for the following workflow was tested for the current polmineR version `r as.package_version("0.8.6")`. Install the correct version of the package accordingly.
 
 ```{r update_polmineR, eval = TRUE}
-if (packageVersion("polmineR") < as.package_version("0.7.9.9005"))
-  devtools::install_github("PolMine/polmineR", ref = "dev")
+if (packageVersion("polmineR") < as.package_version("0.8.6")) {
+install.packages("polmineR")
+}
 ```
 
 

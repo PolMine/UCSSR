@@ -32,14 +32,15 @@ nocite: '@*'
 
 ## Initialization {.smaller}
 
-* Please note that part of the functionality for the following workflow is only available with polmineR version `r as.package_version("0.7.9.9006")`. If required, install the current development version of polmineR.
+* Please note that part of the functionality for the following workflow is only available with polmineR version `r as.package_version("0.8.6")`. If required, install the current development version of polmineR.
 
 * in the examples, the UNGA corpus is used. The corpus has to be activated after loading polmineR.
 
 
 ```{r initialize, eval = TRUE, message = FALSE}
-if (packageVersion("polmineR") < package_version("0.7.10.9006"))
-  devtools::install_github("PolMine/polmineR", ref = "dev")
+if (packageVersion("polmineR") < as.package_version("0.8.6")) {
+install.packages("polmineR")
+}
 library(polmineR)
 ```
 
@@ -294,7 +295,7 @@ x <- wordcloud::wordcloud(
 * in the polmineR package, a `dotplot()` method for `cooccurrences()` objects is defined. An application of this can be seen on the next slide. 
 
 ```{r, eval = FALSE}
-dotplot(mmh, cex = 0.8)
+dotplot(sanction_cooc, cex = 0.8)
 ```
 
 

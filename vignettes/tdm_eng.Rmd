@@ -36,14 +36,15 @@ set.seed(42)
 
 ## Initialization {.smaller}
 
-* Please note that part of the functionality for the following workflow is only available with polmineR version `r as.package_version("0.7.9.9006")`. If required, install the current development version of polmineR.
+* Please note: The functionalities explained here were tested for the current polmineR version `r as.package_version("0.8.6")`. If required, install the current development version of polmineR.
 
 * in the examples, the UNGA corpus is used. The corpus has to be activated after loading polmineR.
 
 
 ```{r initialize, eval = TRUE, message = FALSE}
-if (packageVersion("polmineR") < package_version("0.7.10.9006"))
-  devtools::install_github("PolMine/polmineR", ref = "dev")
+if (packageVersion("polmineR") < as.package_version("0.8.6")) {
+install.packages("polmineR")
+}
 library(polmineR)
 ```
 
@@ -105,7 +106,7 @@ as.matrix(dtm)[sort(sample(1:913, 10)), c(1:5, 300:304)]
 ## Using `as.speeches()` to create a partition_bundle {.smaller}
 
 ```{r, echo = FALSE}
-doit <- !file.exists("~/lab/tmp/unga2000s_speeches_lds.RData")
+doit <- !file.exists("~/lab/tmp/unga2000s_speeches_pos.RData")
 ```
 
 * in plenary protocols a plausible definition of documents a document-term-matrix should be based on could be a single speech of a delegate. The polmineR package provides a method to create a `partition_bundle` of speeches with the `as.speeches()` method. This can be applied to both corpora and `partition` objects.

@@ -51,7 +51,7 @@ The collection of slides is using the `polmineR` package and the `UNGA` corpus. 
 library(polmineR)
 ```
 
-Please note: The functionalities explained here are only available in polmineR version `r as.package_version("0.7.10")` or above. Install the correct version of the package accordingly.
+Please note: The functionalities explained here were tested for the current polmineR version `r as.package_version("0.8.6")`. Install the correct version of the package accordingly.
 
 For the following examples we additionally use the [magrittr](https://magrittr.tidyverse.org/) package.
 

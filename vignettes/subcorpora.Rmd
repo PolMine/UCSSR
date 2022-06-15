@@ -51,7 +51,7 @@ Der Foliensatz nutzt das `polmineR`-Paket und das `GermaParl`-Korpus. Die Instal
 library(polmineR)
 ```
 
-Bitte beachten Sie, dass die Funktionalität für den folgenden Workflow erst mit polmineR-Version `r as.package_version("0.7.10")` zur Verfügung steht. Die installierte Version prüfen Sie mit `packageVersion("polmineR")`. Installieren Sie bei Bedarf die aktuelle Version das polmineR-Pakets.
+Bitte beachten Sie, dass die Funktionalität für den folgenden Workflow für die aktuelle polmineR-Version `r as.package_version("0.8.6")` getestet wurde. Die installierte Version prüfen Sie mit `packageVersion("polmineR")`. Installieren Sie bei Bedarf die aktuelle Version das polmineR-Pakets.
 
 Für die folgenden Beispiele nutzen wir ergänzend das [magrittr](https://magrittr.tidyverse.org/)-Paket.
 

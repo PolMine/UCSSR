@@ -37,12 +37,7 @@ if (!"kableExtra" %in% rownames(installed.packages())) install.packages("kableEx
 library(polmineR)
 ```
 
-* in addition, the `magrittr` package is used to chain operations via the so-called 'Pipe'. Using the pipe means to chain methods and functions via the pipe operator ("%>%") and to use the return value of the left expression as the input value of the right expression.
-
-
-```{r}
-library(magrittr)
-```
+* in addition, the `magrittr` package is used to chain operations via the so-called 'Pipe'. Using the pipe means to chain methods and functions via the pipe operator ("%>%") and to use the return value of the left expression as the input value of the right expression. The package is already loaded with the `polmineR` package.
 
 * Finally, we also load the `data.table` package
 

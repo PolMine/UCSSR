@@ -44,7 +44,7 @@ library(kableExtra)
 
 Der Foliensatz nutzt das `polmineR`-Paket und das `GermaParl`-Korpus. Die Installation wurde im vorhergehenden Foliensatz ausführlicher erläutert.
 
-Beachte: Die Funktionalität für einen Teil des hier beschriebenen Codes steht erst mit polmineR-Version `r as.package_version("0.8.6")` zur Verfügung steht. Bitte updaten, falls erforderlich!
+Beachte: Die Funktionalität für einen Teil des hier beschriebenen Codes steht erst mit polmineR-Version `r as.package_version("0.8.6")` zur Verfügung. Bitte updaten, falls erforderlich!
 
 Für die folgenden Beispiele laden wir zunächst `polmineR`. Außerdem wird für die Beispiele das data.table-Paket benötigt.
 

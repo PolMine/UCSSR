@@ -30,7 +30,7 @@ knitr::opts_chunk$set(widgetframe_widgets_dir = 'widgets' )
 required_packages <- c("vembedr", "htmltools", "devtools", "devtools", "widgetframe")
 for (pkg in required_packages)
   if (!pkg %in% rownames(installed.packages())) install.packages(pkg)
-if (!"annolite" %in% rownames(installed.packages()))
+if (!"fulltext" %in% rownames(installed.packages()))
   devtools::install_github("PolMine/fulltext")
 ```
 
@@ -49,12 +49,13 @@ if (!"annolite" %in% rownames(installed.packages()))
 
 * These slides use the `polmineR` package and the `UNGA` corpus. The installation is explained in a seperate set of slides.
 
-* Please note: The functionalities explained here are only available in polmineR version `r as.package_version("0.7.10")` or above. Install the correct version of the package accordingly.
+* Please note: The functionalities explained here were tested for the current polmineR version `r as.package_version("0.8.6")`. Install the correct version of the package accordingly.
 
 
 ```{r update_polmineR, eval = TRUE, message = FALSE}
-if (packageVersion("polmineR") < as.package_version("0.7.9.9010"))
-  devtools::install_github("PolMine/polmineR", ref = "dev")
+if (packageVersion("polmineR") < as.package_version("0.8.6")) {
+install.packages("polmineR")
+}
 ```
 
 * we now load the `polmineR` package and activate the UNGA corpus.
